@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" content="#f2f5fb">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kejohanan E-Sport MLBB – SMK Seri Rompin</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5fb;--card:#fff;--line:#dbe2f1;--ink:#0f1a3d;--mut:#56628a;--c1:#2457ff;--c1d:#13216f;--c1t:#e8eeff;--c2:#be185d;--c3:#6d28d9;--ok:#0b8a45;--okt:#e3f6ec;--bad:#d62a4a;--badt:#fdebee;--gold:#9a5b00;--amb:#ffc21a;--ambt:#fff6dc;--sh:0 1px 2px rgba(15,26,61,.06),0 6px 18px rgba(15,26,61,.07);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{color-scheme:light;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-ui,sans-serif;min-height:100vh;padding-bottom:84px;overflow-x:hidden}
+h1,h2,h3,.disp{font-family:'Chakra Petch',Inter,sans-serif;margin:0}
+main{max-width:1180px;margin:0 auto;padding:20px 16px}
+#bg{position:fixed;inset:0;z-index:-2;background:var(--bgimg) center/cover no-repeat}
+#bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(242,245,251,.55),rgba(242,245,251,.9))}
+.glass{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh)}
+.pad{padding:18px}
+h2{font-size:20px;margin-bottom:4px}
+.sub{color:var(--mut);margin:0 0 12px;font-size:14px}
+:focus-visible{outline:3px solid var(--c1);outline-offset:2px}
+/* hero: banner sudut dua-tona */
+.hero{position:relative;overflow:hidden;padding:26px 24px;margin-bottom:16px;border:0;color:#fff;background:linear-gradient(115deg,var(--c1d) 0 62%,#1a3fd0 62% 100%)}
+.hero::before,.hero::after{content:"";position:absolute;top:0;bottom:0;right:0;width:36%;pointer-events:none}
+.hero::before{background:var(--amb);clip-path:polygon(24% 0,28% 0,4% 100%,0 100%)}
+.hero::after{background:var(--c1);clip-path:polygon(28% 0,100% 0,100% 100%,4% 100%)}
+.hero>*{position:relative;z-index:1}
+.hero h1{font-size:clamp(24px,5vw,40px);line-height:1.15;color:#fff;max-width:20em}
+.hero p{margin:6px 0 0;color:#cfd9ff}
+.hero.himg{min-height:clamp(180px,32vw,360px);display:flex;flex-direction:column;justify-content:flex-end;background-size:cover;background-position:center}
+.hero.himg::before,.hero.himg::after{display:none}
+.hero.himg h1{text-shadow:0 2px 14px rgba(0,0,0,.6)}.hero.himg p{color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.6)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.chip{display:inline-block;padding:4px 12px;border-radius:99px;background:var(--c1t);border:1px solid #c9d6ff;font-size:13px;font-weight:500;color:#1b3bb3}
+.hero .chip{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.35);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat{padding:14px 16px;border-left:5px solid var(--c1)}
+.stat b{display:block;font:700 30px/1.1 'Chakra Petch',sans-serif;color:var(--ink)}
+.stat span{color:var(--mut);font-size:13px;font-weight:500}
+/* butang */
+.btn{cursor:pointer;border:1px solid var(--c1);background:var(--c1);color:#fff;padding:10px 18px;border-radius:12px;font:600 14px Inter,sans-serif;transition:background .15s,box-shadow .15s,transform .1s}
+.btn:hover{background:#1a46dd;box-shadow:0 4px 14px rgba(36,87,255,.35)}
+.btn:active{transform:translateY(1px)}
+.btn.pink{border-color:var(--ink);background:var(--ink)}.btn.pink:hover{background:#1c2a5e;box-shadow:0 4px 14px rgba(15,26,61,.3)}
+.btn.red{border-color:#f3b4c0;background:var(--badt);color:var(--bad)}.btn.red:hover{background:var(--bad);color:#fff;box-shadow:none}
+.btn.sm{padding:6px 12px;font-size:12px;border-radius:10px}
+.btn:disabled{opacity:.4;pointer-events:none}
+.hero .btn{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.5);color:#fff}
+.hero .btn:hover{background:#fff;color:var(--c1d);box-shadow:none}
+/* borang */
+input,select{width:100%;background:#fff;border:1px solid #c6d0e8;color:var(--ink);padding:10px 12px;border-radius:10px;font:inherit}
+input:focus,select:focus{border-color:var(--c1);outline:none;box-shadow:0 0 0 3px rgba(36,87,255,.2)}
+label{display:block;font-size:13px;font-weight:500;color:var(--mut);margin:12px 0 4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.two{display:grid;grid-template-columns:minmax(0,380px) 1fr;gap:16px;align-items:start}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sq{max-width:260px}
+.team{padding:12px 14px;margin-bottom:10px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.team .n{font:700 16px 'Chakra Petch',sans-serif}
+.team small{color:var(--mut);display:block}
+.empty{text-align:center;padding:36px 16px;color:var(--mut);background:var(--card);border:1px dashed #b9c5e4;border-radius:18px}
+.empty h2{color:var(--ink)}
+/* segmen & penapis */
+.seg{display:inline-flex;gap:2px;padding:4px;margin:2px 0 14px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--sh)}
+.seg button{border:0;background:none;color:var(--mut);padding:8px 18px;border-radius:10px;font:600 13px Inter,sans-serif;cursor:pointer;transition:background .15s,color .15s}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:var(--c1);color:#fff}
+.seg button[disabled]{opacity:.45;cursor:not-allowed}
+.fl{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
+.fl button{background:#fff;border:1px solid var(--line);color:var(--mut);padding:7px 14px;border-radius:99px;font:600 13px Inter,sans-serif;cursor:pointer;transition:.15s}
+.fl button b{margin-left:8px;color:var(--ink)}
+.fl button:hover{border-color:var(--c1);color:var(--c1)}
+.fl button.on{background:var(--ink);border-color:var(--ink);color:#fff}.fl button.on b{color:var(--amb)}
+/* warna pusingan */
+.rc0{--rc:#0e7490}.rc1{--rc:#6d28d9}.rc2{--rc:#c2410c}.rc3{--rc:#1d4ed8}.rcF{--rc:#be185d}
+.bdh{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 10px}
+.bdh h2{font-size:22px}
+.leg{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0 0 12px;font-size:12px;font-weight:500;color:var(--mut)}
+.leg span{display:inline-flex;align-items:center;gap:6px}
+.leg i{width:12px;height:12px;border-radius:4px;display:inline-block;background:var(--rc,var(--ok))}
+.leg .lg i{background:var(--amb)}.leg .ld i{background:var(--ok)}.leg .lw i{background:#c3cce4}
+/* tajuk pusingan */
+.rs{margin-top:26px}
+.rh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.rh .dot{width:12px;height:12px;border-radius:4px;background:var(--rc,var(--c1))}
+.rh h3{font:700 17px 'Chakra Petch',sans-serif;letter-spacing:.04em;color:var(--ink)}
+.rh .fm{font-size:12px;font-weight:600;color:var(--rc,var(--c1));padding:2px 9px;border-radius:99px;border:1px solid currentColor}
+.rh .pg{margin-left:auto;font-size:12px;color:var(--mut)}.rh .pg b{color:var(--ink)}
+.rh .bar{flex-basis:100%;height:4px;border-radius:4px;background:#dbe2f1;overflow:hidden}
+.rh .bar i{display:block;height:100%;border-radius:4px;background:var(--rc,var(--c1));transition:width .4s}
+.rem{font-size:12px;font-weight:600;color:var(--gold);padding:2px 10px;border-radius:99px;background:var(--ambt);border:1px solid #f1d27a}
+.rh.fin .dot,.rh.fin .bar i{background:var(--ok)}
+.rh.fin .pg{color:var(--ok);font-weight:600}
+.chev{margin-left:10px;padding:2px 10px;border-radius:99px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:600}
+.rh.fin:hover .chev{border-color:var(--c1);color:var(--c1)}
+.dv{display:flex;align-items:center;gap:12px;margin:22px 0 14px;color:var(--ok);font:600 12px Inter,sans-serif}
+.dv::before,.dv::after{content:"";flex:1;height:1px;background:var(--line)}
+/* kad perlawanan (senarai) */
+.lst{display:flex;flex-direction:column;gap:8px}
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.mg.big{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-bottom:10px}
+.mc{position:relative;padding:14px 14px 12px 20px;border-radius:16px;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh);transition:box-shadow .2s,border-color .2s}
+.mc::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:5px;border-radius:0 5px 5px 0;background:var(--rc,var(--c1))}
+.mc:hover{border-color:#b9c5e4;box-shadow:0 2px 4px rgba(15,26,61,.06),0 12px 28px rgba(15,26,61,.12)}
+.mc-h{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.mc .no{font:700 16px 'Chakra Petch',sans-serif;color:var(--rc,var(--c1))}
+.mc .tm{font-size:12px;font-weight:500;color:var(--mut)}
+.gt{font:600 11px Inter,sans-serif;color:var(--c1);padding:1px 8px;border-radius:99px;background:var(--c1t)}
+.rt{margin-left:auto;display:flex;align-items:center;gap:8px}
+.fs{font:700 15px 'Chakra Petch',sans-serif;color:var(--c1d);background:var(--c1t);padding:2px 10px;border-radius:8px}
+.pill{margin-left:auto;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:99px;font:600 11px Inter,sans-serif;white-space:nowrap}
+.rt .pill{margin-left:0}
+.pill.live{background:var(--amb);color:#3d2a00}
+.pill.live::before{content:"";width:7px;height:7px;border-radius:50%;background:#3d2a00;animation:blink .6s ease-in-out infinite}
+.pill.rdy{color:var(--c1);background:var(--c1t)}
+.pill.dn{background:var(--okt);color:var(--ok)}
+.pill.wt{color:var(--mut);border:1px dashed #b3bfdc}
+.tr{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:9px 10px;margin-top:6px;border-radius:12px;background:#f4f7fd;cursor:pointer;transition:background .15s}
+.tr:hover{background:#e8eeff}
+.tr .nm{font:600 15px/1.25 Inter,sans-serif;color:var(--ink);min-width:0;overflow-wrap:anywhere}
+.tr .sc{font:700 20px 'Chakra Petch',sans-serif;min-width:22px;text-align:right;color:var(--ink)}
+.tr.w{background:var(--okt)}.tr.w .nm{color:#06592c;font-weight:700}.tr.w .nm::after{content:" ✔";color:var(--ok);font-size:12px}.tr.w .sc{color:var(--ok)}
+.tr.l .nm,.tr.l .sc{color:#6b7799;font-weight:500}
+.tr.p{cursor:default;background:transparent;border:1px dashed #b3bfdc}.tr.p .nm{color:var(--mut);font-style:italic;font-weight:500}
+.av{font:700 10px 'Chakra Petch',sans-serif;font-style:normal;width:26px;height:26px;flex:none;border-radius:8px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--c1),var(--c3))}
+.av.ph{background:none;border:1px dashed #b3bfdc;color:var(--mut)}
+.tn{display:flex;align-items:center;gap:8px;min-width:0}
+.mc.big .tr{padding:12px}.mc.big .nm{font-size:18px}.mc.big .av{width:34px;height:34px;font-size:12px}.mc.big .no{font-size:18px}
+.pub .mc .nm{font-size:18px}
+.mc.nx{border-color:var(--amb)}
+.mc.nx::before{background:var(--amb)}.mc.nx .no{color:var(--gold)}
+.mc.dn{background:#f6f8fc;box-shadow:none}.mc.dn .no{color:var(--mut)}.mc.dn .tr{background:#eef2fa}.mc.dn .tr.w{background:var(--okt)}
+.mc.hl,.m.hl{border-color:var(--c1);box-shadow:0 0 0 3px rgba(36,87,255,.28);animation:none}
+.mc.dim,.m.dim{opacity:.35}
+@property --a{syntax:'<angle>';initial-value:0deg;inherits:false}
+@keyframes spin{to{--a:360deg}}
+@keyframes sheen{from{background-position:160% 0,0 0}to{background-position:-60% 0,0 0}}
+@keyframes ring{0%,100%{box-shadow:0 0 3px rgba(255,170,0,.7),0 0 8px rgba(255,194,26,.45),var(--sh)}50%{box-shadow:0 0 8px #ffb300,0 0 24px rgba(255,170,0,.85),0 0 48px rgba(255,194,26,.55),var(--sh)}}
+@keyframes blink{50%{opacity:.2}}
+.mc.nx,.m.nx{position:relative;background:linear-gradient(110deg,transparent 40%,rgba(255,194,26,.4) 50%,transparent 60%) 0 0/250% 100% no-repeat,linear-gradient(180deg,var(--ambt),#fff 75%) 0 0/100% 100% no-repeat;animation:ring .7s ease-in-out infinite,sheen 1.3s linear infinite}
+.mc.nx::after,.m.nx::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:3px;pointer-events:none;background:conic-gradient(from var(--a),transparent 0 22%,#ffc21a 42%,#ff8a00 50%,transparent 50% 72%,#ffc21a 92%,#ff8a00 100%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0);filter:drop-shadow(0 0 4px #ffb300);animation:spin 1.2s linear infinite}
+.m.nx .mh .go{animation:blink .6s ease-in-out infinite}
+.mc.nx.hl,.m.nx.hl{animation:none}.mc.nx.hl::after,.m.nx.hl::after{display:none}
+/* bracket */
+.bracket{--ln:#b9c4e0;display:flex;gap:32px;align-items:stretch;overflow-x:auto;padding:26px 30px 34px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh)}
+.col{min-width:250px;display:flex;flex-direction:column;flex:1}
+.col h3{font-size:13px;text-align:center;height:46px;padding:3px 6px;margin-bottom:10px;border-radius:10px;color:#fff;background:var(--rc,var(--c1))}
+.col h3 small{display:block;font:500 11px Inter,sans-serif;color:rgba(255,255,255,.85)}
+.cb{flex:1;display:flex;flex-direction:column}
+.pair,.slot{flex:1;display:flex;flex-direction:column;justify-content:space-around;position:relative}
+.slot{justify-content:center}
+.pair::after{content:"";position:absolute;right:-16px;top:25%;height:50%;width:16px;border:2px solid var(--ln);border-left:0}
+.pair::before{content:"";position:absolute;right:-32px;top:50%;width:16px;border-top:2px solid var(--ln)}
+.mw{margin:7px 0}
+.m{border:1px solid var(--line);border-left:5px solid var(--rc,var(--c1));border-radius:12px;background:#fff;overflow:hidden;box-shadow:var(--sh)}
+.mh{display:flex;justify-content:space-between;padding:4px 12px;font-size:11px;font-weight:600;color:var(--mut);background:#f1f4fb}
+.mh .rdy{color:var(--c1)}
+.s{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 12px;font-weight:500}
+.s+.s{border-top:1px solid var(--line)}
+.s:hover{background:#f4f7fd}
+.s.w{background:var(--okt);color:#06592c;font-weight:700}
+.s.l{color:#6b7799;text-decoration:line-through}
+.s.t{cursor:default;color:var(--mut);font-style:italic}
+.mt{font-size:11px;color:var(--mut);padding:3px 12px;border-top:1px solid var(--line)}
+.m.nx{border-color:var(--amb);border-left-color:var(--amb)}
+.m.nx .mh{background:var(--amb);color:#3d2a00}.m.nx .mh .go{font-weight:700;color:#3d2a00}
+.m.dn{background:#f6f8fc;box-shadow:none}.m.dn .mh{color:var(--ok)}.m.dn .s.l{text-decoration:none}
+.pub .s{font-size:17px;padding:11px 14px}.pub .col{min-width:270px}
+/* jadual kedudukan */
+.gbox{--gc:#0e7490;margin:18px 0 22px;border-radius:16px;overflow:hidden;background:#fff;border:1px solid var(--line);box-shadow:var(--sh)}
+.gh{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:24px 0 10px;font:700 15px 'Chakra Petch',sans-serif;letter-spacing:.04em;color:var(--ink)}
+.gh span{font:500 12px Inter,sans-serif;color:var(--mut);letter-spacing:0}
+.gbox .gh{margin:0;padding:12px 16px;background:var(--gc);color:#fff;font-size:18px;align-items:center;justify-content:space-between}
+.gbox .gh span{color:#fff;font-weight:600;background:rgba(255,255,255,.22);padding:3px 10px;border-radius:99px}
+.tbw{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:14px}.gbox .tbw{border:0;border-radius:0}
+.tb{width:100%;border-collapse:collapse;min-width:540px}
+.tb th{font:600 12px Inter,sans-serif;color:#33406b;background:#eef2fb;padding:12px 8px;border-bottom:1px solid var(--line)}
+.tb td{padding:12px 8px;text-align:center;border-bottom:1px solid #e8edf7;font:600 16px Inter,sans-serif;color:var(--ink)}
+.tb tr:last-child td{border-bottom:0}
+.tb tbody tr{cursor:pointer;transition:background .15s}
+.tb tbody tr:nth-child(even) td{background:#f8faff}
+.tb tbody tr:hover td{background:#eaf0ff}
+.tb th:nth-child(2),.tb td:nth-child(2){text-align:left}
+.tb .rk{font:700 19px 'Chakra Petch',sans-serif;width:46px;color:var(--mut)}
+.tb .tn b{display:block;font-weight:700}.tb .tn small{color:var(--mut);font-weight:400;font-size:12px}
+.tb .pt{font:700 24px 'Chakra Petch',sans-serif;color:var(--c1)}
+.tb tr.q td{background:var(--okt)!important}
+.tb tr.q td:first-child{box-shadow:inset 6px 0 var(--ok)}
+.tb tr.q .rk{color:var(--ok)}
+.tb tr.q+tr:not(.q) td{border-top:3px dashed var(--bad)}
+.tb tr.hl td{background:#d6e2ff!important}.tb tr.dim{opacity:.35}
+.qb{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:99px;background:var(--ok);color:#fff;font:700 10px Inter,sans-serif;letter-spacing:.04em;vertical-align:middle}
+.gnote{display:flex;flex-wrap:wrap;gap:14px;margin:6px 0 4px;color:var(--mut);font-size:13px}
+.gnote i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.fmtbox{margin:12px 0;padding:14px 16px;border-radius:14px;background:#f4f7fd;border:1px solid var(--line)}
+.fmtbox h3{margin:0 0 6px;font:700 15px 'Chakra Petch',sans-serif}
+.fmtsum{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+/* pengesahan */
+.rn{display:flex;justify-content:space-between;gap:8px;font:700 14px 'Chakra Petch',sans-serif;color:var(--rc,var(--ink));background:#fff;border:1px solid var(--line);border-left:5px solid var(--rc,var(--c1));padding:8px 14px;border-radius:10px;margin:18px 0 10px}
+.vs{padding:16px;margin-bottom:12px}
+.vs.cur{border:2px solid var(--ok)}
+.vs.nxt{border-style:dashed;opacity:.8}.vs.nxt:hover,.vs.nxt:focus-within{opacity:1}
+.nxrow{opacity:.85}
+.vs .vh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;font:700 12px 'Chakra Petch',sans-serif;color:var(--mut)}
+.vs .badge{padding:3px 10px;border-radius:99px;white-space:nowrap}
+.vs .badge.cur{background:var(--okt);color:var(--ok)}.vs .badge.nxt{background:#eef2fb;color:var(--mut)}
+.vs .tt{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;text-align:center}
+.vs .tt b{font:700 17px 'Chakra Petch',sans-serif}
+.vs .x{color:var(--c2);font-weight:700}
+.sc{width:64px;margin:8px auto 0;text-align:center}
+.win{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.gate{padding:18px;margin:14px 0;text-align:center;background:var(--okt);border:2px solid var(--ok)}.gate h2{margin:0 0 6px;color:#06592c}
+.champ{padding:22px;text-align:center;margin-bottom:16px;background:linear-gradient(180deg,var(--ambt),#fff);border:2px solid var(--amb)}
+.champ h2{font-size:clamp(22px,5vw,34px);color:#7a4a00}
+/* nav, toast, dialog */
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;gap:4px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));background:rgba(255,255,255,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);box-shadow:0 -4px 20px rgba(15,26,61,.08);z-index:5}
+nav button{flex:1;max-width:200px;background:none;border:0;color:var(--mut);padding:8px 4px;border-radius:12px;cursor:pointer;font:600 12px Inter,sans-serif;transition:background .15s,color .15s}
+nav button i{display:block;font-style:normal;font-size:18px}
+nav button:hover{background:#f1f4fb;color:var(--ink)}
+nav button.on{background:var(--c1);color:#fff}
+.toast{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-weight:500;padding:10px 18px;border-radius:12px;z-index:30;box-shadow:0 8px 24px rgba(15,26,61,.3)}
+.ov{position:fixed;inset:0;background:rgba(15,26,61,.45);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;z-index:20;padding:16px}
+.dlg{max-width:380px;width:100%;box-shadow:0 20px 50px rgba(15,26,61,.3)}.dlg p{margin:0 0 16px;white-space:pre-line}
+.fsb{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:10px;z-index:9;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:20px;cursor:pointer;box-shadow:var(--sh)}
+.fsb:hover{border-color:var(--c1);color:var(--c1)}
+body.pres #app{zoom:1.2;padding-bottom:24px}body.pres .fsb{opacity:.45}body.pres .fsb:hover{opacity:1}
+@media(max-width:760px){.two{grid-template-columns:1fr}.col{min-width:200px}.hero::before,.hero::after{width:22%}}
+@media(min-width:900px){nav{top:0;bottom:auto;padding:10px 16px;border-top:0;border-bottom:1px solid var(--line);box-shadow:0 4px 20px rgba(15,26,61,.06)}
+nav button{flex:none;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px}nav button i{display:inline;font-size:16px}
+body{padding-top:68px;padding-bottom:28px}}
+@media print{body{background:#fff;padding:0}#bg,nav,.noprint,.fsb{display:none}.glass,.mc,.m,.hero{box-shadow:none;animation:none;background:#fff;color:#000;border:1px solid #999}.hero::before,.hero::after,.mc::before,.mc::after,.m::after{display:none}.hero h1,.hero p{color:#000;text-shadow:none}.mc *,.m *{color:#000!important}.tr,.pill{background:none!important}.rh .bar{display:none}.bracket{box-shadow:none}.col h3{background:#fff;color:#000;border:1px solid #999}.col h3 small{color:#000}}
+
+/* ===== bracket gaya turnamen profesional ===== */
+@keyframes flash{50%{opacity:.3}}
+.bracket{scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:#b9c4e0 transparent;background:linear-gradient(#fff,#fff) padding-box,#fff}
+.col{scroll-snap-align:start}
+.col h3{box-shadow:0 2px 0 rgba(15,26,61,.12)}
+.col.cur h3{outline:3px solid rgba(255,194,26,.9);outline-offset:2px;animation:ring .7s ease-in-out infinite}
+.col.cur h3 small::before{content:"● ";color:var(--amb);animation:blink .6s ease-in-out infinite}
+.pair.hot::before,.pair.hot::after{border-color:#ff9f00;filter:drop-shadow(0 0 3px #ffb300);animation:flash .7s ease-in-out infinite}
+.pair.fin::before,.pair.fin::after{border-color:#5fcf93}
+.m{transition:transform .15s,box-shadow .15s}
+.m:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(15,26,61,.06),0 10px 24px rgba(15,26,61,.14)}
+.s>span:last-child{min-width:30px;text-align:center;font:700 15px 'Chakra Petch',sans-serif;background:#eef2fb;border-radius:6px;padding:1px 7px}
+.s>span:last-child:empty{display:none}
+.s.w>span:last-child{background:var(--ok);color:#fff}
+.s.t>span:last-child{min-width:0;padding:0;background:none;font:inherit;text-align:left}
+.s .tn{font-size:14px}
+.s .av{width:24px;height:24px;border-radius:7px}
+.bracket::-webkit-scrollbar{height:8px}.bracket::-webkit-scrollbar-thumb{background:#b9c4e0;border-radius:8px}
+.tb td,.tr .sc,.stat b,.fs{font-variant-numeric:tabular-nums}
+.hero h1{text-wrap:balance}
+
+/* ===== logo kumpulan ===== */
+.av.lg{background:none;border:0;border-radius:0;width:32px;height:32px;display:block;filter:drop-shadow(0 1px 2px rgba(15,26,61,.35))}
+.av.lg svg{display:block;width:100%;height:100%}
+.mc.big .av.lg{width:46px;height:46px}
+.s .av.lg{width:28px;height:28px}
+.tl{display:flex;align-items:center;gap:12px;min-width:0}.tl .av.lg{width:40px;height:40px;flex:none}
+.tb td.tn{display:table-cell}
+.tb .av.lg{display:inline-block;vertical-align:middle;width:28px;height:28px;margin-right:8px}
+.av.xl{width:88px;height:88px;margin:0 auto 8px}
+.av.lgv{width:58px;height:58px;margin:0 auto 6px}
+.bracket{scroll-padding-left:30px}
+
+.imcap{margin:10px 0 0;font-size:13px;font-weight:500;color:var(--mut);text-align:center}
+.hero .imcap{color:#e3eaff;text-align:left;margin:6px 0 0}
+.impanel{margin:0 0 14px}
+input[type=range]{padding:0;border:0;background:none;accent-color:var(--c1);height:28px}
+.ppad{display:grid;grid-template-columns:repeat(3,34px);gap:6px}
+.ppad button{width:34px;height:34px;border-radius:8px;border:1px solid #c6d0e8;background:#fff;cursor:pointer;padding:0}
+.ppad button:hover{border-color:var(--c1)}
+.ppad button.on{background:var(--c1);border-color:var(--c1);box-shadow:inset 0 0 0 4px #fff}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<main id="app"></main>
+<nav class="noprint" id="nav"></nav>
+<button id="fsb" class="fsb noprint" onclick="toggleFS()" title="Skrin penuh (tekan F)" aria-label="Skrin penuh">⛶</button>
+<script>
+const KEY='mlbb_seri_rompin_v1';
+const def=()=>({set:{title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:'',venue:'',fmt:3,shuffle:true},teams:[],rounds:null});
+let S;try{S=JSON.parse(localStorage.getItem(KEY))||def()}catch(e){S=def()}
+let tab='jadual',edit=null,drafts=[],scanning=false,pubMode=location.hash=='#paparan',pubData=null,dbh=null,canPush=false,pubStarted=false,pt;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}queuePush()};
+const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tm=id=>S.teams.find(t=>t.id===id);
+const nm=id=>id?e(tm(id)?.name):null;
+const started=()=>!!S.rounds;
+let SCD={},SO={};
+const pts=()=>S.set.mode=='pts',grp=()=>S.set.mode=='grp';
+const isLg=m=>pts()||m.g!=null,GL=g=>String.fromCharCode(65+g);
+const gcount=()=>S.rounds.filter(rd=>rd.length&&rd[0].g!=null).length;
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+function seedOrder(n){let o=[1];while(o.length<n){const k=o.length*2+1;o=o.flatMap(x=>[x,k-x])}return o}
+function rname(r){if(pts())return 'PUSINGAN '+(r+1);if(grp()&&r<gcount())return 'PUSINGAN KUMPULAN '+(r+1);const R=S.rounds.length,d=R-r;return d==1?'FINAL':d==2?'SEPARUH AKHIR':d==3?'SUKU AKHIR':grp()?'PUSINGAN AWAL':'PUSINGAN '+(r+1)}
+function adv(m,w){m.w=w;const nx=(pts()||m.g!=null)?null:S.rounds[m.r+1];if(nx){const k=nx[m.i>>1];if(m.i%2==0)k.a=w;else k.b=w}}
+function genGrp(t){
+  const G=+S.set.G||4,adv=+S.set.adv||2,n=t.length;
+  if(n<2*G){toast('Terlalu banyak kumpulan: perlukan sekurang-kurangnya '+2*G+' pasukan');return false}
+  const gm=Array.from({length:G},()=>[]);t.forEach((id,i)=>gm[i%G].push(id));
+  const lr=gm.map(ids=>{const q=ids.slice();if(q.length%2)q.push(null);const m=q.length,rs=[];for(let r=0;r<m-1;r++){const ms=[];for(let i=0;i<m/2;i++){const a=q[i],b=q[m-1-i];if(a&&b)ms.push([a,b])}rs.push(ms);q.splice(1,0,q.pop())}return rs});
+  /* Susun semula supaya SEMUA kumpulan bermain serentak dalam setiap pusingan:
+     perlawanan kumpulan kecil diagihkan sama rata merentasi semua pusingan. */
+  let GR=Math.max(...lr.map(x=>x.length));
+  const bal=lr.map(rs=>{const list=rs.flat(),M=list.length,out=[];
+    const take=q=>{const used=new Set(),pick=[];for(let j=0;j<list.length&&pick.length<q;){const [a,b]=list[j];if(!used.has(a)&&!used.has(b)){pick.push(list.splice(j,1)[0]);used.add(a);used.add(b)}else j++}return pick};
+    for(let r=0;r<GR;r++)out.push(take(Math.floor((r+1)*M/GR)-Math.floor(r*M/GR)));
+    while(list.length){const k=take(list.length);if(!k.length)break;out.push(k)}
+    return out});
+  GR=Math.max(...bal.map(x=>x.length));S.rounds=[];
+  for(let r=0;r<GR;r++){const ms=[];bal.forEach((rs,g)=>(rs[r]||[]).forEach(([a,b])=>ms.push({r,i:ms.length,g,a,b,w:null,sa:'',sb:'',time:'',bye:false})));S.rounds.push(ms)}
+  const seeds=[],o=Array.from({length:G},(_,g)=>g);
+  for(let k=0;k<adv;k++){(k==0?o:o.map((_,i)=>o[(i+(G>>1))%G])).forEach(g=>{if(gm[g].length>k)seeds.push([g,k])})}
+  const Q=seeds.length;let size=2;while(size<Q)size*=2;
+  const sl=seedOrder(size).map(x=>x<=Q?x-1:null),lab=ix=>{const [g,k]=seeds[ix];return (k==0?'Johan ':k==1?'Naib Johan ':'Tempat '+(k+1)+' ')+GL(g)};
+  for(let r=0,c=size/2;c>=1;r++,c/=2)S.rounds.push(Array.from({length:c},(_,i)=>({r:GR+r,i,a:null,b:null,w:null,sa:'',sb:'',time:'',bye:false})));
+  S.rounds[GR].forEach((m,i)=>{m.sd=[sl[2*i],sl[2*i+1]];m.ph={};if(m.sd[0]!=null)m.ph.a=lab(m.sd[0]);if(m.sd[1]!=null)m.ph.b=lab(m.sd[1]);if(m.sd[0]==null||m.sd[1]==null)m.bye=true});
+  S.set.gm=gm;S.set.seeds=seeds;jv='tbl';return true}
+function fillKO(){
+  if(!grp())return;const GR=gcount(),k0=S.rounds[GR];if(!k0)return;
+  const ok=S.rounds.slice(0,GR).flat().every(m=>m.w),rank=ok?S.set.gm.map((_,g)=>standings(g)):null;
+  k0.forEach(m=>{
+    if(!ok){if(m.bye&&m.w){const nx=S.rounds[m.r+1];if(nx){const k=nx[m.i>>1];if(m.i%2==0)k.a=null;else k.b=null}}m.a=m.b=null;if(m.bye)m.w=null;return}
+    const id=ix=>ix==null?null:rank[S.set.seeds[ix][0]][S.set.seeds[ix][1]].id;
+    m.a=id(m.sd[0]);m.b=id(m.sd[1]);if(m.bye&&!m.w)adv(m,m.a||m.b)})}
+function gen(){
+  if(S.teams.length<2)return toast('Daftarkan sekurang-kurangnya 2 kumpulan');
+  let t=S.teams.map(x=>x.id);
+  if(S.set.shuffle)for(let i=t.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[t[i],t[j]]=[t[j],t[i]]}
+  if(grp()){if(!genGrp(t))return}else if(pts()){const q=t.slice();if(q.length%2)q.push(null);const n=q.length;S.rounds=[];
+    for(let r=0;r<n-1;r++){const ms=[];for(let i=0;i<n/2;i++){const a=q[i],b=q[n-1-i];if(a&&b)ms.push({r,i:ms.length,a,b,w:null,sa:'',sb:'',time:'',bye:false})}S.rounds.push(ms);q.splice(1,0,q.pop())}
+    jv='tbl'}else{
+  let size=2;while(size<t.length)size*=2;
+  const slots=seedOrder(size).map(s=>t[s-1]||null);
+  S.rounds=[];
+  for(let r=0,c=size/2;c>=1;r++,c/=2)S.rounds.push(Array.from({length:c},(_,i)=>({r,i,a:null,b:null,w:null,sa:'',sb:'',time:'',bye:false})));
+  S.rounds[0].forEach((m,i)=>{m.a=slots[2*i];m.b=slots[2*i+1];if(!m.a||!m.b){m.bye=true;adv(m,m.a||m.b)}});jv='list'}
+  S.go=autoGo();save();tab='jadual';render();toast('Jadual dijana')
+}
+function slot(m,side){const id=m[side],w=m.w;
+  if(!id)return `<div class="s t"><span>${m.ph&&m.ph[side]?m.ph[side]:m.bye?'BYE':'Menunggu…'}</span></div>`;
+  const sc=side=='a'?m.sa:m.sb,t=tm(id),ini=e(((t&&t.name)||'?').trim().slice(0,2).toUpperCase());
+  return `<div class="s ${w?(w===id?'w':'l'):''}" onclick="hl('${id}')"><span class="tn"><i class="av lg">${logo(id)}</i>${nm(id)}</span><span>${sc!==''&&!m.bye?e(sc):''}</span></div>`}
+function autoGo(){const i=S.rounds.findIndex(rd=>rd.some(m=>!m.bye&&!m.w));return i<0?S.rounds.length-1:i}
+function curGo(){return S.go==null?autoGo():Math.min(S.go,S.rounds.length-1)}
+function gateInfo(){if(!S.rounds)return null;const g=curGo();if(S.rounds[g].some(m=>!m.bye&&!m.w))return null;let n=g+1;while(n<S.rounds.length&&!S.rounds[n].some(m=>!m.bye))n++;if(n>=S.rounds.length)return null;return {from:g,to:n,cnt:S.rounds[n].filter(m=>!m.bye).length}}
+async function startRound(){const g=gateInfo();if(!g)return;
+  if(!await ask(`${rname(g.from)} sudah selesai.\nMulakan ${rname(g.to)} (${g.cnt} perlawanan)?`))return;
+  S.go=g.to;save();render();toast(rname(g.to)+' dimulakan')}
+function rdy(m){if(m.r>curGo())return false;if(m.w||!m.a||!m.b)return false;if(!isLg(m))return true;return !S.rounds.slice(0,m.r).some(rd=>rd.some(x=>!x.w&&(x.a===m.a||x.b===m.a||x.a===m.b||x.b===m.b)))}
+function r1done(){return !!S.rounds&&S.rounds[0].filter(m=>!m.bye).every(m=>m.w)}
+function nxOn(){return !S.set.noNx}
+function numM(){let c=0;S.rounds.forEach(rd=>rd.forEach(m=>{if(!m.bye)m.n=++c}))}
+function rcl(r){if(pts())return 'rc'+(r%4);if(grp()){const g=gcount();return r<g?'rc0':r==S.rounds.length-1?'rcF':r==S.rounds.length-2?'rc1':'rc2'}return r==S.rounds.length-1?'rcF':'rc'+Math.min(r,3)}
+function legH(){let h='<div class="leg">';for(let r=gcount();r<S.rounds.length;r++)h+=`<span class="${rcl(r)}"><i></i>${rname(r)}</span>`;return h+'<span class="lg"><i></i>▶ Game seterusnya</span><span class="ld"><i></i>✔ Selesai</span><span class="lw"><i></i>Menunggu</span></div>'}
+function lbl(m,side){if(m.ph&&m.ph[side])return m.ph[side];if(m.bye)return 'BYE';const f=m.r>0&&S.rounds[m.r-1][m.i*2+(side=='a'?0:1)];return f&&f.n?'Pemenang P'+f.n:'Menunggu'}
+function fs(m){if(!m.w||m.sa===''||m.sa==null||m.sb===''||m.sb==null)return '';const a=m.w===m.a;return e(a?m.sa:m.sb)+'-'+e(a?m.sb:m.sa)}
+function mcH(m,big){
+  const ids=hlIds(),live=rdy(m),nx=live&&nxOn(),inv=ids&&ids.some(i=>m.a===i||m.b===i);
+  const row=side=>{const id=m[side],w=m.w,sc=side=='a'?m.sa:m.sb;
+    if(!id)return `<div class="tr p"><i class="av ph">?</i><span class="nm">${lbl(m,side)}</span></div>`;
+    const t=tm(id),ini=e(((t&&t.name)||'?').trim().slice(0,2).toUpperCase());
+    return `<div class="tr ${w?(w===id?'w':'l'):''}" onclick="hl('${id}')"><i class="av lg">${logo(id)}</i><span class="nm">${nm(id)}</span>${w&&sc!==''&&sc!=null?`<b class="sc">${e(sc)}</b>`:''}</div>`};
+  const pill=m.w?'<span class="pill dn">Selesai</span>':live?(nx?'<span class="pill live">Game seterusnya</span>':'<span class="pill rdy">Sedia</span>'):'<span class="pill wt">Menunggu</span>';
+  return `<article class="mc ${big?'big':''} ${rcl(m.r)} ${m.w?'dn':''} ${nx?'nx':''} ${ids?(inv?'hl':'dim'):''}"><div class="mc-h"><span class="no">P${m.n}</span>${m.g!=null?`<span class="gt">Kump. ${GL(m.g)}</span>`:''}${m.time?`<span class="tm">${e(m.time)}</span>`:''}<span class="rt">${fs(m)?`<b class="fs">${fs(m)}</b>`:''}${pill}</span></div>${row('a')}${row('b')}</article>`}
+function nextH(){
+  if(!S.rounds)return '';
+  const nx=S.rounds.flat().filter(rdy);if(!nx.length){const g=gateInfo();return g?`<div class="bdh"><h2 class="disp">⏳ ${rname(g.from)} selesai</h2><span class="chip">Menunggu ${rname(g.to)} dimulakan</span></div>`:''}
+  const on=nxOn();numM();
+  return `<div class="bdh"><h2 class="disp">${on?'▶ Game seterusnya':'Perlawanan sedia bermula'}</h2><span class="chip">${nx.length} perlawanan serentak</span></div><div class="mg big">${nx.map(m=>mcH(m,true)).join('')}</div>`}
+function setJv(v){jv=v;render()}
+function setJf(v){jf=v;render()}
+function swH(){const o=pts()?[['tbl','🏆 Kedudukan']]:grp()?[['tbl','🏆 Kedudukan'],['br','🌳 Bracket']]:[['br','🌳 Bracket']];
+  return `<div class="seg noprint"><button class="${jv=='list'?'on':''}" onclick="setJv('list')">📋 Senarai</button>${o.map(([k,l])=>`<button class="${jv==k?'on':''}" onclick="setJv('${k}')">${l}</button>`).join('')}</div>${jv=='br'&&!pts()?legH():''}`}
+function bodyH(){return jv=='tbl'&&(pts()||grp())?tableH():jv=='br'&&!pts()?bracketH():listH()}
+function togR(r){jo[r]=!jo[r];render()}
+function listH(){
+  numM();
+  const all=S.rounds.flat().filter(m=>!m.bye);
+  const isNx=rdy,isWt=m=>!m.w&&!rdy(m);
+  const cnt={all:all.length,nx:all.filter(isNx).length,wt:all.filter(isWt).length,dn:all.filter(m=>m.w).length};
+  const ok=m=>jf=='all'||(jf=='nx'&&isNx(m))||(jf=='wt'&&isWt(m))||(jf=='dn'&&m.w);
+  const f=[['all','Semua'],['nx','Seterusnya'],['wt','Menunggu'],['dn','Selesai']];
+  let h=srchRow()+`<div class="fl noprint">${f.map(([k,l])=>`<button class="${jf==k?'on':''}" onclick="setJf('${k}')">${l}<b>${cnt[k]}</b></button>`).join('')}</div><div class="lst">`,any=false;
+  S.rounds.forEach((rd,r)=>{const ms=rd.filter(m=>!m.bye);if(!ms.length)return;const sh=ms.filter(ok);if(!sh.length)return;any=true;
+    const d=ms.filter(m=>m.w).length,fin=d==ms.length,tog=fin&&jf=='all',col=tog&&!jo[r];
+    const todo=sh.filter(m=>!m.w).sort((a,b)=>(+rdy(b))-(+rdy(a))),done=sh.filter(m=>m.w);
+    h+=`<section class="rs ${rcl(r)}"><header class="rh ${fin?'fin':''}" ${tog?`onclick="togR(${r})" style="cursor:pointer"`:''}><i class="dot"></i><h3>${rname(r)}</h3><span class="fm">${fmtOf(r)}</span>${todo.length&&!fin?`<span class="rem">${ms.length-d} belum selesai</span>`:''}<span class="pg">${fin?'✔ Semua selesai':`<b>${d}</b>/${ms.length} selesai`}${tog?`<span class="chev">${col?'▸ Papar':'▾ Tutup'}</span>`:''}</span><div class="bar"><i style="width:${Math.round(d/ms.length*100)}%"></i></div></header>`;
+    if(!col){
+      if(todo.length)h+=`<div class="mg">${todo.map(m=>mcH(m)).join('')}</div>`;
+      if(done.length){if(todo.length)h+=`<div class="dv"><span>✔ Selesai · ${done.length}</span></div>`;h+=`<div class="mg">${done.map(m=>mcH(m)).join('')}</div>`}
+    }
+    h+='</section>'});
+  if(!any)h+='<div class="empty">Tiada perlawanan dalam kategori ini</div>';
+  return h+'</div>'}
+function toggleNx(){S.set.noNx=!S.set.noNx;save();render()}
+function standings(g){
+  const ids=g==null?S.teams.map(t=>t.id):S.set.gm[g],all=S.rounds.flat();
+  const T=ids.map(id=>({id,p:0,w:0,l:0,gw:0,gl:0})),by=Object.fromEntries(T.map(x=>[x.id,x]));
+  all.forEach(m=>{if(g!=null&&m.g!==g)return;if(!m.w||!m.a||!m.b||!by[m.a]||!by[m.b])return;
+    let sa=+m.sa||0,sb=+m.sb||0;if(!sa&&!sb){if(m.w===m.a)sa=1;else sb=1}
+    const A=by[m.a],B=by[m.b];A.gw+=sa;A.gl+=sb;B.gw+=sb;B.gl+=sa;
+    const W=by[m.w],Lo=m.w===m.a?B:A;W.w++;W.p+=3;Lo.l++});
+  const h2h=(a,b)=>{const m=all.find(x=>x.w&&(g==null||x.g===g)&&((x.a===a.id&&x.b===b.id)||(x.a===b.id&&x.b===a.id)));return m?(m.w===a.id?-1:1):0};
+  return T.sort((a,b)=>b.p-a.p||h2h(a,b)||(b.gw-b.gl)-(a.gw-a.gl)||b.gw-a.gw||(tm(a.id).name||'').localeCompare(tm(b.id).name||''))}
+function tbl(st,q){const ids=hlIds();
+  return `<div class="tbw"><table class="tb"><thead><tr><th>#</th><th>Kumpulan</th><th>Main</th><th>Menang</th><th>Kalah</th><th>Game</th><th>+/-</th><th>Mata</th></tr></thead><tbody>${st.map((x,i)=>{const d=x.gw-x.gl;return `<tr class="${i<3&&x.w+x.l?'r'+(i+1):''} ${i<q?'q':''} ${ids?(ids.includes(x.id)?'hl':'dim'):''}" onclick="hl('${x.id}')"><td class="rk">${i+1}</td><td class="tn"><b><i class="av lg">${logo(x.id)}</i>${nm(x.id)}${i<q?'<span class="qb">LAYAK</span>':''}</b><small>${e(tm(x.id).cls||'')}</small></td><td>${x.w+x.l}</td><td>${x.w}</td><td>${x.l}</td><td>${x.gw}-${x.gl}</td><td>${d>0?'+':''}${d}</td><td class="pt">${x.p}</td></tr>`}).join('')}</tbody></table></div>`}
+function tableH(){
+  if(grp()){const adv=+S.set.adv||2;const GC=['#0e7490','#6d28d9','#c2410c','#be185d','#15803d','#1d4ed8','#a16207','#b91c1c'];return S.set.gm.map((_,g)=>`<section class="gbox" style="--gc:${GC[g%GC.length]}"><h3 class="gh">KUMPULAN ${GL(g)}<span>${adv} teratas mara ke ${rname(gcount())}</span></h3>${tbl(standings(g),adv)}</section>`).join('')+`<div class="gnote"><span><i style="background:#e3f6ec;border:2px solid var(--ok)"></i>Hijau = layak ke peringkat seterusnya</span><span><i style="background:#ff5a7a"></i>Garis merah putus = had kelayakan</span></div><p class="sub">Menang = 3 mata. Jika mata sama: keputusan antara dua pasukan, beza game, kemudian jumlah game menang.</p>`}
+  return tbl(standings(),0)+`<p class="sub" style="margin-top:10px">Menang = 3 mata. Jika mata sama: keputusan antara dua pasukan, beza game, kemudian jumlah game menang.</p>`}
+function setMode(v){if(started())return;S.set.mode=v;save();render()}
+function koN(){
+  if(S.rounds)return Math.max(1,grp()?S.rounds.length-gcount():S.rounds.length);
+  const n=S.teams.length,G=+S.set.G||4,adv=+S.set.adv||2;let q=n;
+  if(S.set.mode=='grp'){const b=Math.floor(n/G),x=n%G;q=Array.from({length:G},(_,i)=>b+(i<x?1:0)).reduce((a,z)=>a+Math.min(adv,z),0)}
+  let sz=2,r=1;while(sz<q){sz*=2;r++}return r}
+const stName=(d,K)=>d==1?'Final':d==2?'Separuh akhir':d==3?'Suku akhir':(S.set.mode=='grp'?'Pusingan awal'+(K>4?' '+(K-d+1):''):'Pusingan '+(K-d+1));
+function getB1(K){let v=S.set.b1;if(v==null)v=(S.set.mode=='grp'&&K>3)?4:0;return Math.max(0,Math.min(v,K))}
+function getB3(K,b1){let v=S.set.b3;if(v==null||v<1)v=1;return b1>0?Math.min(v,Math.max(b1-1,1)):Math.min(v,K)}
+function boOf(d){const K=koN(),b1=getB1(K);if(b1>0&&d>=b1)return 1;return d>=getB3(K,b1)?3:5}
+function fmtSegs(){const K=koN(),o=[];if(S.set.mode=='grp')o.push(['Kumpulan',1]);for(let d=K;d>=1;d--)o.push([stName(d,K),boOf(d)]);const seg=[];o.forEach(([n,b])=>{const l=seg[seg.length-1];if(l&&l.b===b)l.to=n;else seg.push({from:n,to:n,b})});return seg}
+const segTxt=x=>(x.from==x.to?x.from:x.from+' → '+x.to)+': Bo'+x.b;
+function fmtText(){return pts()?'Bo'+(S.set.fmt||3):fmtSegs().map(segTxt).join(' · ')}
+function fmtCfg(){const K=koN(),b1=getB1(K),b3=getB3(K,b1),gm=S.set.mode=='grp',op=(v,l,sel)=>`<option value="${v}" ${sel?'selected':''}>${l}</option>`;
+  let h=`<div class="fmtbox"><h3>Format perlawanan</h3>${gm?'<p class="sub" style="margin:0 0 8px">Peringkat kumpulan sentiasa Bo1.</p>':''}<label>① Kalah mati Bo1 sehingga peringkat mana?</label><select onchange="S.set.b1=+this.value;S.set.b3=Math.max(1,Math.min(S.set.b3||1,+this.value>0?+this.value-1:99));save();render()">${op(0,gm?'Tiada — terus Bo3 selepas peringkat kumpulan':'Tiada — terus Bo3 dari pusingan pertama',b1==0)}${Array.from({length:K},(_,i)=>K-i).map(d=>op(d,'Hingga '+stName(d,K),b1==d)).join('')}</select>`;
+  const top=b1>0?b1-1:K;
+  if(top>=1){h+=`<label>② Selepas itu, Bo3 hingga peringkat mana?</label><select onchange="S.set.b3=+this.value;save();render()">${Array.from({length:top},(_,i)=>top-i).map(d=>op(d,'Hingga '+stName(d,K),b3==d)).join('')}</select>`;
+    if(b3>1)h+=`<p class="sub" style="margin:6px 0 0">Selepas itu Bo5: ${Array.from({length:b3-1},(_,i)=>b3-1-i).map(d=>stName(d,K)).join(', ')}.</p>`}
+  return h+`<div class="fmtsum">${fmtSegs().map(x=>`<span class="chip">${segTxt(x)}</span>`).join('')}</div></div>`}
+function modeSel(){const L=started(),m=S.set.mode||'ko',n=S.teams.length,G=+S.set.G||4,adv=+S.set.adv||2;
+  const btn=(k,l)=>`<button class="${m==k?'on':''}" onclick="setMode('${k}')" ${L?'disabled':''}>${l}</button>`;
+  let info,cfg='';
+  if(m=='pts'){info=`Setiap kumpulan bertemu semua kumpulan lain. Menang = 3 mata, juara ialah mata tertinggi. ${n} kumpulan = ${n*(n-1)/2} perlawanan dalam ${n%2?n:n-1} pusingan.`;
+    cfg=`<div class="fmtbox"><h3>Format perlawanan</h3><select onchange="S.set.fmt=+this.value;save();render()">${[1,3,5].map(v=>`<option value="${v}" ${(S.set.fmt||3)==v?'selected':''}>Best of ${v}</option>`).join('')}</select></div>`}
+  else if(m=='grp'){const b=Math.floor(n/G),x=n%G,sz=Array.from({length:G},(_,i)=>b+(i<x?1:0)),lm=sz.reduce((a,z)=>a+z*(z-1)/2,0),lr=Math.max(...sz.map(z=>z%2?z:z-1)),Q=sz.reduce((a,z)=>a+Math.min(adv,z),0);
+    info=n<2*G?`Terlalu banyak kumpulan: perlukan sekurang-kurangnya ${2*G} pasukan.`:`${n} pasukan dibahagi kepada ${G} kumpulan (${[...new Set(sz)].join('/')} pasukan). Peringkat kumpulan: ${lm} perlawanan dalam ${lr} pusingan serentak. ${adv} teratas setiap kumpulan (${Q} pasukan) mara ke kalah mati (${Q-1} perlawanan).`;
+    cfg=`<div class="grid2"><div><label>Bilangan kumpulan</label><select onchange="S.set.G=+this.value;save();render()" ${L?'disabled':''}>${[2,3,4,5,6,8].map(v=>`<option ${v==G?'selected':''}>${v}</option>`).join('')}</select></div><div><label>Mara setiap kumpulan</label><select onchange="S.set.adv=+this.value;save();render()" ${L?'disabled':''}>${[1,2,3].map(v=>`<option value="${v}" ${v==adv?'selected':''}>${v} teratas</option>`).join('')}</select></div></div>`+fmtCfg()}
+  else{info=`Kumpulan yang kalah terus tersingkir. Pantas dan sesuai jika masa terhad. ${n} kumpulan = ${Math.max(n-1,0)} perlawanan.`;cfg=fmtCfg()}
+  return `<div style="margin:14px 0"><label>Sistem pertandingan</label><div class="seg">${btn('ko','🥊 Kalah mati')}${btn('pts','📊 Kiraan mata')}${btn('grp','🏟️ Kumpulan + kalah mati')}</div><p class="sub">${info}</p>${cfg}</div>`}
+function champion(){if(!S.rounds)return null;if(pts()){const a=S.rounds.flat();return a.length&&a.every(m=>m.w)?standings()[0].id:null}const f=S.rounds[S.rounds.length-1][0];return f.w}
+function viewJadual(){
+  const s=S.set,all=S.rounds?S.rounds.flat().filter(m=>!m.bye):[],done=all.filter(m=>m.w).length,ch=champion();
+  let h=`<section class="glass hero${heroSt(hdData)}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p>${imCap('hd')}<div class="chips">${s.date?`<span class="chip">📅 ${e(s.date)}</span>`:''}${s.venue?`<span class="chip">📍 ${e(s.venue)}</span>`:''}<span class="chip">${fmtText()}</span><span class="chip">${pts()?'Kiraan mata':grp()?'Kumpulan + kalah mati':'Kalah mati'}</span></div><div class="row noprint" style="margin-top:14px"><button class="btn sm" onclick="document.getElementById('hdf').click()">🖼️ ${hdData?'Tukar':'Muat naik'} gambar header</button>${hdData?'<button class="btn sm red" onclick="clearHd()">Buang gambar</button><button class="btn sm" onclick="imTg(\'hd\')">⚙️ Laras gambar</button>':''}<button class="btn sm pink" onclick="toggleFS()">⛶ Skrin penuh</button><input type="file" id="hdf" accept="image/*" hidden onchange="setHd(this.files[0]);this.value=''"></div></section>${imPanel('hd')}
+  <div class="stats"><div class="glass stat"><b>${S.teams.length}</b><span>Kumpulan</span></div><div class="glass stat"><b>${S.teams.length*5}</b><span>Pelajar</span></div><div class="glass stat"><b>${done}/${all.length}</b><span>Perlawanan selesai</span></div><div class="glass stat"><b>${S.rounds?S.rounds.length:0}</b><span>Pusingan</span></div></div>`;
+  if(!S.rounds)return h+`<div class="glass empty"><h2>Jadual belum dijana</h2><p>${S.teams.length<2?'Daftarkan sekurang-kurangnya 2 kumpulan dahulu.':`${S.teams.length} kumpulan sedia. Jana jadual untuk mula.`}</p>${S.teams.length>=2?'<p class="sub">Sistem pertandingan dan format perlawanan ditetapkan di tab Pendaftaran.</p>':''}<div class="row" style="justify-content:center"><button class="btn pink" onclick="go('daftar')">Daftar kumpulan</button><button class="btn" onclick="gen()" ${S.teams.length<2?'disabled':''}>Jana jadual</button></div></div>`;
+  if(ch)h+=`<div class="glass champ"><i class="av lg xl">${logo(ch)}</i><p class="sub">Juara kejohanan</p><h2>🏆 ${nm(ch)}</h2><p class="sub">${e(tm(ch).cls)} · ${tm(ch).members.filter(Boolean).map(e).join(', ')}</p></div>`;
+  h+=`<div class="row noprint" style="margin-bottom:10px"><button class="btn sm" onclick="print()">Cetak jadual</button><button class="btn sm pink" onclick="location.hash='#paparan'">📺 Paparan awam</button>${canPush?'<span class="chip">🟢 Siaran langsung aktif</span>':''}<button class="btn sm ${S.set.noNx?'':'pink'}" onclick="toggleNx()">⚡ Sorot game seterusnya: ${S.set.noNx?'MATI':'HIDUP'}</button></div>`;
+  return h+nextH()+swH()+bodyH()}
+function viewDaftar(){
+  const L=started(),dr=drafts[0],t=dr||(edit?tm(edit):null);
+  const mem=[0,1,2,3,4].map(i=>`<label>${i==0?'Ketua pasukan':'Ahli '+(i+1)}</label><input id="m${i}" maxlength="40" value="${e(t?.members[i]||'')}" ${L?'disabled':''}>`).join('');
+  let h=`<div class="two"><div>${scanCard(L)}<section class="glass pad"><h2>${dr?'Semak borang imbasan':t?'Kemas kini kumpulan':'Daftar kumpulan'}</h2><p class="sub">${dr?'Semak nama yang dibaca, betulkan jika perlu, kemudian daftar.':'Setiap kumpulan 5 ahli.'}</p>
+  ${L?'<p style="color:var(--gold)">Jadual telah dijana. Pendaftaran dikunci. Tetapkan semula jadual di Setting untuk mengubah.</p>':''}
+  <label>Nama kumpulan</label><input id="tn" maxlength="30" value="${e(t?.name||'')}" ${L?'disabled':''}>
+  <label>Kelas</label><input id="tc" maxlength="20" placeholder="cth: 4 Bestari" value="${e(t?.cls||'')}" ${L?'disabled':''}>${mem}
+  <div class="row" style="margin-top:16px"><button class="btn" onclick="addTeam()" ${L?'disabled':''}>${t?'Simpan':'Daftar kumpulan'}</button>${t?`<button class="btn red" onclick="skip()">${dr?'Langkau':'Batal'}</button>`:''}</div></section></div>
+  <section><h2>Senarai kumpulan (${S.teams.length})</h2><p class="sub">${S.teams.length*5} pelajar terlibat</p>`;
+  h+=`<div class="row" style="margin-bottom:10px"><button class="btn sm" onclick="demo15()" ${L?'disabled':''}>🧪 Isi 20 kumpulan contoh</button></div>`;
+  if(!S.teams.length)h+=`<div class="glass empty">Belum ada kumpulan didaftarkan.</div>`;
+  S.teams.forEach((x,i)=>{h+=`<div class="glass team"><div class="tl"><i class="av lg">${logo(x.id)}</i><div><span class="n">${i+1}. ${e(x.name)}</span><small>${e(x.cls)} · ${x.members.filter(Boolean).map(e).join(', ')}</small></div></div><div class="row"><button class="btn sm" onclick="edit='${x.id}';render()" ${L?'disabled':''}>Edit</button><button class="btn sm red" onclick="delTeam('${x.id}')" ${L?'disabled':''}>Padam</button></div></div>`});
+  if(S.teams.length>=2)h+=modeSel()+(L?'':`<button class="btn pink" onclick="gen()">Jana jadual (${S.teams.length} kumpulan)</button>`);
+  return h+`</section></div>`}
+function addTeam(){
+  const name=document.getElementById('tn').value.trim(),cls=document.getElementById('tc').value.trim(),members=[0,1,2,3,4].map(i=>document.getElementById('m'+i).value.trim());
+  if(!name)return toast('Masukkan nama kumpulan');
+  if(members.some(x=>!x))return toast('Lengkapkan nama 5 ahli');
+  if(S.teams.some(x=>x.name.toLowerCase()===name.toLowerCase()&&x.id!==edit))return toast('Nama kumpulan sudah digunakan');
+  if(drafts.length){drafts.shift();S.teams.push({id:'t'+Date.now(),name,cls,members})}else if(edit){Object.assign(tm(edit),{name,cls,members});edit=null}else S.teams.push({id:'t'+Date.now(),name,cls,members});
+  save();render();toast('Kumpulan disimpan')}
+async function demo15(){
+  if(started())return;
+  if(S.teams.length&&!await ask('Gantikan '+S.teams.length+' kumpulan sedia ada dengan 20 kumpulan contoh?'))return;
+  const N=['Harimau Rompin','Naga Pahang','Lang Merah','Pendekar Siber','Srikandi Gaming','Bayu Esports','Rimba Warriors','Garuda Muda','Tuah Legacy','Jebat Squad','Cendana Kings','Panglima X','Bintang Timur','Kilat Rompin','Seri Gemilang','Pasukan Elit','Gagak Hitam','Rajawali Pahang','Taufan Muda','Sri Mahkota'];
+  const C=['4 Bestari','4 Cemerlang','4 Dinamik','5 Amanah','5 Bestari','5 Cemerlang','3 Gemilang','3 Amanah'];
+  const F=['Aiman','Hakim','Danish','Irfan','Syafiq','Zikri','Haziq','Amirul','Farhan','Adam','Nabil','Ikhwan','Khairul','Faiz','Hafiz','Izzat','Aqil','Naim','Rafiq','Firdaus','Aisyah','Nurul','Sofea','Balqis','Alya','Qistina','Damia','Irdina','Hana','Syuhada'];
+  const L=['Rosli','Hamzah','Ismail','Yusof','Ahmad','Razak','Salleh','Jamil','Kamal','Zainal','Mansor','Hassan','Ibrahim','Othman','Latif'];
+  const t0=Date.now();
+  S.teams=N.map((name,i)=>({id:'t'+(t0+i),name,cls:C[i%C.length],members:[0,1,2,3,4].map(j=>{const k=i*5+j;return F[k%30]+' '+L[(k*3+Math.floor(k/30))%15]})}));
+  edit=null;drafts.length=0;save();render();toast('20 kumpulan contoh didaftarkan')}
+async function delTeam(id){if(await ask('Padam kumpulan ini?')){S.teams=S.teams.filter(t=>t.id!==id);save();render()}}
+function ask(msg){return new Promise(res=>{const d=document.createElement('div');d.className='ov';d.innerHTML=`<div class="glass pad dlg"><p>${e(msg)}</p><div class="row" style="justify-content:flex-end"><button class="btn sm" data-v="0">Batal</button><button class="btn sm red" data-v="1">Teruskan</button></div></div>`;d.onclick=ev=>{const v=ev.target.dataset&&ev.target.dataset.v;if(v!==undefined){d.remove();res(v==='1')}};document.body.appendChild(d)})}
+let aiOK=null;
+(async()=>{try{const s=await claude.use('sample');aiOK=!!s}catch(x){aiOK=false}if(tab=='daftar'&&!scanning)render()})();
+let apiKey='';try{apiKey=localStorage.getItem('mlbb_key')||''}catch(e){}
+const PROMPT=`Ini gambar borang pendaftaran pasukan e-sport sekolah (Mobile Legends). Borang mengandungi nama ahli, tingkatan, dan penanda siapa ketua kumpulan dan siapa ahli. Tulisan mungkin tulisan tangan. Baca semua borang yang kelihatan. Balas dengan JSON sahaja, tanpa teks lain, dalam bentuk: {"teams":[{"name":"nama kumpulan atau kosong","members":[{"name":"nama penuh","form":"tingkatan/kelas, cth 4 Bestari","role":"ketua atau ahli"}]}]}. Salin nama seperti tertulis dan jangan reka nama. Jika tidak pasti, letak rentetan kosong.`;
+async function askAI(blob){
+  let sm=null;try{sm=await claude.use('sample');if(sm&&!(await sm.limits()).images)sm=null}catch(x){sm=null}
+  if(sm){const r=await sm(PROMPT,{images:[blob],cache:false});return r.text}
+  if(!apiKey)throw{code:'na'};
+  const b64=await new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]);fr.onerror=no;fr.readAsDataURL(blob)});
+  const mt=/^image\/(jpeg|png|webp|gif)$/.test(blob.type)?blob.type:'image/jpeg';
+  let res;try{res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:2000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:PROMPT}]}]})})}catch(x){throw{code:'net'}}
+  const d=await res.json().catch(()=>({}));
+  if(!res.ok)throw{code:res.status==401?'badkey':'api',message:d.error&&d.error.message};
+  return (d.content||[]).map(c=>c.text||'').join('')}
+function saveKey(clear){const v=clear?'':document.getElementById('ak').value.trim();apiKey=v;try{v?localStorage.setItem('mlbb_key',v):localStorage.removeItem('mlbb_key')}catch(e){}render();toast(v?'Kunci disimpan':'Kunci dibuang')}
+function scanCard(L){const off=(aiOK===false&&!apiKey)||L||scanning;return `<section class="glass pad" style="margin-bottom:16px"><h2>Imbas borang</h2><p class="sub">Tekan Imbas, kamera telefon terus terbuka. Ambil gambar borang dan nama ahli dimasukkan ke borang untuk disemak.</p>${aiOK===false&&!apiKey?'<p style="color:var(--gold)">Fail yang dimuat turun memerlukan kunci API untuk imbasan. <a href="#" style="color:var(--c1)" onclick="go(\'set\');return false">Buka Setting</a></p>':''}<div class="row"><button class="btn pink" onclick="document.getElementById('cam').click()" ${off?'disabled':''}>${scanning?'Membaca borang…':'📷 Imbas borang'}</button><button class="btn" onclick="document.getElementById('gal').click()" ${off?'disabled':''}>🖼️ Pilih dari galeri</button><input type="file" id="cam" accept="image/*" capture="environment" hidden onchange="scan(this.files[0]);this.value=''"><input type="file" id="gal" accept="image/*" hidden onchange="scan(this.files[0]);this.value=''"></div>${drafts.length?`<p style="color:var(--gold);margin:12px 0 0">${drafts.length} borang menunggu semakan.</p>`:''}</section>`}
+async function shrink(f){try{const b=await createImageBitmap(f),k=Math.min(1,1800/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(r,'image/jpeg',.9))}catch(x){return f}}
+async function scan(f){
+  if(!f)return;scanning=true;render();
+  try{
+    const blob=await shrink(f);
+    const text=await askAI(blob);
+    const m=String(text||'').match(/\{[\s\S]*\}/);if(!m)throw{code:'parse'};
+    const list=(JSON.parse(m[0]).teams||[]).map(t=>{
+      const ms=(t.members||[]).map(x=>({n:String(x.name||'').trim(),f:String(x.form||'').trim(),k:/ketua|leader/i.test(x.role||'')})).filter(x=>x.n);
+      ms.sort((a,b)=>b.k-a.k);
+      const forms=[...new Set(ms.map(x=>x.f).filter(Boolean))];
+      return {name:String(t.name||'').trim(),cls:forms.join(' / '),members:[0,1,2,3,4].map(i=>ms[i]?ms[i].n:'')}}).filter(t=>t.members.some(Boolean));
+    if(list.length){drafts=list;toast(list.length+' borang dibaca. Sila semak.')}else toast('Tiada nama dikesan. Cuba ambil gambar lebih dekat dan terang');
+  }catch(x){
+    const c=x&&x.code;
+    toast(c=='na'||c=='noimg'?'Masukkan kunci API di Setting untuk imbasan':c=='net'?'Tiada sambungan internet':c=='badkey'?'Kunci API tidak sah. Semak di Setting':c=='not_granted'?'Kebenaran ditolak. Imbas semula dan pilih Benarkan':c=='rate_limited'?'Terlalu banyak cubaan, tunggu sebentar':c=='parse'?'Bacaan gagal, cuba imbas semula':'Gagal membaca: '+((x&&x.message)||c||'ralat'));
+    if(c=='na'||c=='noimg')aiOK=false}
+  scanning=false;tab='daftar';render()}
+let bgData='';try{bgData=localStorage.getItem('mlbb_bg')||''}catch(e){}
+function defBg(){const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><radialGradient id='a' cx='10%' cy='5%' r='45%'><stop offset='0' stop-color='#2457ff' stop-opacity='.16'/><stop offset='1' stop-color='#2457ff' stop-opacity='0'/></radialGradient><radialGradient id='b' cx='92%' cy='95%' r='45%'><stop offset='0' stop-color='#ffc21a' stop-opacity='.22'/><stop offset='1' stop-color='#ffc21a' stop-opacity='0'/></radialGradient><pattern id='h' width='52' height='90' patternUnits='userSpaceOnUse'><path d='M26 0L52 15V45L26 60L0 45V15ZM26 60V90M0 45V75M52 45V75' fill='none' stroke='#2457ff' stroke-opacity='.07'/></pattern></defs><rect width='1600' height='900' fill='#f2f5fb'/><rect width='1600' height='900' fill='url(#h)'/><rect width='1600' height='900' fill='url(#a)'/><rect width='1600' height='900' fill='url(#b)'/></svg>`;return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg)}
+function applyBg(src){document.documentElement.style.setProperty('--bgimg','url("'+(src||bgData||defBg())+'")')}
+function setBg(f){if(!f)return;createImageBitmap(f).then(b=>{const k=Math.min(1,1280/b.width),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);bgData=c.toDataURL('image/jpeg',.6);try{localStorage.setItem('mlbb_bg',bgData)}catch(e){toast('Gambar terlalu besar untuk disimpan')}applyBg();queuePush();render();toast('Latar belakang ditukar')}).catch(()=>toast('Gambar tidak boleh dibaca'))}
+function clearBg(){bgData='';try{localStorage.removeItem('mlbb_bg')}catch(e){}applyBg();queuePush();render();toast('Latar asal digunakan')}
+applyBg();
+let hdData='';try{hdData=localStorage.getItem('mlbb_hd')||''}catch(e){}
+function setHd(f){if(!f)return;createImageBitmap(f).then(b=>{let w=Math.min(b.width,1600),q=.8,out='';
+  for(let i=0;i<8;i++){const c=document.createElement('canvas');c.width=w;c.height=Math.round(b.height*w/b.width);c.getContext('2d').drawImage(b,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<320000)break;q=Math.max(.45,q-.1);if(i>=3)w=Math.round(w*.8)}
+  hdData=out;try{localStorage.setItem('mlbb_hd',hdData)}catch(e){toast('Gambar terlalu besar untuk disimpan')}queuePush();render();toast('Gambar header ditukar')}).catch(()=>toast('Gambar tidak boleh dibaca'))}
+function clearHd(){hdData='';try{localStorage.removeItem('mlbb_hd')}catch(e){}queuePush();render();toast('Gambar header dibuang')}
+const heroSt=src=>src?` himg" style="${hdCss(src)}`:'';
+let fsApi=false;const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function fsBtn(){const x=document.getElementById('fsb');if(x)x.textContent=document.body.classList.contains('pres')?'✕':'⛶'}
+function toggleFS(){const b=document.body,d=document,el=d.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;
+  if(!b.classList.contains('pres')){b.classList.add('pres');fsApi=false;if(rq){try{const r=rq.call(el);fsApi=true;if(r&&r.catch)r.catch(()=>{fsApi=false})}catch(x){}}}
+  else{b.classList.remove('pres');if(fsOn())(d.exitFullscreen||d.webkitExitFullscreen).call(d)}
+  fsBtn()}
+function fsCh(){if(!fsOn()&&fsApi&&document.body.classList.contains('pres')){document.body.classList.remove('pres');fsApi=false;fsBtn()}}
+addEventListener('fullscreenchange',fsCh);addEventListener('webkitfullscreenchange',fsCh);
+addEventListener('keydown',ev=>{if((ev.key=='f'||ev.key=='F')&&!ev.ctrlKey&&!ev.metaKey&&!ev.altKey&&!/INPUT|SELECT|TEXTAREA/.test((ev.target.tagName||'')))toggleFS()});
+
+LGC=[['#2457ff','#7c3aed'],['#0891b2','#2457ff'],['#ea580c','#dc2626'],['#db2777','#7c3aed'],['#16a34a','#0891b2'],['#ca8a04','#ea580c'],['#dc2626','#9f1239'],['#4f46e5','#0ea5e9'],['#059669','#65a30d'],['#be185d','#f59e0b']]
+LGS=['M20 2 36 8V20C36 29 29 35 20 38 11 35 4 29 4 20V8Z','M20 2 35 11V29L20 38 5 29V11Z','M12 3H28L37 12V28L28 37H12L3 28V12Z','M20 2 37 16 20 38 3 16Z']
+LGI=[k=>'<path d="M22.5 8 12.5 22H19l-2 10 10.5-15H21z" fill="#fff"/>',k=>'<path d="M20 9l3.3 7 7.7.9-5.7 5.2 1.6 7.6L20 26l-6.9 3.7 1.6-7.6L9 16.9l7.7-.9z" fill="#fff"/>',k=>'<path d="M10.5 27V15l5.5 5 4-8 4 8 5.5-5v12z" fill="#fff"/><rect x="10.5" y="28.5" width="19" height="2.5" rx="1" fill="#fff"/>',k=>'<path d="M12 12l16 16M28 12L12 28" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/><path d="M11 17l4-4M29 17l-4-4" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>',k=>'<path d="M20 8c.8 5 7 8 7 15a7 7 0 0 1-14 0c0-3 1.8-5 3-7 .6 2 1.4 3 2.4 3 0-4-1.2-7 1.6-11z" fill="#fff"/>',k=>'<path d="M12.5 22a7.5 7.5 0 1 1 15 0v3.5H25V30h-3v-2.5h-4V30h-3v-4.5h-2.5z" fill="#fff"/><circle cx="16.5" cy="21.5" r="2.2" fill="'+k+'"/><circle cx="23.5" cy="21.5" r="2.2" fill="'+k+'"/>',k=>'<path d="M13 10l7 20M20 9l6 21M27 11l4 17" stroke="#fff" stroke-width="3" stroke-linecap="round"/>',k=>'<path d="M13 16l3.5-5h7l3.5 5-7 15z" fill="#fff"/><path d="M13 16h14M16.5 11l3.5 20 3.5-20" stroke="'+k+'" stroke-width="1.2" fill="none" stroke-linejoin="round"/>']
+function logo(id){const t=tm(id),k=String((t&&t.id)||id)+'|'+(t&&!t.id?t.name:'');let h=5381;for(let i=0;i<k.length;i++)h=((h<<5)+h+k.charCodeAt(i))>>>0;h^=h>>>15;h=Math.imul(h,2246822519)>>>0;h=(h^(h>>>13))>>>0;
+ const n=h%LGC.length,c=LGC[n],s=LGS[(h>>>4)%LGS.length],ic=LGI[(h>>>8)%LGI.length](c[1]),g='lg'+n;
+ return `<svg viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c[0]}"/><stop offset="1" stop-color="${c[1]}"/></linearGradient></defs><path d="${s}" fill="url(#${g})" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/><path d="${s}" fill="none" stroke="rgba(15,26,61,.28)" stroke-width=".8"/>${ic}</svg>`}
+let brData='';try{brData=localStorage.getItem('mlbb_br')||''}catch(e){}
+function setBr(f){if(!f)return;createImageBitmap(f).then(b=>{let w=Math.min(b.width,1600),q=.8,out='';for(let i=0;i<8;i++){const c=document.createElement('canvas');c.width=w;c.height=Math.round(b.height*w/b.width);c.getContext('2d').drawImage(b,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<320000)break;q=Math.max(.45,q-.1);if(i>=3)w=Math.round(w*.8)}brData=out;try{localStorage.setItem('mlbb_br',brData)}catch(x){toast('Gambar terlalu besar untuk disimpan')}queuePush();render();toast('Gambar bracket ditukar')}).catch(()=>toast('Gambar tidak boleh dibaca'))}
+function clearBr(){brData='';try{localStorage.removeItem('mlbb_br')}catch(e){}queuePush();render();toast('Gambar bracket dibuang')}
+function brBar(){return pubMode?'':`<div class="row noprint" style="margin-bottom:10px"><button class="btn sm" onclick="document.getElementById('brf').click()">🖼️ ${brData?'Tukar':'Muat naik'} gambar bracket</button>${brData?'<button class="btn sm pink" onclick="imTg(\'br\')">⚙️ Laras gambar</button><button class="btn sm red" onclick="clearBr()">Buang gambar</button>':''}<input type="file" id="brf" accept="image/*" hidden onchange="setBr(this.files[0]);this.value=''"></div>${imPanel('br')}`}
+function brSt(){const c=brCss();return c?` style="${c}"`:''}
+
+let imOpen={};
+const IM=k=>Object.assign({x:50,y:50,fit:'cover',ov:86,cap:''},(S.set.im&&S.set.im[k])||{});
+const brSrc=()=>(pubMode&&pubData&&pubData.br)||brData,hdSrc=()=>(pubMode&&pubData&&pubData.hd)||hdData;
+function brCss(){const s=brSrc();if(!s)return '';const m=IM('br'),o=m.ov/100;return `background-image:linear-gradient(rgba(255,255,255,${o}),rgba(255,255,255,${o})),url(${s});background-size:100% 100%,${m.fit};background-position:0 0,${m.x}% ${m.y}%;background-repeat:no-repeat`}
+function hdCss(s){const m=IM('hd');return `background-color:#13216f;background-image:linear-gradient(180deg,rgba(15,26,61,.05) 30%,rgba(15,26,61,.85) 100%),url(${s});background-size:100% 100%,${m.fit};background-position:0 0,${m.x}% ${m.y}%;background-repeat:no-repeat`}
+function imCap(k){const m=IM(k);return m.cap&&(k=='br'?brSrc():hdSrc())?`<p class="imcap">📷 ${e(m.cap)}</p>`:''}
+function imTg(k){imOpen[k]=!imOpen[k];render()}
+function imApply(k){const el=document.querySelector(k=='br'?'.bracket':'.hero.himg');if(el)el.setAttribute('style',k=='br'?brCss():hdCss(hdData))}
+function imSet(k,f,v,re){S.set.im=S.set.im||{};S.set.im[k]=Object.assign(IM(k),{[f]:v});save();if(re)return render();const b=document.getElementById('iv'+k+f);if(b)b.textContent=v+'%';imApply(k)}
+function imReset(k){if(S.set.im)delete S.set.im[k];save();render();toast('Kedudukan gambar disetkan semula')}
+function imPanel(k){if(pubMode||!imOpen[k]||!(k=='br'?brData:hdData))return '';const m=IM(k);
+ const sl=(f,l,mn,mx)=>`<label>${l}: <b id="iv${k}${f}">${m[f]}%</b></label><input type="range" min="${mn}" max="${mx}" value="${m[f]}" oninput="imSet('${k}','${f}',+this.value)">`;
+ const pad=[0,50,100].flatMap(y=>[0,50,100].map(x=>`<button class="${m.x==x&&m.y==y?'on':''}" aria-label="Kedudukan ${x}% ${y}%" onclick="imSet('${k}','x',${x});imSet('${k}','y',${y},1)"></button>`)).join('');
+ return `<section class="glass pad noprint impanel"><h2>Laras gambar ${k=='br'?'bracket':'header'}</h2><label>Keterangan gambar</label><input maxlength="120" value="${e(m.cap)}" placeholder="cth: Dewan Sekolah, Hari Kejohanan" onchange="imSet('${k}','cap',this.value,1)"><div class="grid2"><div><label>Kedudukan pantas</label><div class="ppad">${pad}</div></div><div>${sl('x','Mendatar',0,100)}${sl('y','Menegak',0,100)}</div></div><label>Saiz gambar</label><div class="seg"><button class="${m.fit=='cover'?'on':''}" onclick="imSet('${k}','fit','cover',1)">Penuhi ruang</button><button class="${m.fit=='contain'?'on':''}" onclick="imSet('${k}','fit','contain',1)">Tunjuk semua</button></div>${k=='br'?sl('ov','Lapisan putih (supaya teks jelas)',0,95):''}<div class="row" style="margin-top:12px"><button class="btn sm pink" onclick="imReset('${k}')">Set semula</button><button class="btn sm" onclick="imTg('${k}')">Siap</button></div></section>`}
+function pubOf(){return {set:S.set,teams:S.teams.map(t=>({id:t.id,name:t.name,cls:t.cls})),rounds:S.rounds,go:S.go,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
+function queuePush(){if(pubMode||!canPush)return;clearTimeout(pt);pt=setTimeout(pushNow,800)}
+async function pushNow(){try{await dbh.doc('tournament/state').set({json:JSON.stringify(pubOf()),t:Date.now()})}catch(x){}}
+let hlTeam=null,hlQ='',jv='list',jf='all',jo={};
+function hlIds(){if(hlTeam)return [hlTeam];if(hlQ)return S.teams.filter(t=>t.name.toLowerCase().includes(hlQ)).map(t=>t.id);return null}
+function hl(id){hlTeam=hlTeam===id?null:id;hlQ='';render()}
+function srch(v){hlQ=v.trim().toLowerCase();hlTeam=null;render();const i=document.getElementById('sq');if(i){i.focus();i.setSelectionRange(99,99)}}
+function fmtOf(r){if(pts())return 'Bo'+(S.set.fmt||3);if(grp()&&r<gcount())return 'Bo1';return 'Bo'+boOf(S.rounds.length-r)}
+function mcard(m){const ids=hlIds(),live=rdy(m),nx=live&&nxOn(),inv=ids&&ids.some(i=>m.a===i||m.b===i);
+  return `<div class="mw"><div class="m ${rcl(m.r)} ${m.w?'dn':''} ${live?'live':''} ${nx?'nx':''} ${ids?(inv?'hl':'dim'):''}"><div class="mh"><span>${m.bye?'—':'P'+m.n}</span><span class="${nx?'go':live?'rdy':''}">${m.bye?'BYE':m.w?'Selesai'+(fs(m)?' · '+fs(m):''):nx?'▶ GAME SETERUSNYA':live?'● Sedia':'Menunggu'}</span></div>${slot(m,'a')}${slot(m,'b')}${m.time&&!m.bye?`<div class="mt">⏰ ${e(m.time)}</div>`:''}</div></div>`}
+function srchRow(){return `<div class="row noprint" style="margin-bottom:10px"><input id="sq" class="sq" placeholder="🔍 Cari kumpulan" value="${e(hlQ)}" oninput="srch(this.value)">${hlTeam||hlQ?'<button class="btn sm red" onclick="hlTeam=null;hlQ=\'\';render()">Padam sorotan</button>':'<span class="sub" style="margin:0">Tekan nama kumpulan untuk menjejak perjalanannya</span>'}</div>`}
+function pc(a,b){return nxOn()&&(rdy(a)||rdy(b))?' hot':(a.w&&b.w?' fin':'')}
+function bracketH(){
+  numM();
+  const R=S.rounds.length;
+  let h=srchRow()+brBar()+`<div class="bracket"${brSt()}>`;
+  const GR0=gcount();S.rounds.forEach((rd,r)=>{if(r<GR0)return;h+=`<div class="col ${rcl(r)}${r==curGo()?' cur':''}"><h3>${rname(r)}<small>${fmtOf(r)} · ${rd.filter(m=>!m.bye&&m.w).length}/${rd.filter(m=>!m.bye).length}</small></h3><div class="cb">`;
+    if(r==R-1)h+=`<div class="slot">${mcard(rd[0])}</div>`;
+    else for(let k=0;k<rd.length;k+=2)h+=`<div class="pair${pc(rd[k],rd[k+1])}">${mcard(rd[k])}${mcard(rd[k+1])}</div>`;
+    h+='</div></div>'});
+  return h+'</div>'+imCap('br')}
+function viewPub(){
+  const s=S.set;let h=`${(canPush||!dbh)?'<button class="btn sm noprint" style="margin-bottom:10px" onclick="location.hash=\'\'">← Keluar paparan</button>':''}<section class="glass hero${heroSt((pubData&&pubData.hd)||hdData)}"><h1>${e(s.title)}</h1><p>${e(s.school)}${s.date?' · '+e(s.date):''}${s.venue?' · '+e(s.venue):''}</p>${imCap('hd')}</section>`;
+  if(!S.rounds)return h+`<div class="glass empty"><h2>Jadual belum dijana</h2><p>${S.teams.length} kumpulan berdaftar.</p></div>`;
+  const ch=champion();
+  if(ch)h+=`<div class="glass champ"><i class="av lg xl">${logo(ch)}</i><p class="sub">Juara kejohanan</p><h2>🏆 ${nm(ch)}</h2></div>`;
+  h+=nextH()+swH();
+  return h+bodyH()+'<p class="sub" style="text-align:center">Dikemas kini secara automatik</p>'}
+function startPub(){
+  if(pubStarted)return;pubStarted=true;
+  const loc=()=>{try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.set)pubData={set:d.set,teams:d.teams||[],rounds:d.rounds,go:d.go}}catch(x){}};
+  loc();
+  if(dbh)dbh.doc('tournament/state').onSnapshot(sn=>{if(sn.exists){try{pubData=JSON.parse(sn.data().json)}catch(x){}}else loc();render()},()=>{});
+  addEventListener('storage',()=>{if(!dbh){loc();render()}});
+  setInterval(()=>{if(!dbh){loc();render()}},3000)}
+addEventListener('hashchange',()=>{pubMode=location.hash=='#paparan';if(pubMode)startPub();else applyBg();render()});
+(async()=>{
+  try{dbh=await claude.use('db');const u=await claude.use('user');canPush=!!(dbh&&u&&await u.canEdit())}catch(x){}
+  if(pubMode)startPub();else if(canPush&&(S.teams.length||S.rounds))pushNow();
+  render()})();
+function autoTime(){
+  if(!S.rounds)return;const s=S.set,st=(s.start||'09:00').split(':'),gap=+s.gap||40,cn=Math.max(1,+s.courts||1);
+  let t0=(+st[0])*60+(+st[1]);
+  S.rounds.forEach((rd,rr)=>{const gp=grp()&&rr<gcount()?(+s.gapG||20):gap,ms=rd.filter(m=>!m.bye);ms.forEach((m,i)=>{if(m.w)return;const t=t0+Math.floor(i/cn)*gp;m.time=String(Math.floor(t/60)%24).padStart(2,'0')+':'+String(t%60).padStart(2,'0')+' · Gelanggang '+(i%cn+1)});t0+=Math.ceil(ms.length/cn)*gp});
+  save();render();toast('Masa perlawanan dijana')}
+function skip(){if(drafts.length)drafts.shift();else edit=null;render()}
+function viewSah(){
+  if(!S.rounds)return `<div class="glass empty"><h2>Tiada perlawanan</h2><p>Jana jadual dahulu untuk mengesahkan keputusan.</p><button class="btn" onclick="go('jadual')">Ke jadual</button></div>`;
+  const ch=champion();let h=`<h2>Pengesahan keputusan</h2><p class="sub">${pts()||grp()?'Pilih kumpulan yang menang dan masukkan skor game. '+(grp()?'Kedudukan kumpulan dan bracket':'Mata dan kedudukan')+' dikemas kini automatik.':'Pilih kumpulan yang menang. Kumpulan itu akan mara ke pusingan seterusnya.'}</p>`;
+  if(ch)h+=`<div class="glass champ"><h2>🏆 ${nm(ch)}</h2><p class="sub">Juara kejohanan</p></div>`;
+  numM();
+  const gt=gateInfo();
+  if(gt)h+=`<div class="glass gate"><h2>✅ ${rname(gt.from)} selesai</h2><p class="sub">${gt.cnt} perlawanan ${rname(gt.to)} menunggu pengesahan anda. Selepas disahkan, perlawanan itu disorot untuk semua orang dan senarai pengesahan bertukar kepada pusingan ini.</p><button class="btn pink" onclick="startRound()">▶ Mulakan ${rname(gt.to)}</button></div>`;
+  const rl=S.rounds.flat().filter(rdy),any=rl.length>0,cr=any?Math.min(...rl.map(m=>m.r)):-1;
+  const card=(m,c)=>{const k=`${m.r}-${m.i}`,va=SCD['sa'+k]??'',vb=SCD['sb'+k]??'';return `<div class="glass vs ${c?'cur':'nxt open'}"><div class="vh"><span>P${m.n}${m.g!=null?' · Kumpulan '+GL(m.g):''}${c?'':' · '+rname(m.r)}${m.time?' · ⏰ '+e(m.time):''}</span><span class="badge ${c?'cur':'nxt'}">${c?'▶ SEKARANG':'⏭ SETERUSNYA'}</span></div><div class="tt"><div><i class="av lg lgv">${logo(m.a)}</i><b>${nm(m.a)}</b><br><input class="sc" type="number" min="0" id="sa${k}" placeholder="0" value="${e(va)}" oninput="SCD['sa${k}']=this.value"></div><span class="x">VS</span><div><i class="av lg lgv">${logo(m.b)}</i><b>${nm(m.b)}</b><br><input class="sc" type="number" min="0" id="sb${k}" placeholder="0" value="${e(vb)}" oninput="SCD['sb${k}']=this.value"></div></div>
+    <label>Masa / gelanggang (pilihan)</label><input id="tm${k}" value="${e(m.time)}" placeholder="cth: 9:00 pagi, Makmal 1" onchange="S.rounds[${m.r}][${m.i}].time=this.value;save()">
+    <div class="win"><button class="btn" onclick="win(${m.r},${m.i},'a')">${nm(m.a)} menang</button><button class="btn pink" onclick="win(${m.r},${m.i},'b')">${nm(m.b)} menang</button></div></div>`};
+  if(any){
+    const now=rl.filter(m=>m.r==cr),nxt=rl.filter(m=>m.r!=cr),all=S.rounds[cr].filter(m=>!m.bye),dn0=all.filter(m=>m.w).length;
+    h+=`<div class="rn" style="--rc:var(--ok)">▶ SEKARANG · ${rname(cr)} · ${fmtOf(cr)}<span style="float:right">${dn0}/${all.length} selesai</span></div>`;
+    if(now.some(m=>m.g!=null)){const gs=[...new Set(now.map(m=>m.g))].sort((x,y)=>x-y);gs.forEach(g=>{const gl=now.filter(m=>m.g===g),gt=all.filter(m=>m.g===g);h+=`<h3 class="gh">KUMPULAN ${GL(g)}<span>${gt.filter(m=>m.w).length}/${gt.length} selesai</span></h3>`+gl.map(m=>card(m,true)).join('')})}
+    else h+=now.map(m=>card(m,true)).join('');
+    if(nxt.length){h+=`<div class="rn">⏭ SETERUSNYA (${nxt.length}) — belum giliran</div>`;
+      nxt.forEach(m=>{const k=`${m.r}-${m.i}`;h+=SO[k]?card(m,false):`<div class="glass team nxrow"><div><span class="n">P${m.n} · ${nm(m.a)} vs ${nm(m.b)}</span><small>${rname(m.r)}${m.g!=null?' · Kumpulan '+GL(m.g):''}${m.time?' · ⏰ '+e(m.time):''}</small></div><button class="btn sm" onclick="SO['${k}']=1;render()">Sahkan awal</button></div>`})}
+  }
+  if(!any&&!ch&&!gt)h+=`<div class="glass empty">Menunggu pusingan sebelumnya selesai.</div>`;
+  const dn=S.rounds.flat().filter(m=>m.w&&!m.bye);
+  if(dn.length){h+=`<div class="rn">KEPUTUSAN DISAHKAN</div>`;dn.reverse().forEach(m=>{h+=`<div class="glass team"><div><span class="n">${nm(m.w)}</span><small>${rname(m.r)} · lawan ${nm(m.w===m.a?m.b:m.a)}${m.sa!==''?` · ${e(m.sa)}-${e(m.sb)}`:''}</small></div><button class="btn sm red" onclick="undo(${m.r},${m.i})">Batal</button></div>`})}
+  return h}
+async function win(r,i,side){const m=S.rounds[r][i],k=`${r}-${i}`,w=m[side];
+  const ea=document.getElementById('sa'+k),eb=document.getElementById('sb'+k),va=ea?ea.value:'',vb=eb?eb.value:'';
+  if(va!==''&&vb!==''&&+va!==+vb&&((side=='a')!==(+va>+vb)))return toast('Skor tidak sepadan dengan pemenang yang dipilih');
+  numM();const rl=S.rounds.flat().filter(rdy),isCur=rl.length&&m.r==Math.min(...rl.map(x=>x.r));
+  if(!await ask(`${isCur?'':'⚠️ INI BUKAN PERLAWANAN SEKARANG (perlawanan seterusnya).\n'}P${m.n}${m.g!=null?' · Kumpulan '+GL(m.g):''}: ${tm(m.a).name} vs ${tm(m.b).name}${va!==''&&vb!==''?' ('+va+'-'+vb+')':''}\nSahkan ${tm(w).name} menang${isLg(m)?'':' dan mara'}?`))return;
+  delete SCD['sa'+k];delete SCD['sb'+k];delete SO[k];
+  m.sa=document.getElementById('sa'+k).value;m.sb=document.getElementById('sb'+k).value;
+  const was=r1done();adv(m,w);fillKO();save();render();
+  const g2=gateInfo();toast(g2?rname(g2.from)+' selesai! Sahkan untuk mulakan '+rname(g2.to):grp()&&m.g!=null&&S.rounds.flat().filter(x=>x.g!=null).every(x=>x.w)?'Peringkat kumpulan selesai!':tm(w).name+(isLg(m)?' menang':' mara'))}
+async function undo(r,i){const m=S.rounds[r][i],nx=isLg(m)?null:S.rounds[r+1]?.[i>>1];
+  if(nx&&nx.w)return toast('Batalkan keputusan pusingan seterusnya dahulu');
+  if(grp()&&m.g!=null&&S.rounds.flat().some(x=>x.g==null&&!x.bye&&x.w))return toast('Batalkan keputusan peringkat kalah mati dahulu');
+  if(!await ask('Batalkan keputusan ini?'))return;
+  if(S.go!=null&&S.go>m.r)S.go=m.r;
+  if(nx){if(i%2==0)nx.a=null;else nx.b=null}
+  m.w=null;m.sa='';m.sb='';fillKO();save();render()}
+function viewSet(){const s=S.set;
+  return `<div class="two"><section class="glass pad"><h2>Maklumat kejohanan</h2>
+  <label>Nama kejohanan</label><input value="${e(s.title)}" onchange="S.set.title=this.value;save()">
+  <label>Sekolah</label><input value="${e(s.school)}" onchange="S.set.school=this.value;save()">
+  <div class="grid2"><div><label>Tarikh</label><input type="date" value="${e(s.date)}" onchange="S.set.date=this.value;save()"></div><div><label>Lokasi</label><input value="${e(s.venue)}" onchange="S.set.venue=this.value;save()"></div></div>
+  <p class="sub" style="margin-top:14px">Sistem pertandingan dan format perlawanan ditetapkan di tab <b>Pendaftaran</b>.</p>
+  <label><input type="checkbox" style="width:auto" ${s.shuffle?'checked':''} onchange="S.set.shuffle=this.checked;save()"> Acak susunan kumpulan semasa jana jadual</label>
+  <p class="sub">Jika dimatikan, susunan mengikut urutan pendaftaran.</p></section>
+  <section class="glass pad"><h2>Data</h2><p class="sub">Data disimpan dalam pelayar peranti ini sahaja. Eksport untuk simpanan atau pindah ke peranti lain.</p>
+  <div class="row" style="margin-bottom:10px"><button class="btn pink" onclick="resetSched()" ${S.rounds?'':'disabled'}>Jana semula jadual (kekalkan kumpulan)</button></div><div class="row"><button class="btn" onclick="exp()">Eksport data</button><button class="btn" onclick="document.getElementById('imp').click()">Import data</button><input type="file" id="imp" accept=".json" hidden onchange="imp(this.files[0])"></div>
+  <h2 style="margin-top:22px">Tetapan semula</h2>
+  <div class="row"><button class="btn pink" onclick="resetB()" ${started()?'':'disabled'}>Reset jadual sahaja</button><button class="btn red" onclick="resetAll()">Padam semua data</button></div></section>
+  <section class="glass pad" style="grid-column:1/-1"><h2>Jadual masa</h2><p class="sub">Jana masa dan gelanggang untuk semua perlawanan yang belum selesai. Anda masih boleh ubah masa setiap perlawanan di tab Pengesahan.</p><div class="grid2"><div><label>Masa mula</label><input type="time" value="${e(s.start||'09:00')}" onchange="S.set.start=this.value;save()"></div><div><label>Selang setiap perlawanan (minit)</label><input type="number" min="5" value="${s.gap||40}" onchange="S.set.gap=+this.value;save()"></div><div><label>Bilangan gelanggang serentak</label><input type="number" min="1" value="${s.courts||2}" onchange="S.set.courts=+this.value;save()"></div>${grp()?`<div><label>Selang perlawanan peringkat kumpulan (minit)</label><input type="number" min="5" value="${s.gapG||20}" onchange="S.set.gapG=+this.value;save()"></div>`:''}</div><div class="row" style="margin-top:14px"><button class="btn pink" onclick="autoTime()" ${started()?'':'disabled'}>Jana masa automatik</button></div></section>
+  <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang</h2><p class="sub">Latar asal ialah reka bentuk medan perang bertema MOBA. Anda boleh memuat naik wallpaper sendiri, contohnya imej Mobile Legends yang anda berhak guna. Gambar disimpan pada peranti ini dan turut dipaparkan pada paparan awam.</p><div class="row"><button class="btn" onclick="document.getElementById('bgf').click()">Muat naik gambar</button><button class="btn red" onclick="clearBg()" ${bgData?'':'disabled'}>Guna latar asal</button><input type="file" id="bgf" accept="image/*" hidden onchange="setBg(this.files[0]);this.value=''"></div></section>
+  <section class="glass pad" style="grid-column:1/-1"><h2>Imbasan AI</h2><p class="sub">Untuk fail yang dimuat turun atau di-deploy sendiri, imbasan memerlukan kunci API Anthropic daripada console.anthropic.com. Kunci disimpan pada peranti ini sahaja dan tidak masuk dalam eksport data. Tetapkan had perbelanjaan di akaun anda dan jangan kongsi peranti ini.</p><label>Kunci API</label><input type="password" id="ak" value="${e(apiKey)}" placeholder="sk-ant-..." autocomplete="off"><div class="row" style="margin-top:12px"><button class="btn" onclick="saveKey()">Simpan kunci</button><button class="btn red" onclick="saveKey(true)" ${apiKey?'':'disabled'}>Buang kunci</button></div></section></div>`}
+function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='mlbb-seri-rompin.json';a.click()}
+function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.teams||!d.set)throw 0;S=d;save();render();toast('Data diimport')}catch(x){toast('Fail tidak sah')}};r.readAsText(f)}
+async function resetB(){if(await ask('Reset jadual dan semua keputusan? Kumpulan kekal.')){S.rounds=null;save();tab='jadual';render();toast('Jadual direset')}}
+async function resetSched(){if(!S.rounds)return;if(!await ask('Padam jadual dan semua keputusan perlawanan? Senarai kumpulan dikekalkan, kemudian anda boleh jana jadual baharu.'))return;S.rounds=null;S.go=null;save();tab='jadual';render();toast('Jadual dipadam — sedia dijana semula')}
+async function resetAll(){if(await ask('Padam SEMUA data termasuk kumpulan?')){S=def();drafts=[];edit=null;save();tab='jadual';render();toast('Semua data dipadam')}}
+function go(t){tab=t;render();scrollTo(0,0)}
+function render(){
+  document.body.classList.toggle('pub',pubMode);
+  if(pubMode){const bak=S;S=Object.assign(def(),pubData||{});applyBg(pubData&&pubData.bg);document.getElementById('nav').style.display='none';document.getElementById('app').innerHTML=pubData?viewPub():'<div class="glass empty"><h2>Menunggu data jadual…</h2><p>Jika paparan kekal kosong, log masuk akaun Claude dan muat semula halaman.</p></div>';S=bak;return}
+  document.getElementById('nav').style.display='';
+  const T=[['jadual','🏆','Jadual'],['daftar','👥','Pendaftaran'],['sah','✅','Pengesahan'],['set','⚙️','Setting']];
+  document.getElementById('nav').innerHTML=T.map(([k,i,n])=>`<button class="${tab==k?'on':''}" onclick="go('${k}')"><i>${i}</i>${n}</button>`).join('');
+  document.getElementById('app').innerHTML={jadual:viewJadual,daftar:viewDaftar,sah:viewSah,set:viewSet}[tab]()}
+render();
+</script>
+</body>
+</html>
