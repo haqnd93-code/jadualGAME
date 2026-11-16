@@ -6,6 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Kejohanan E-Sport MLBB – SMK Seri Rompin</title>
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 :root{--bg:#f2f5fb;--card:#fff;--line:#dbe2f1;--ink:#0f1a3d;--mut:#56628a;--c1:#2457ff;--c1d:#13216f;--c1t:#e8eeff;--c2:#be185d;--c3:#6d28d9;--ok:#0b8a45;--okt:#e3f6ec;--bad:#d62a4a;--badt:#fdebee;--gold:#9a5b00;--amb:#ffc21a;--ambt:#fff6dc;--sh:0 1px 2px rgba(15,26,61,.06),0 6px 18px rgba(15,26,61,.07);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -273,6 +276,9 @@ input[type=range]{padding:0;border:0;background:none;accent-color:var(--c1);heig
 .ppad button{width:34px;height:34px;border-radius:8px;border:1px solid #c6d0e8;background:#fff;cursor:pointer;padding:0}
 .ppad button:hover{border-color:var(--c1)}
 .ppad button.on{background:var(--c1);border-color:var(--c1);box-shadow:inset 0 0 0 4px #fff}
+.mth{width:100%;max-width:240px;aspect-ratio:16/9;border-radius:10px;border:1px dashed #b9c5e4;background:#eef2fb center/cover no-repeat;margin:8px 0;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:12px}
+body.imgbg #bg::after{background:linear-gradient(180deg,rgba(242,245,251,.15),rgba(242,245,251,.6))}
+.gt2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:760px){.gt2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -284,6 +290,24 @@ input[type=range]{padding:0;border:0;background:none;accent-color:var(--c1);heig
 const KEY='mlbb_seri_rompin_v1';
 const def=()=>({set:{title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:'',venue:'',fmt:3,shuffle:true},teams:[],rounds:null});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||def()}catch(e){S=def()}
+/* ===== SAMBUNGAN FIREBASE (isi sebelum deploy) =====
+   Firebase Console > Project settings > Your apps > Web app > firebaseConfig.
+   ajkEmail = e-mel akaun AJK yang anda cipta di Authentication (Email/Password). */
+const FB_CONFIG={apiKey:'',authDomain:'',projectId:'',appId:'',ajkEmail:''};
+const FB_ON=()=>!!(FB_CONFIG.apiKey&&FB_CONFIG.projectId&&typeof firebase!=='undefined');
+let fbAuth=null;
+function fbSet(u){uid=u?u.uid:null;canPush=!!(u&&!u.isAnonymous&&u.email&&u.email.toLowerCase()===String(FB_CONFIG.ajkEmail).toLowerCase())}
+async function fbInit(){
+  firebase.initializeApp(FB_CONFIG);dbh=firebase.firestore();fbAuth=firebase.auth();
+  await new Promise(res=>{const un=fbAuth.onAuthStateChanged(()=>{un();res()})});
+  let u=fbAuth.currentUser;
+  if(!u){try{u=(await fbAuth.signInAnonymously()).user}catch(x){console.error('Anonymous Auth belum diaktifkan?',x)}}
+  fbSet(u);fbAuth.onAuthStateChanged(fbSet)}
+async function fbToAnon(noRender){
+  if(!FB_ON()||!fbAuth)return;
+  if(regUn){try{regUn()}catch(x){}regUn=null}regs=[];
+  try{await fbAuth.signOut();const r=await fbAuth.signInAnonymously();fbSet(r.user)}catch(x){fbSet(null)}
+  if(!noRender)render()}
 let tab='jadual',edit=null,drafts=[],scanning=false,pubMode=location.hash=='#paparan',pubData=null,dbh=null,canPush=false,pubStarted=false,pt;
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}queuePush()};
 const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -453,7 +477,7 @@ function viewJadual(){
 function viewDaftar(){
   const L=started(),dr=drafts[0],t=dr||(edit?tm(edit):null);
   const mem=[0,1,2,3,4].map(i=>`<label>${i==0?'Ketua pasukan':'Ahli '+(i+1)}</label><input id="m${i}" maxlength="40" value="${e(t?.members[i]||'')}" ${L?'disabled':''}>`).join('');
-  let h=`<div class="two"><div>${scanCard(L)}<section class="glass pad"><h2>${dr?'Semak borang imbasan':t?'Kemas kini kumpulan':'Daftar kumpulan'}</h2><p class="sub">${dr?'Semak nama yang dibaca, betulkan jika perlu, kemudian daftar.':'Setiap kumpulan 5 ahli.'}</p>
+  let h=`<div id="inbox">${inboxH()}</div><div class="two"><div>${scanCard(L)}<section class="glass pad"><h2>${dr?'Semak borang imbasan':t?'Kemas kini kumpulan':'Daftar kumpulan'}</h2><p class="sub">${dr?'Semak nama yang dibaca, betulkan jika perlu, kemudian daftar.':'Setiap kumpulan 5 ahli.'}</p>
   ${L?'<p style="color:var(--gold)">Jadual telah dijana. Pendaftaran dikunci. Tetapkan semula jadual di Setting untuk mengubah.</p>':''}
   <label>Nama kumpulan</label><input id="tn" maxlength="30" value="${e(t?.name||'')}" ${L?'disabled':''}>
   <label>Kelas</label><input id="tc" maxlength="20" placeholder="cth: 4 Bestari" value="${e(t?.cls||'')}" ${L?'disabled':''}>${mem}
@@ -481,7 +505,7 @@ async function demo15(){
   const t0=Date.now();
   S.teams=N.map((name,i)=>({id:'t'+(t0+i),name,cls:C[i%C.length],members:[0,1,2,3,4].map(j=>{const k=i*5+j;return F[k%30]+' '+L[(k*3+Math.floor(k/30))%15]})}));
   edit=null;drafts.length=0;save();render();toast('20 kumpulan contoh didaftarkan')}
-async function delTeam(id){if(await ask('Padam kumpulan ini?')){S.teams=S.teams.filter(t=>t.id!==id);save();render()}}
+async function delTeam(id){if(await ask('Padam kumpulan ini?')){const dt=tm(id);if(dt&&dt.rid)S.rej=[...(S.rej||[]),dt.rid];S.teams=S.teams.filter(t=>t.id!==id);save();render()}}
 function ask(msg){return new Promise(res=>{const d=document.createElement('div');d.className='ov';d.innerHTML=`<div class="glass pad dlg"><p>${e(msg)}</p><div class="row" style="justify-content:flex-end"><button class="btn sm" data-v="0">Batal</button><button class="btn sm red" data-v="1">Teruskan</button></div></div>`;d.onclick=ev=>{const v=ev.target.dataset&&ev.target.dataset.v;if(v!==undefined){d.remove();res(v==='1')}};document.body.appendChild(d)})}
 let aiOK=null;
 (async()=>{try{const s=await claude.use('sample');aiOK=!!s}catch(x){aiOK=false}if(tab=='daftar'&&!scanning)render()})();
@@ -528,6 +552,21 @@ function setHd(f){if(!f)return;createImageBitmap(f).then(b=>{let w=Math.min(b.wi
   for(let i=0;i<8;i++){const c=document.createElement('canvas');c.width=w;c.height=Math.round(b.height*w/b.width);c.getContext('2d').drawImage(b,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<320000)break;q=Math.max(.45,q-.1);if(i>=3)w=Math.round(w*.8)}
   hdData=out;try{localStorage.setItem('mlbb_hd',hdData)}catch(e){toast('Gambar terlalu besar untuk disimpan')}queuePush();render();toast('Gambar header ditukar')}).catch(()=>toast('Gambar tidak boleh dibaca'))}
 function clearHd(){hdData='';try{localStorage.removeItem('mlbb_hd')}catch(e){}queuePush();render();toast('Gambar header dibuang')}
+/* ===== Gambar halaman pemilihan & latar peserta (AJK sahaja boleh muat naik) ===== */
+let gbgData='',pbgData='',mediaData={};
+try{gbgData=localStorage.getItem('mlbb_gbg')||'';pbgData=localStorage.getItem('mlbb_pbg')||''}catch(e){}
+const samePic=()=>!!((pubData&&pubData.set)?pubData.set.sameBg:S.set.sameBg);
+const hdAny=()=>(pubData&&pubData.hd)||hdData;
+const gateOwn=()=>samePic()&&hdAny()?hdAny():(mediaData.gbg||gbgData||'');
+const pesOwn=()=>samePic()&&hdAny()?hdAny():(mediaData.pbg||pbgData||'');
+const pesBg=()=>pesOwn()||(pubData&&pubData.bg)||'';
+function packImg(f,cb){createImageBitmap(f).then(b=>{let w=Math.min(b.width,1600),q=.8,out='';for(let i=0;i<8;i++){const c=document.createElement('canvas');c.width=w;c.height=Math.round(b.height*w/b.width);c.getContext('2d').drawImage(b,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<330000)break;q=Math.max(.45,q-.1);if(i>=3)w=Math.round(w*.8)}cb(out)}).catch(()=>toast('Gambar tidak boleh dibaca'))}
+async function pushMedia(k,v){if(!dbh||!canPush)return;try{await dbh.doc('tournament/'+k+'bg').set({d:v,t:Date.now()})}catch(x){toast('Gagal menyegerak gambar kepada peserta')}}
+function setMedia(k,f){if(role!='ajk')return toast('Hanya AJK boleh menukar gambar ini');if(!f)return;
+  packImg(f,out=>{if(k=='g')gbgData=out;else pbgData=out;try{localStorage.setItem('mlbb_'+k+'bg',out)}catch(x){toast('Gambar terlalu besar untuk disimpan')}mediaData[k+'bg']=out;pushMedia(k,out);render();toast(k=='g'?'Gambar halaman pemilihan ditukar':'Latar peserta ditukar')})}
+function clearMedia(k){if(role!='ajk')return toast('Hanya AJK boleh menukar gambar ini');if(k=='g')gbgData='';else pbgData='';try{localStorage.removeItem('mlbb_'+k+'bg')}catch(x){}mediaData[k+'bg']='';pushMedia(k,'');render();toast('Gambar dibuang')}
+function mediaBox(k,t,d){const v=k=='g'?gbgData:pbgData;
+  return `<div><label style="margin-top:0"><b>${t}</b></label><p class="sub" style="margin:2px 0 0">${d}</p><div class="mth"${v?` style="background-image:url(${v})"`:''}>${v?'':'Belum ada gambar'}</div><div class="row"><button class="btn sm" onclick="document.getElementById('mf${k}').click()">🖼️ ${v?'Tukar':'Muat naik'} gambar</button><button class="btn sm red" onclick="clearMedia('${k}')" ${v?'':'disabled'}>Buang</button><input type="file" id="mf${k}" accept="image/*" hidden onchange="setMedia('${k}',this.files[0]);this.value=''"></div></div>`}
 const heroSt=src=>src?` himg" style="${hdCss(src)}`:'';
 let fsApi=false;const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function fsBtn(){const x=document.getElementById('fsb');if(x)x.textContent=document.body.classList.contains('pres')?'✕':'⛶'}
@@ -548,12 +587,12 @@ function logo(id){const t=tm(id),k=String((t&&t.id)||id)+'|'+(t&&!t.id?t.name:''
 let brData='';try{brData=localStorage.getItem('mlbb_br')||''}catch(e){}
 function setBr(f){if(!f)return;createImageBitmap(f).then(b=>{let w=Math.min(b.width,1600),q=.8,out='';for(let i=0;i<8;i++){const c=document.createElement('canvas');c.width=w;c.height=Math.round(b.height*w/b.width);c.getContext('2d').drawImage(b,0,0,c.width,c.height);out=c.toDataURL('image/jpeg',q);if(out.length<320000)break;q=Math.max(.45,q-.1);if(i>=3)w=Math.round(w*.8)}brData=out;try{localStorage.setItem('mlbb_br',brData)}catch(x){toast('Gambar terlalu besar untuk disimpan')}queuePush();render();toast('Gambar bracket ditukar')}).catch(()=>toast('Gambar tidak boleh dibaca'))}
 function clearBr(){brData='';try{localStorage.removeItem('mlbb_br')}catch(e){}queuePush();render();toast('Gambar bracket dibuang')}
-function brBar(){return pubMode?'':`<div class="row noprint" style="margin-bottom:10px"><button class="btn sm" onclick="document.getElementById('brf').click()">🖼️ ${brData?'Tukar':'Muat naik'} gambar bracket</button>${brData?'<button class="btn sm pink" onclick="imTg(\'br\')">⚙️ Laras gambar</button><button class="btn sm red" onclick="clearBr()">Buang gambar</button>':''}<input type="file" id="brf" accept="image/*" hidden onchange="setBr(this.files[0]);this.value=''"></div>${imPanel('br')}`}
+function brBar(){return pm()?'':`<div class="row noprint" style="margin-bottom:10px"><button class="btn sm" onclick="document.getElementById('brf').click()">🖼️ ${brData?'Tukar':'Muat naik'} gambar bracket</button>${brData?'<button class="btn sm pink" onclick="imTg(\'br\')">⚙️ Laras gambar</button><button class="btn sm red" onclick="clearBr()">Buang gambar</button>':''}<input type="file" id="brf" accept="image/*" hidden onchange="setBr(this.files[0]);this.value=''"></div>${imPanel('br')}`}
 function brSt(){const c=brCss();return c?` style="${c}"`:''}
 
 let imOpen={};
 const IM=k=>Object.assign({x:50,y:50,fit:'cover',ov:86,cap:''},(S.set.im&&S.set.im[k])||{});
-const brSrc=()=>(pubMode&&pubData&&pubData.br)||brData,hdSrc=()=>(pubMode&&pubData&&pubData.hd)||hdData;
+const brSrc=()=>(pm()&&pubData&&pubData.br)||brData,hdSrc=()=>(pm()&&pubData&&pubData.hd)||hdData;
 function brCss(){const s=brSrc();if(!s)return '';const m=IM('br'),o=m.ov/100;return `background-image:linear-gradient(rgba(255,255,255,${o}),rgba(255,255,255,${o})),url(${s});background-size:100% 100%,${m.fit};background-position:0 0,${m.x}% ${m.y}%;background-repeat:no-repeat`}
 function hdCss(s){const m=IM('hd');return `background-color:#13216f;background-image:linear-gradient(180deg,rgba(15,26,61,.05) 30%,rgba(15,26,61,.85) 100%),url(${s});background-size:100% 100%,${m.fit};background-position:0 0,${m.x}% ${m.y}%;background-repeat:no-repeat`}
 function imCap(k){const m=IM(k);return m.cap&&(k=='br'?brSrc():hdSrc())?`<p class="imcap">📷 ${e(m.cap)}</p>`:''}
@@ -565,7 +604,7 @@ function imPanel(k){if(pubMode||!imOpen[k]||!(k=='br'?brData:hdData))return '';c
  const sl=(f,l,mn,mx)=>`<label>${l}: <b id="iv${k}${f}">${m[f]}%</b></label><input type="range" min="${mn}" max="${mx}" value="${m[f]}" oninput="imSet('${k}','${f}',+this.value)">`;
  const pad=[0,50,100].flatMap(y=>[0,50,100].map(x=>`<button class="${m.x==x&&m.y==y?'on':''}" aria-label="Kedudukan ${x}% ${y}%" onclick="imSet('${k}','x',${x});imSet('${k}','y',${y},1)"></button>`)).join('');
  return `<section class="glass pad noprint impanel"><h2>Laras gambar ${k=='br'?'bracket':'header'}</h2><label>Keterangan gambar</label><input maxlength="120" value="${e(m.cap)}" placeholder="cth: Dewan Sekolah, Hari Kejohanan" onchange="imSet('${k}','cap',this.value,1)"><div class="grid2"><div><label>Kedudukan pantas</label><div class="ppad">${pad}</div></div><div>${sl('x','Mendatar',0,100)}${sl('y','Menegak',0,100)}</div></div><label>Saiz gambar</label><div class="seg"><button class="${m.fit=='cover'?'on':''}" onclick="imSet('${k}','fit','cover',1)">Penuhi ruang</button><button class="${m.fit=='contain'?'on':''}" onclick="imSet('${k}','fit','contain',1)">Tunjuk semua</button></div>${k=='br'?sl('ov','Lapisan putih (supaya teks jelas)',0,95):''}<div class="row" style="margin-top:12px"><button class="btn sm pink" onclick="imReset('${k}')">Set semula</button><button class="btn sm" onclick="imTg('${k}')">Siap</button></div></section>`}
-function pubOf(){return {set:S.set,teams:S.teams.map(t=>({id:t.id,name:t.name,cls:t.cls})),rounds:S.rounds,go:S.go,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
+function pubOf(){return {set:S.set,teams:S.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid})),rej:S.rej||[],rounds:S.rounds,go:S.go,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
 function queuePush(){if(pubMode||!canPush)return;clearTimeout(pt);pt=setTimeout(pushNow,800)}
 async function pushNow(){try{await dbh.doc('tournament/state').set({json:JSON.stringify(pubOf()),t:Date.now()})}catch(x){}}
 let hlTeam=null,hlQ='',jv='list',jf='all',jo={};
@@ -595,15 +634,18 @@ function viewPub(){
   return h+bodyH()+'<p class="sub" style="text-align:center">Dikemas kini secara automatik</p>'}
 function startPub(){
   if(pubStarted)return;pubStarted=true;
-  const loc=()=>{try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.set)pubData={set:d.set,teams:d.teams||[],rounds:d.rounds,go:d.go}}catch(x){}};
+  const loc=()=>{try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.set)pubData={set:d.set,teams:d.teams||[],rej:d.rej||[],rounds:d.rounds,go:d.go}}catch(x){}};
   loc();
-  if(dbh)dbh.doc('tournament/state').onSnapshot(sn=>{if(sn.exists){try{pubData=JSON.parse(sn.data().json)}catch(x){}}else loc();render()},()=>{});
-  addEventListener('storage',()=>{if(!dbh){loc();render()}});
-  setInterval(()=>{if(!dbh){loc();render()}},3000)}
+  const live=()=>pubMode||role=='peserta'||!role,skip=()=>!pubMode&&typing();
+  if(dbh){dbh.doc('tournament/state').onSnapshot(sn=>{if(sn.exists){try{pubData=JSON.parse(sn.data().json)}catch(x){}}else loc();if(live()&&!skip())render()},()=>{});
+    ['gbg','pbg'].forEach(k=>dbh.doc('tournament/'+k).onSnapshot(sn=>{mediaData[k]=sn.exists?((sn.data()||{}).d||''):'';if(live()&&!skip())render()},()=>{}))}
+  addEventListener('storage',()=>{if(!dbh&&live()){loc();render()}});
+  setInterval(()=>{if(!dbh&&live()){loc();if(!typing())render()}},3000)}
 addEventListener('hashchange',()=>{pubMode=location.hash=='#paparan';if(pubMode)startPub();else applyBg();render()});
 (async()=>{
-  try{dbh=await claude.use('db');const u=await claude.use('user');canPush=!!(dbh&&u&&await u.canEdit())}catch(x){}
-  if(pubMode)startPub();else if(canPush&&(S.teams.length||S.rounds))pushNow();
+  try{if(FB_ON())await fbInit();else{dbh=await claude.use('db');const u=await claude.use('user');canPush=!!(dbh&&u&&await u.canEdit());try{uid=u?await u.id():null}catch(x){}}}catch(x){console.error(x)}
+  if(FB_ON()){if(role=='ajk'&&!canPush){role='';try{sessionStorage.removeItem('mlbb_role')}catch(x){}}else if(canPush&&role!='ajk')await fbToAnon(true)}
+  if(pubMode||role!='ajk')startPub();if(role=='ajk')startRegs();if(!pubMode&&canPush&&(S.teams.length||S.rounds))pushNow();
   render()})();
 function autoTime(){
   if(!S.rounds)return;const s=S.set,st=(s.start||'09:00').split(':'),gap=+s.gap||40,cn=Math.max(1,+s.courts||1);
@@ -664,18 +706,88 @@ function viewSet(){const s=S.set;
   <div class="row"><button class="btn pink" onclick="resetB()" ${started()?'':'disabled'}>Reset jadual sahaja</button><button class="btn red" onclick="resetAll()">Padam semua data</button></div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Jadual masa</h2><p class="sub">Jana masa dan gelanggang untuk semua perlawanan yang belum selesai. Anda masih boleh ubah masa setiap perlawanan di tab Pengesahan.</p><div class="grid2"><div><label>Masa mula</label><input type="time" value="${e(s.start||'09:00')}" onchange="S.set.start=this.value;save()"></div><div><label>Selang setiap perlawanan (minit)</label><input type="number" min="5" value="${s.gap||40}" onchange="S.set.gap=+this.value;save()"></div><div><label>Bilangan gelanggang serentak</label><input type="number" min="1" value="${s.courts||2}" onchange="S.set.courts=+this.value;save()"></div>${grp()?`<div><label>Selang perlawanan peringkat kumpulan (minit)</label><input type="number" min="5" value="${s.gapG||20}" onchange="S.set.gapG=+this.value;save()"></div>`:''}</div><div class="row" style="margin-top:14px"><button class="btn pink" onclick="autoTime()" ${started()?'':'disabled'}>Jana masa automatik</button></div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang</h2><p class="sub">Latar asal ialah reka bentuk medan perang bertema MOBA. Anda boleh memuat naik wallpaper sendiri, contohnya imej Mobile Legends yang anda berhak guna. Gambar disimpan pada peranti ini dan turut dipaparkan pada paparan awam.</p><div class="row"><button class="btn" onclick="document.getElementById('bgf').click()">Muat naik gambar</button><button class="btn red" onclick="clearBg()" ${bgData?'':'disabled'}>Guna latar asal</button><input type="file" id="bgf" accept="image/*" hidden onchange="setBg(this.files[0]);this.value=''"></div></section>
+  <section class="glass pad" style="grid-column:1/-1"><h2>Gambar halaman pemilihan &amp; bahagian peserta</h2><p class="sub">Hanya AJK boleh menukar gambar ini. Peserta hanya dapat melihatnya.</p>
+  <label><input type="checkbox" style="width:auto" ${s.sameBg?'checked':''} onchange="S.set.sameBg=this.checked;save();render()"> Guna gambar header yang sama untuk semua bahagian</label>
+  <p class="sub">${s.sameBg?(hdData?'Gambar header (dimuat naik di tab Jadual) kini digunakan sebagai latar halaman pemilihan dan bahagian peserta. Dua gambar di bawah tidak digunakan.':'<b>Gambar header belum dimuat naik.</b> Muat naik di tab Jadual, atau matikan pilihan ini untuk guna gambar berasingan.'):'Matikan pilihan ini untuk menggunakan gambar berasingan di bawah.'}</p>
+  <div class="grid2" style="${s.sameBg&&hdData?'opacity:.45':''}">${mediaBox('g','Halaman pemilihan AJK / Peserta','Latar penuh pada halaman sebelum memilih peranan.')}${mediaBox('p','Latar bahagian peserta','Latar semasa peserta mendaftar dan melihat jadual.')}</div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Imbasan AI</h2><p class="sub">Untuk fail yang dimuat turun atau di-deploy sendiri, imbasan memerlukan kunci API Anthropic daripada console.anthropic.com. Kunci disimpan pada peranti ini sahaja dan tidak masuk dalam eksport data. Tetapkan had perbelanjaan di akaun anda dan jangan kongsi peranti ini.</p><label>Kunci API</label><input type="password" id="ak" value="${e(apiKey)}" placeholder="sk-ant-..." autocomplete="off"><div class="row" style="margin-top:12px"><button class="btn" onclick="saveKey()">Simpan kunci</button><button class="btn red" onclick="saveKey(true)" ${apiKey?'':'disabled'}>Buang kunci</button></div></section></div>`}
 function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='mlbb-seri-rompin.json';a.click()}
 function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.teams||!d.set)throw 0;S=d;save();render();toast('Data diimport')}catch(x){toast('Fail tidak sah')}};r.readAsText(f)}
 async function resetB(){if(await ask('Reset jadual dan semua keputusan? Kumpulan kekal.')){S.rounds=null;save();tab='jadual';render();toast('Jadual direset')}}
 async function resetSched(){if(!S.rounds)return;if(!await ask('Padam jadual dan semua keputusan perlawanan? Senarai kumpulan dikekalkan, kemudian anda boleh jana jadual baharu.'))return;S.rounds=null;S.go=null;save();tab='jadual';render();toast('Jadual dipadam — sedia dijana semula')}
 async function resetAll(){if(await ask('Padam SEMUA data termasuk kumpulan?')){S=def();drafts=[];edit=null;save();tab='jadual';render();toast('Semua data dipadam')}}
-function go(t){tab=t;render();scrollTo(0,0)}
+/* ===== Pintu masuk: AJK / Peserta ===== */
+let role='';try{role=sessionStorage.getItem('mlbb_role')||''}catch(x){}
+let gs=0,ptab='daftar',regs=[],my=[],regUn=null,uid=null;
+try{my=JSON.parse(localStorage.getItem('mlbb_my'))||[]}catch(x){}
+const typing=()=>/INPUT|SELECT|TEXTAREA/.test((document.activeElement&&document.activeElement.tagName)||'');
+const pm=()=>pubMode||role=='peserta';
+const closed=()=>!!(pubData&&pubData.rounds);
+function setRole(r){const was=role;role=r;gs=0;if(FB_ON()&&canPush&&r!='ajk'&&was=='ajk')fbToAnon();try{r?sessionStorage.setItem('mlbb_role',r):sessionStorage.removeItem('mlbb_role')}catch(x){}if(r!='ajk')startPub();if(r=='ajk')startRegs();render();scrollTo(0,0)}
+async function ajkLogin(){const p=document.getElementById('pw'),v=p?p.value.trim():'';
+  const bad=()=>{toast('Kata laluan salah');if(p){p.value='';p.focus()}};
+  if(FB_ON()&&fbAuth){if(!v)return bad();try{const r=await fbAuth.signInWithEmailAndPassword(FB_CONFIG.ajkEmail,v);fbSet(r.user);if(!canPush)return bad();setRole('ajk')}catch(x){bad()}return}
+  if(v==='12345')setRole('ajk');else bad()}
+function gateH(){const s=(pubData&&pubData.set)||S.set;
+  return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div>`}
+
+/* ===== AJK: peti masuk pendaftaran peserta ===== */
+const pend=()=>regs.filter(t=>!S.teams.some(x=>x.rid===t.rid)&&!(S.rej||[]).includes(t.rid));
+function inboxH(){const p=pend(),L=started();
+  if(!canPush&&!localMode())return `<section class="glass pad" style="margin-bottom:16px"><h2>Pendaftaran daripada peserta</h2><p class="sub">Hanya akaun penyunting boleh melihat pendaftaran yang dihantar peserta.</p></section>`;
+  return `<section class="glass pad" style="margin-bottom:16px"><h2>Pendaftaran daripada peserta (${p.length})</h2><p class="sub">Semak, kemudian terima untuk masukkan ke senarai kumpulan.${localMode()?' (Mod ujian: pendaftaran dibaca dari pelayar ini sahaja.)':''}${L?' Jadual telah dijana, pendaftaran dikunci.':''}</p>${p.length?`<div class="row" style="margin-bottom:10px"><button class="btn sm pink" onclick="acc()" ${L?'disabled':''}>Terima semua</button></div>`:'<p class="sub" style="margin:0">Tiada pendaftaran baharu.</p>'}${p.map(t=>`<div class="glass team"><div><span class="n">${e(t.name)}</span><small>${e(t.cls)} · ${t.members.map(e).join(', ')}</small></div><div class="row"><button class="btn sm" onclick="acc('${t.rid}')" ${L?'disabled':''}>Terima</button><button class="btn sm red" onclick="rej('${t.rid}')">Tolak</button></div></div>`).join('')}</section>`}
+function inboxUp(){const b=document.getElementById('inbox');if(b)b.innerHTML=inboxH()}
+const localMode=()=>!FB_ON()&&!(dbh&&uid);
+const localRegs=()=>{try{return JSON.parse(localStorage.getItem('mlbb_regs'))||[]}catch(x){return[]}};
+let locT=null;
+function startLocalRegs(){const f=()=>{const n=localRegs();if(JSON.stringify(n)!==JSON.stringify(regs)){regs=n;inboxUp()}};f();if(!locT){locT=setInterval(f,1500);addEventListener('storage',f)}}
+function startRegs(){if(localMode())return startLocalRegs();if(regUn||!dbh||!canPush)return;try{regUn=dbh.collection('registrations').onSnapshot(sn=>{regs=[];sn.docs.forEach(d=>{((d.data()||{}).items||[]).forEach(t=>regs.push(t))});inboxUp()},()=>{})}catch(x){}}
+function acc(rid){if(started())return toast('Jadual telah dijana');
+  const L=rid?pend().filter(t=>t.rid===rid):pend();let n=0;
+  L.forEach(t=>{if(S.teams.some(x=>x.name.toLowerCase()===t.name.toLowerCase()))return;S.teams.push({id:'t'+Date.now()+n,rid:t.rid,name:t.name,cls:t.cls,members:t.members});n++});
+  save();render();toast(n?n+' kumpulan diterima':'Nama kumpulan sudah wujud, tidak diterima')}
+function rej(rid){S.rej=[...(S.rej||[]),rid];save();inboxUp();toast('Pendaftaran ditolak')}
+
+/* ===== Bahagian peserta ===== */
+function pgo(t){if(t=='out')return setRole('');ptab=t;render();scrollTo(0,0)}
+function navP(){const T=[['daftar','📝','Daftar'],['jadual','📅','Jadual'],['kep','🏆','Keputusan'],['out','🚪','Keluar']],n=document.getElementById('nav');n.style.display='';n.innerHTML=T.map(([k,i,l])=>`<button class="${ptab==k?'on':''}" onclick="pgo('${k}')"><i>${i}</i>${l}</button>`).join('')}
+function regSt(r){return S.teams.some(x=>x.rid===r.rid)?'✅ Diterima':(S.rej||[]).includes(r.rid)?'❌ Ditolak':'⏳ Menunggu kelulusan AJK'}
+function regH(){const c=closed(),off=c||(!localMode()&&(!dbh||!uid));
+  const mem=[0,1,2,3,4].map(i=>`<label>${i?'Ahli '+(i+1):'Ketua pasukan'}</label><input id="rm${i}" maxlength="40" ${off?'disabled':''}>`).join('');
+  let h=`<div class="two"><section class="glass pad"><h2>Daftar kumpulan</h2><p class="sub">Setiap kumpulan 5 ahli. Pendaftaran akan disemak oleh AJK.</p>${c?'<p style="color:var(--gold)">Pendaftaran ditutup kerana jadual sudah dijana.</p>':localMode()?'<p style="color:var(--gold)">Mod ujian: pendaftaran disimpan dalam pelayar ini dan boleh dilihat AJK di pelayar yang sama.</p>':!dbh||!uid?`<p style="color:var(--gold)">${FB_ON()?'Sedang menyambung ke pangkalan data… jika berterusan, muat semula halaman.':'Pangkalan data belum disediakan. Isi FB_CONFIG dalam fail ini.'}</p>`:''}<label>Nama kumpulan</label><input id="rn" maxlength="30" ${off?'disabled':''}><label>Kelas</label><input id="rc" maxlength="20" placeholder="cth: 4 Bestari" ${off?'disabled':''}>${mem}<div class="row" style="margin-top:16px"><button class="btn" onclick="regSend()" ${off?'disabled':''}>Hantar pendaftaran</button></div></section><section>`;
+  if(my.length)h+=`<h2>Pendaftaran saya</h2>`+my.map(r=>`<div class="glass team"><div><span class="n">${e(r.name)}</span><small>${e(r.cls)}</small></div><span class="chip">${regSt(r)}</span></div>`).join('');
+  h+=`<h2 style="margin-top:18px">Kumpulan berdaftar (${S.teams.length})</h2>`+(S.teams.length?S.teams.map((x,i)=>`<div class="glass team"><div class="tl"><i class="av lg">${logo(x.id)}</i><div><span class="n">${i+1}. ${e(x.name)}</span><small>${e(x.cls||'')}</small></div></div></div>`).join(''):'<div class="glass empty">Belum ada kumpulan diterima.</div>');
+  return h+'</section></div>'}
+async function regSend(){
+  if(closed())return toast('Pendaftaran telah ditutup');
+  const g=i=>document.getElementById(i).value.trim(),name=g('rn'),cls=g('rc'),members=[0,1,2,3,4].map(i=>g('rm'+i));
+  if(!name)return toast('Masukkan nama kumpulan');
+  if(members.some(x=>!x))return toast('Lengkapkan nama 5 ahli');
+  if(my.length>=5)return toast('Had 5 pendaftaran bagi satu peranti');
+  const nl=name.toLowerCase();
+  if(((pubData&&pubData.teams)||[]).some(x=>x.name.toLowerCase()===nl)||my.some(x=>x.name.toLowerCase()===nl))return toast('Nama kumpulan sudah digunakan');
+  const t={rid:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,cls,members};
+  try{if(localMode()){const L=localRegs();L.push(t);localStorage.setItem('mlbb_regs',JSON.stringify(L))}else{const d=dbh.doc('registrations/'+uid),sn=await d.get(),items=(sn.exists&&sn.data().items)||[];await d.set({items:[...items,t]})}
+    my.push({rid:t.rid,name,cls});try{localStorage.setItem('mlbb_my',JSON.stringify(my))}catch(x){}
+    render();toast('Pendaftaran dihantar. Menunggu kelulusan AJK')}catch(x){toast('Gagal menghantar. Cuba lagi')}}
+function viewPes(){
+  const s=S.set;let h=`<section class="glass hero${heroSt((pubData&&pubData.hd)||hdData)}"><h1>${e(s.title)}</h1><p>${e(s.school)}${s.date?' · '+e(s.date):''}${s.venue?' · '+e(s.venue):''}</p>${imCap('hd')}</section>`;
+  if(ptab=='daftar')return h+regH();
+  if(!S.rounds)return h+`<div class="glass empty"><h2>Jadual belum dijana</h2><p>${S.teams.length} kumpulan berdaftar. Jadual dan keputusan dipaparkan di sini selepas AJK menjana jadual.</p></div>`;
+  const ch=champion();if(ch)h+=`<div class="glass champ"><i class="av lg xl">${logo(ch)}</i><p class="sub">Juara kejohanan</p><h2>🏆 ${nm(ch)}</h2></div>`;
+  if(ptab=='jadual'){jv='list';return h+nextH()+listH()}
+  const o=pts()?[['tbl','🏆 Kedudukan']]:grp()?[['tbl','🏆 Kedudukan'],['br','🌳 Bracket']]:[['br','🌳 Bracket']];
+  if(!o.some(x=>x[0]==jv))jv=o[0][0];
+  return h+`<div class="seg">${o.map(([k,l])=>`<button class="${jv==k?'on':''}" onclick="setJv('${k}')">${l}</button>`).join('')}</div>${jv=='br'&&!pts()?legH():''}${bodyH()}<p class="sub" style="text-align:center">Dikemas kini secara automatik</p>`}
+function go(t){if(t=='out')return setRole('');tab=t;render();scrollTo(0,0)}
 function render(){
   document.body.classList.toggle('pub',pubMode);
+  document.body.classList.remove('imgbg');
   if(pubMode){const bak=S;S=Object.assign(def(),pubData||{});applyBg(pubData&&pubData.bg);document.getElementById('nav').style.display='none';document.getElementById('app').innerHTML=pubData?viewPub():'<div class="glass empty"><h2>Menunggu data jadual…</h2><p>Jika paparan kekal kosong, log masuk akaun Claude dan muat semula halaman.</p></div>';S=bak;return}
+  if(!role){document.getElementById('nav').style.display='none';const bak=S;if(pubData&&pubData.set)S=Object.assign(def(),pubData);applyBg(gateOwn());document.body.classList.toggle('imgbg',!!gateOwn());document.getElementById('app').innerHTML=gateH();S=bak;const p=document.getElementById('pw');if(p)p.focus();return}
+  if(role=='peserta'){const bak=S;S=Object.assign(def(),pubData||{});applyBg(pesBg());document.body.classList.toggle('imgbg',!!pesOwn());navP();document.getElementById('app').innerHTML=viewPes();S=bak;return}
   document.getElementById('nav').style.display='';
-  const T=[['jadual','🏆','Jadual'],['daftar','👥','Pendaftaran'],['sah','✅','Pengesahan'],['set','⚙️','Setting']];
+  const T=[['jadual','🏆','Jadual'],['daftar','👥','Pendaftaran'],['sah','✅','Pengesahan'],['set','⚙️','Setting'],['out','🚪','Keluar']];
   document.getElementById('nav').innerHTML=T.map(([k,i,n])=>`<button class="${tab==k?'on':''}" onclick="go('${k}')"><i>${i}</i>${n}</button>`).join('');
   document.getElementById('app').innerHTML={jadual:viewJadual,daftar:viewDaftar,sah:viewSah,set:viewSet}[tab]()}
 render();
