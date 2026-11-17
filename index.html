@@ -426,6 +426,11 @@ body.tv.tvbgi #bg{display:block!important;background:var(--tvimg) center/cover n
 <script>
 const KEY='mlbb_seri_rompin_v1';
 const def=()=>({set:{title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:'',venue:'',fmt:3,shuffle:true},teams:[],rounds:null});
+/* ===== Kata laluan AJK (boleh tukar) + kunci pemulihan ===== */
+const PW_KEY='mlbb_ajkpw';
+const AJK_MASTER_KEY='HAQHENSEM';
+function getAjkPw(){try{return localStorage.getItem(PW_KEY)||'12345'}catch(e){return '12345'}}
+function setAjkPw(v){try{localStorage.setItem(PW_KEY,v)}catch(e){}}
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||def()}catch(e){S=def()}
 /* ===== SAMBUNGAN FIREBASE (projek: jadual-game) =====
    Tanpa e-mel: semua pengguna masuk secara Anonymous. Kata laluan AJK (cth 12345) disemak oleh
@@ -1126,6 +1131,11 @@ function viewSet(){const s=S.set;
   <p class="sub" style="margin-top:14px">Sistem pertandingan dan format perlawanan ditetapkan di tab <b>Pendaftaran</b>.</p>
   <label><input type="checkbox" style="width:auto" ${s.shuffle?'checked':''} onchange="S.set.shuffle=this.checked;save()"> Acak susunan kumpulan semasa jana jadual</label>
   <p class="sub">Jika dimatikan, susunan mengikut urutan pendaftaran.</p></section>
+  ${role=='ajk'?`<section class="glass pad"><h2>🔑 Tukar Kata Laluan AJK</h2><p class="sub">Kata laluan baharu akan berkuat kuasa serta-merta pada peranti ini. Menukar kata laluan tidak memadam atau mengubah sebarang data kejohanan.</p>
+  <label>Kata laluan semasa</label><input type="password" id="pwcur" autocomplete="off">
+  <label>Kata laluan baharu</label><input type="password" id="pwnew" autocomplete="off">
+  <label>Sahkan kata laluan baharu</label><input type="password" id="pwcfm" autocomplete="off" onkeydown="if(event.key=='Enter')changeAjkPw()">
+  <div class="row" style="margin-top:12px"><button class="btn pink" onclick="changeAjkPw()">Tukar kata laluan</button></div></section>`:''}
   <section class="glass pad"><h2>Data</h2><p class="sub">Data disimpan dalam pelayar peranti ini sahaja. Eksport untuk simpanan atau pindah ke peranti lain.</p>
   <div class="row" style="margin-bottom:10px"><button class="btn pink" onclick="resetSched()" ${S.rounds?'':'disabled'}>Jana semula jadual (kekalkan kumpulan)</button></div><div class="row"><button class="btn" onclick="exp()">Eksport data</button><button class="btn" onclick="document.getElementById('imp').click()">Import data</button><input type="file" id="imp" accept=".json" hidden onchange="imp(this.files[0])"></div>
   <h2 style="margin-top:22px">Tetapan semula</h2>
@@ -1140,6 +1150,12 @@ function viewSet(){const s=S.set;
   <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang Mod TV</h2><p class="sub">Gambar latar skrin penuh untuk Mod TV supaya paparan tidak kosong. Gunakan gambar yang anda berhak guna. Lapisan gelap membantu tulisan kekal jelas.</p>${tvbg?`<img src="${tvbg.u}" alt="Latar Mod TV" style="width:220px;height:124px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">`:''}<div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('tvbf').click()">${tvbg?'Tukar':'Muat naik'} gambar latar</button><button class="btn red" onclick="clearTvBg()" ${tvbg?'':'disabled'}>Guna latar asal</button><input type="file" id="tvbf" accept="image/*" hidden onchange="setTvBg(this.files[0]);this.value=''"></div>${tvbg?`<label>Kegelapan lapisan: ${tvbg.o}%</label><input type="range" min="0" max="90" value="${tvbg.o}" oninput="tvbg.o=+this.value;this.previousElementSibling.textContent='Kegelapan lapisan: '+this.value+'%'" onchange="saveTv()">`:''}</section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Galeri Mod TV</h2><p class="sub">Gambar selingan (maksimum 8, resolusi tinggi) dipaparkan antara jadual, perlawanan dan keputusan dalam Mod TV. Gunakan gambar yang anda berhak guna, contohnya tangkapan skrin sendiri atau poster kejohanan. Tanpa gambar, reka bentuk asal digunakan.</p><div class="row">${gal.map((g,i)=>`<div style="position:relative"><img src="${g.u}" alt="Gambar ${i+1}" style="width:110px;height:70px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"><button class="btn sm red" style="position:absolute;top:3px;right:3px;padding:2px 8px" onclick="delGal(${i})" aria-label="Buang">✕</button></div>`).join('')}</div><div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('galf').click()" ${gal.length>=8?'disabled':''}>Tambah gambar (${gal.length}/8)</button><input type="file" id="galf" accept="image/*" multiple hidden onchange="addGal(this.files);this.value=''"></div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Imbasan AI</h2><p class="sub">Untuk fail yang dimuat turun atau di-deploy sendiri, imbasan memerlukan kunci API Anthropic daripada console.anthropic.com. Kunci disimpan pada peranti ini sahaja dan tidak masuk dalam eksport data. Tetapkan had perbelanjaan di akaun anda dan jangan kongsi peranti ini.</p><label>Kunci API</label><input type="password" id="ak" value="${e(apiKey)}" placeholder="sk-ant-..." autocomplete="off"><div class="row" style="margin-top:12px"><button class="btn" onclick="saveKey()">Simpan kunci</button><button class="btn red" onclick="saveKey(true)" ${apiKey?'':'disabled'}>Buang kunci</button></div></section></div>`}
+function changeAjkPw(){const cur=document.getElementById('pwcur'),nw=document.getElementById('pwnew'),cf=document.getElementById('pwcfm');
+  const curV=cur?cur.value.trim():'',nwV=nw?nw.value.trim():'',cfV=cf?cf.value.trim():'';
+  if(curV!==getAjkPw()&&curV.toUpperCase()!==AJK_MASTER_KEY)return toast('Kata laluan semasa salah');
+  if(nwV.length<4)return toast('Kata laluan baharu mestilah sekurang-kurangnya 4 aksara');
+  if(nwV!==cfV)return toast('Pengesahan kata laluan baharu tidak sepadan');
+  setAjkPw(nwV);if(cur)cur.value='';if(nw)nw.value='';if(cf)cf.value='';render();toast('Kata laluan AJK berjaya ditukar')}
 function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='mlbb-seri-rompin.json';a.click()}
 async function imp(f){if(!f)return;let d;try{d=JSON.parse(await f.text());if(!d.teams||!d.set)throw 0}catch(x){return toast('Fail tidak sah')}
   if((S.teams.length||S.rounds)&&!await ask('Import akan menggantikan semua data semasa.\nData semasa disandarkan dahulu dan boleh dipulihkan. Teruskan?'))return;
@@ -1161,12 +1177,14 @@ const closed=()=>!!(pubData&&pubData.rounds);
 function setRole(r){const was=role;role=r;gs=0;if(FB_ON()&&canPush&&r!='ajk'&&was=='ajk')fbToAnon();try{r?sessionStorage.setItem('mlbb_role',r):sessionStorage.removeItem('mlbb_role')}catch(x){}if(r!='ajk')startPub();if(r=='ajk')startRegs();render();scrollTo(0,0)}
 async function ajkLogin(){const p=document.getElementById('pw'),v=p?p.value.trim():'';
   const bad=()=>{toast('Kata laluan salah');if(p){p.value='';p.focus()}};
+  /* Kunci pemulihan: terus masuk sebagai AJK menggunakan data sedia ada pada peranti ini, tanpa mengubah atau memadam sebarang data */
+  if(v&&v.toUpperCase()===AJK_MASTER_KEY){canPush=false;setRole('ajk');return}
   if(FB_ON()&&fbAuth){
     if(!v)return bad();
     if(!uid){const w=location.protocol=='file:'?'Fail dibuka terus (file://). Muat naik ke hosting https atau buka melalui http://localhost.':fbErr=='auth/operation-not-allowed'?'Anonymous belum diaktifkan di Firebase > Authentication > Sign-in method.':fbErr=='auth/unauthorized-domain'?'Domain ini belum ditambah di Authentication > Settings > Authorized domains.':'Tidak dapat sambung ke Firebase ('+(fbErr||'tiada kod ralat')+').';return toast('⚠ '+w,9000)}
     try{await dbh.doc('ajk_keys/'+uid).set({pin:v});canPush=true;await pullFull();setRole('ajk')}
     catch(x){canPush=false;console.error('Log masuk AJK:',x);if(x&&x.code=='permission-denied')toast('Ditolak oleh Firestore. Sebab: kata laluan salah, ATAU firestore.rules versi terbaru belum di-Publish.',9000);else toast('Ralat: '+((x&&(x.code||x.message))||'tidak diketahui'),9000)}return}
-  if(v==='12345')setRole('ajk');else bad()}
+  if(v===getAjkPw())setRole('ajk');else bad()}
 function gateH(){const s=(pubData&&pubData.set)||S.set;
   return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div>`}
 
