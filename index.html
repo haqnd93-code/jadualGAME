@@ -428,8 +428,8 @@ const KEY='mlbb_seri_rompin_v1';
 const def=()=>({set:{title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:'',venue:'',fmt:3,shuffle:true},teams:[],rounds:null});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||def()}catch(e){S=def()}
 /* ===== SAMBUNGAN FIREBASE (projek: jadual-game) =====
-   ajkEmail = e-mel akaun AJK yang dicipta di Firebase Console > Authentication > Users (Email/Password).
-   E-mel yang SAMA mesti ditulis dalam firestore.rules (fungsi isAjk). Kata laluan AJK = kata laluan akaun ini. */
+   Tanpa e-mel: semua pengguna masuk secara Anonymous. Kata laluan AJK (cth 12345) disemak oleh
+   firestore.rules (bukan dalam fail ini) - tukar kata laluan di firestore.rules sahaja. */
 const FB_CONFIG={
   apiKey:'AIzaSyC9nlhJpJKd6n8_mDrOD-5iE6_j4nL_dYY',
   authDomain:'jadual-game.firebaseapp.com',
@@ -437,22 +437,23 @@ const FB_CONFIG={
   storageBucket:'jadual-game.firebasestorage.app',
   messagingSenderId:'692694313460',
   appId:'1:692694313460:web:611e1e92643d1a2180b1a1',
-  measurementId:'G-44R1Y1HVDR',
-  ajkEmail:'ajk@jadual-game.com'
+  measurementId:'G-44R1Y1HVDR'
 };
 const FB_ON=()=>!!(FB_CONFIG.apiKey&&FB_CONFIG.projectId&&typeof firebase!=='undefined');
-let fbAuth=null;
-function fbSet(u){uid=u?u.uid:null;canPush=!!(u&&!u.isAnonymous&&u.email&&u.email.toLowerCase()===String(FB_CONFIG.ajkEmail).toLowerCase())}
+let fbAuth=null,fbErr='';
+function fbSet(u){const n=u?u.uid:null;if(n!==uid)canPush=false;uid=n}
+/* AJK = peranti yang ada dokumen ajk_keys/{uid}; dokumen itu hanya boleh dicipta jika kata laluan betul (disemak oleh rules) */
+async function fbChk(){if(!dbh||!uid)return;try{canPush=(await dbh.doc('ajk_keys/'+uid).get()).exists}catch(x){canPush=false}}
 async function fbInit(){
   firebase.initializeApp(FB_CONFIG);dbh=firebase.firestore();fbAuth=firebase.auth();
   await new Promise(res=>{const un=fbAuth.onAuthStateChanged(()=>{un();res()})});
   let u=fbAuth.currentUser;
-  if(!u){try{u=(await fbAuth.signInAnonymously()).user}catch(x){console.error('Anonymous Auth belum diaktifkan?',x)}}
-  fbSet(u);fbAuth.onAuthStateChanged(fbSet)}
+  if(!u){try{u=(await fbAuth.signInAnonymously()).user}catch(x){fbErr=(x&&(x.code||x.message))||'ralat';console.error('Anonymous Auth gagal:',x)}}
+  fbSet(u);await fbChk();fbAuth.onAuthStateChanged(fbSet)}
 async function fbToAnon(noRender){
   if(!FB_ON()||!fbAuth)return;
   if(regUn){try{regUn()}catch(x){}regUn=null}regs=[];
-  try{await fbAuth.signOut();const r=await fbAuth.signInAnonymously();fbSet(r.user)}catch(x){fbSet(null)}
+  try{if(canPush&&uid){try{await dbh.doc('ajk_keys/'+uid).delete()}catch(x){}}await fbAuth.signOut();const r=await fbAuth.signInAnonymously();fbSet(r.user)}catch(x){fbSet(null)}
   if(!noRender)render()}
 let tab='jadual',edit=null,drafts=[],scanning=false,pubMode=(location.hash=='#paparan'||location.hash=='#tv'),pubData=null,dbh=null,canPush=false,pubStarted=false,pt;
 let lastAuto=0;
@@ -465,7 +466,7 @@ let SCD={},SO={},REV={};
 const pts=()=>S.set.mode=='pts',grp=()=>S.set.mode=='grp';
 const isLg=m=>pts()||m.g!=null,GL=g=>String.fromCharCode(65+g);
 const gcount=()=>S.rounds.filter(rd=>rd.length&&rd[0].g!=null).length;
-function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2200)}
+function toast(t,ms){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),ms||2200)}
 function seedOrder(n){let o=[1];while(o.length<n){const k=o.length*2+1;o=o.flatMap(x=>[x,k-x])}return o}
 function rname(r){if(pts())return 'PUSINGAN '+(r+1);if(grp()&&r<gcount())return 'PUSINGAN KUMPULAN '+(r+1);const R=S.rounds.length,d=R-r;return d==1?'FINAL':d==2?'SEPARUH AKHIR':d==3?'SUKU AKHIR':grp()?'PUSINGAN AWAL':'PUSINGAN '+(r+1)}
 function adv(m,w){m.w=w;const nx=(pts()||m.g!=null)?null:S.rounds[m.r+1];if(nx){const k=nx[m.i>>1];if(m.i%2==0)k.a=w;else k.b=w}}
@@ -1160,7 +1161,11 @@ const closed=()=>!!(pubData&&pubData.rounds);
 function setRole(r){const was=role;role=r;gs=0;if(FB_ON()&&canPush&&r!='ajk'&&was=='ajk')fbToAnon();try{r?sessionStorage.setItem('mlbb_role',r):sessionStorage.removeItem('mlbb_role')}catch(x){}if(r!='ajk')startPub();if(r=='ajk')startRegs();render();scrollTo(0,0)}
 async function ajkLogin(){const p=document.getElementById('pw'),v=p?p.value.trim():'';
   const bad=()=>{toast('Kata laluan salah');if(p){p.value='';p.focus()}};
-  if(FB_ON()&&fbAuth){if(!v)return bad();try{const r=await fbAuth.signInWithEmailAndPassword(FB_CONFIG.ajkEmail,v);fbSet(r.user);if(!canPush)return bad();await pullFull();setRole('ajk')}catch(x){bad()}return}
+  if(FB_ON()&&fbAuth){
+    if(!v)return bad();
+    if(!uid){const w=location.protocol=='file:'?'Fail dibuka terus (file://). Muat naik ke hosting https atau buka melalui http://localhost.':fbErr=='auth/operation-not-allowed'?'Anonymous belum diaktifkan di Firebase > Authentication > Sign-in method.':fbErr=='auth/unauthorized-domain'?'Domain ini belum ditambah di Authentication > Settings > Authorized domains.':'Tidak dapat sambung ke Firebase ('+(fbErr||'tiada kod ralat')+').';return toast('⚠ '+w,9000)}
+    try{await dbh.doc('ajk_keys/'+uid).set({pin:v});canPush=true;await pullFull();setRole('ajk')}
+    catch(x){canPush=false;console.error('Log masuk AJK:',x);if(x&&x.code=='permission-denied')toast('Ditolak oleh Firestore. Sebab: kata laluan salah, ATAU firestore.rules versi terbaru belum di-Publish.',9000);else toast('Ralat: '+((x&&(x.code||x.message))||'tidak diketahui'),9000)}return}
   if(v==='12345')setRole('ajk');else bad()}
 function gateH(){const s=(pubData&&pubData.set)||S.set;
   return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div>`}
