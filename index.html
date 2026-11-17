@@ -836,9 +836,9 @@ function tvSched(){clearTimeout(tvTm);if(!(pubMode&&tv)||tvPaused)return;
   tvTm=setTimeout(()=>{tvI++;tvEl=0;tvSched();render()},rem)}
 function tvGo(d){tvI+=d;tvEl=0;tvStart=Date.now();tvSched();render()}
 function tvPause(){if(tvPaused){tvPaused=false;tvSched()}else{tvEl=Date.now()-tvStart;tvPaused=true;clearTimeout(tvTm)}render()}
-function tvEnter(){location.hash='#tv';try{const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen||(()=>{})).call(el)}catch(x){}}
-function tvExit(){try{if(document.fullscreenElement)document.exitFullscreen()}catch(x){}location.hash=(canPush||!dbh)?'':'#paparan'}
-function tvFs(){try{const d=document,el=d.documentElement;if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);else(el.requestFullscreen||el.webkitRequestFullscreen).call(el)}catch(x){}}
+function tvEnter(){location.hash='#tv'}
+function tvExit(){location.hash=(canPush||!dbh)?'':'#paparan'}
+function tvFs(){document.body.classList.toggle('pres');fsBtn()}
 async function wake(){try{if(navigator.wakeLock&&!wl)wl=await navigator.wakeLock.request('screen')}catch(x){}}
 function tvSet(){clearInterval(tvSp);clearTimeout(tvTm);cancelAnimationFrame(tvRaf);document.body.classList.toggle('tv',pubMode&&tv);
   if(pubMode&&tv){tvI=0;tvEl=0;tvPaused=false;tvPrev='';tvStart=Date.now();tvSched();wake()}
@@ -939,7 +939,7 @@ addEventListener('keydown',ev=>{if(/INPUT|SELECT|TEXTAREA/.test((ev.target.tagNa
   if(!(pubMode&&tv))return;
   if(ev.key=='ArrowRight')tvGo(1);else if(ev.key=='ArrowLeft')tvGo(-1);else if(ev.key==' '){ev.preventDefault();tvPause()}else if(ev.key=='Escape')tvExit()});
 function toggleFS(){const b=document.body,d=document,el=d.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;
-  if(!b.classList.contains('pres')){b.classList.add('pres');fsApi=false;if(rq){try{const r=rq.call(el);fsApi=true;if(r&&r.catch)r.catch(()=>{fsApi=false})}catch(x){}}}
+  if(!b.classList.contains('pres')){b.classList.add('pres');fsApi=false;}
   else{b.classList.remove('pres');if(fsOn())(d.exitFullscreen||d.webkitExitFullscreen).call(d)}
   fsBtn()}
 function fsCh(){if(!fsOn()&&fsApi&&document.body.classList.contains('pres')){document.body.classList.remove('pres');fsApi=false;fsBtn()}}
@@ -1224,7 +1224,7 @@ async function ajkLogin(){const p=document.getElementById('pw'),v=p?p.value.trim
     if(!v)return bad();
     if(!uid){const w=location.protocol=='file:'?'Fail dibuka terus (file://). Muat naik ke hosting https atau buka melalui http://localhost.':fbErr=='auth/operation-not-allowed'?'Anonymous belum diaktifkan di Firebase > Authentication > Sign-in method.':fbErr=='auth/unauthorized-domain'?'Domain ini belum ditambah di Authentication > Settings > Authorized domains.':'Tidak dapat sambung ke Firebase ('+(fbErr||'tiada kod ralat')+').';return toast('⚠ '+w,9000)}
     try{await dbh.doc('ajk_keys/'+uid).set({pin:v});canPush=true;await pullFull();setRole('ajk')}
-    catch(x){canPush=false;console.error('Log masuk AJK:',x);if(x&&x.code=='permission-denied')toast('Ditolak oleh Firestore. Sebab: kata laluan salah, ATAU firestore.rules versi terbaru belum di-Publish.',9000);else toast('Ralat: '+((x&&(x.code||x.message))||'tidak diketahui'),9000)}return}
+    catch(x){canPush=false;console.error('Log masuk AJK:',x);if(x&&x.code=='permission-denied')toast('Kata laluan salah',4000);else toast('Ralat: '+((x&&(x.code||x.message))||'tidak diketahui'),9000)}return}
   if(v===getAjkPw())setRole('ajk');else bad()}
 function gateH(){const s=(pubData&&pubData.set)||S.set;
   return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div>`}
