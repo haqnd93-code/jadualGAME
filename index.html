@@ -349,7 +349,7 @@ body.tv{background:radial-gradient(ellipse at 15% 0,#1b2a7a 0,#0b1230 55%,#060a1
 body.tv.tvmv{cursor:auto}
 body.tv #bg,body.tv .fsb,body.tv .vmm{display:none!important}
 body.tv main,body.tv.v-phone main,body.tv.v-desk main{max-width:none;margin:0;padding:0}
-.tvw{height:100vh;display:flex;flex-direction:column;gap:14px;padding:18px 32px 14px}
+.tvw{height:100vh;height:100dvh;display:flex;flex-direction:column;gap:14px;padding:18px 32px 14px;padding-left:calc(32px + env(safe-area-inset-left,0px));padding-right:calc(32px + env(safe-area-inset-right,0px));padding-top:calc(18px + env(safe-area-inset-top,0px))}
 .tvh{display:flex;align-items:center;justify-content:space-between;gap:20px}
 .tvt b{display:block;font:700 clamp(20px,2.6vw,40px)/1.1 'Chakra Petch',sans-serif;letter-spacing:.02em}
 .tvt span{color:#9fb0ee;font-size:clamp(12px,1.2vw,19px)}
@@ -362,10 +362,15 @@ body.tv main,body.tv.v-phone main,body.tv.v-desk main{max-width:none;margin:0;pa
 .tvp{height:5px;border-radius:4px;overflow:hidden;background:#1c2760}
 .tvp i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#2457ff,#ff5a7a);transform-origin:left;transform:scaleX(0);animation:tvp linear forwards}
 @keyframes tvp{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-.tvc{position:fixed;right:18px;bottom:22px;display:flex;gap:6px;opacity:0;transition:opacity .3s}
+.tvc{position:fixed;right:18px;bottom:calc(22px + env(safe-area-inset-bottom,0px));display:flex;gap:6px;opacity:0;transition:opacity .3s}
 body.tvmv .tvc,.tvc:hover{opacity:1}
 .tvc button{width:44px;height:44px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:rgba(10,16,48,.85);color:#fff;font-size:18px;cursor:pointer}
 .tvc button:hover{background:var(--c1)}
+/* Peranti sentuh (telefon/tablet) tiada "hover", jadi kawalan mesti sentiasa kelihatan, bukan bergantung pada gerakan tetikus */
+@media (hover:none){
+  .tvc{opacity:1;left:0;right:0;bottom:0;justify-content:center;gap:10px;padding:10px calc(10px + env(safe-area-inset-left,0px)) calc(10px + env(safe-area-inset-bottom,0px)) calc(10px + env(safe-area-inset-right,0px));background:linear-gradient(0deg,rgba(6,10,31,.92) 40%,rgba(6,10,31,0));transition:none}
+  .tvc button{width:46px;height:46px;font-size:19px}
+}
 .tv .tvs .row.noprint{display:none}
 .tv .bdh h2,.tv .tvs .gh{color:#fff}.tv .sub,.tv .gnote,.tv .leg{color:#aab6e0}
 .tvpod{display:flex;justify-content:center}.tvpod .pod{max-width:1000px}
@@ -409,6 +414,42 @@ body.tv.tvbgi #bg{display:block!important;background:var(--tvimg) center/cover n
 .tvbar{margin-top:22px;height:16px;border-radius:99px;background:#1c2760;overflow:hidden}.tvbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#ffc21a)}
 .tvtk{overflow:hidden;white-space:nowrap;border-radius:10px;background:rgba(255,255,255,.08);padding:8px 0;font-size:clamp(13px,1.3vw,22px)}
 .tvtkin{display:inline-block;animation:tvtk linear infinite}.tvtkin span{margin:0 30px}@keyframes tvtk{to{transform:translateX(-50%)}}
+/* ===== Mod TV: telefon (skrin sempit) ===== */
+@media (max-width:680px){
+  .tvw{gap:10px;padding:12px 14px calc(68px + env(safe-area-inset-bottom,0px));padding-left:calc(14px + env(safe-area-inset-left,0px));padding-right:calc(14px + env(safe-area-inset-right,0px));padding-top:calc(12px + env(safe-area-inset-top,0px))}
+  .tvh{flex-wrap:wrap;row-gap:4px;column-gap:12px}
+  .tvt{min-width:0;flex:1 1 auto}
+  .tvt b{font-size:clamp(15px,5vw,20px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tvt span{font-size:clamp(10px,3vw,12px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .tvk{font-size:clamp(11px,3vw,13px);gap:8px;flex:0 0 auto}
+  .tvd{order:3;flex:1 0 100%;justify-content:center;gap:5px}
+  .tvd i{width:7px;height:7px}.tvd i.on{width:20px}
+  .tvT{font-size:clamp(15px,5.5vw,20px);margin-bottom:8px;letter-spacing:.03em}
+  .tvvs{padding:14px 10px;margin-bottom:10px}
+  /* Susun menegak: pasukan A, perkataan VS/skor, pasukan B (susunan ini ikut susunan asal dalam HTML) - guna flex supaya VS pasti di tengah-tengah, bukan tersasar ke tepi */
+  .tvvr{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .tvvr .tvside{width:100%}
+  .tvvr .tvx{width:100%;text-align:center;margin:0}
+  .tvside{flex-direction:row;justify-content:center;gap:12px;width:100%}
+  .tvside .av.lg,.tvside i.av{width:46px!important;height:46px!important}
+  .tvside b{font-size:clamp(15px,4.5vw,19px)}
+  .tvteam.ld .av.lg{width:56px;height:56px}
+  .tvwall{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+  .tvteam{padding:10px 6px}.tvteam .av.lg{width:44px;height:44px}
+  .tvst{grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+  .tvsc{padding:16px 10px}
+  /* Jadual kedudukan: jangan susun 2 kumpulan sebelah-menyebelah, kerana itu memaksa jadual jadi terlalu sempit dan memotong lajur Mata */
+  .tvf.g2{grid-template-columns:1fr;gap:10px}
+  /* Jadual kedudukan: sembunyikan lajur kurang penting supaya lajur # , Kumpulan, Menang, Kalah dan Mata dipaparkan penuh dan mudah dibaca */
+  .tv .tb{min-width:0;width:100%;table-layout:fixed}
+  .tv .tb th:nth-child(3),.tv .tb td:nth-child(3),.tv .tb th:nth-child(6),.tv .tb td:nth-child(6),.tv .tb th:nth-child(7),.tv .tb td:nth-child(7){display:none}
+  .tv .tb th,.tv .tb td{padding:8px 4px;font-size:clamp(11px,3vw,14px)}
+  .tv .tb .rk{width:26px;font-size:clamp(13px,3.5vw,16px)}
+  .tv .tb .tn b{display:flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .tv .tb .tn b>i.av{flex:0 0 auto}
+  .tv .tb .pt{font-size:clamp(16px,4.5vw,20px)}
+  .tv .tbw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
 .tvs[data-sc^=g]{display:flex;flex-direction:column}.tvs[data-sc^=g] .tvf{flex:1;min-height:0;position:relative}
 .tvimg{position:absolute;inset:0;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.18)}
 .tvim{position:absolute;inset:0;background-size:cover;background-position:center;}
