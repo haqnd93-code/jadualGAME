@@ -379,6 +379,14 @@ body.tv.tvbgi #bg{display:block!important;background:var(--tvimg) center/cover n
 .tvside.win b{color:#ffd75e}.tvside.win .av.lg{filter:drop-shadow(0 0 18px rgba(255,194,26,.9))}.tvside.los{opacity:.55}
 .tvwn{color:#ffc21a;font:700 clamp(13px,1.4vw,22px) 'Chakra Petch',sans-serif;letter-spacing:.06em}
 .tvteam.ld .av.lg{width:110px;height:110px}
+.tvvs.idle .tvx{animation:none;color:#fff;text-shadow:none}.tvlive.q{color:#9fb0ee}.tvlive.q::before{background:#9fb0ee;animation:none}
+.tvvs.tvres{background:linear-gradient(115deg,rgba(11,138,69,.42),rgba(255,194,26,.2));border:2px solid rgba(255,194,26,.75);box-shadow:0 0 34px rgba(255,194,26,.2)}
+.tvres .tvvm{color:#8ff0b6}
+.tvdone{display:inline-block;margin-bottom:6px;padding:3px 16px;border-radius:99px;background:#0b8a45;color:#fff;font:700 clamp(13px,1.4vw,22px) 'Chakra Petch',sans-serif;letter-spacing:.08em}
+.tvres .tvside.win{padding:14px 10px;border-radius:20px;border:2px solid #ffc21a;background:rgba(255,194,26,.16);box-shadow:0 0 36px rgba(255,194,26,.4)}
+.tvres .tvside.los{opacity:.5;filter:grayscale(.75)}
+.tvwn{padding:3px 16px;border-radius:99px;background:#ffc21a;color:#3d2a00}
+.tvres .tvx{font-size:clamp(36px,6.5vw,104px)}
 .tvf{will-change:transform}
 .tvteam{transition:box-shadow .7s,border-color .7s,background .7s}
 .tvteam.spot{border-color:#ffc21a;background:rgba(255,194,26,.14);animation:tvfl 1.1s ease-in-out infinite}
@@ -438,12 +446,13 @@ async function fbToAnon(noRender){
   try{await fbAuth.signOut();const r=await fbAuth.signInAnonymously();fbSet(r.user)}catch(x){fbSet(null)}
   if(!noRender)render()}
 let tab='jadual',edit=null,drafts=[],scanning=false,pubMode=(location.hash=='#paparan'||location.hash=='#tv'),pubData=null,dbh=null,canPush=false,pubStarted=false,pt;
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}queuePush()};
+let lastAuto=0;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(Date.now()-lastAuto>180000){lastAuto=Date.now();try{bakSave('Auto',true)}catch(x){}}queuePush()};
 const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tm=id=>S.teams.find(t=>t.id===id);
 const nm=id=>id?e(tm(id)?.name):null;
 const started=()=>!!S.rounds;
-let SCD={},SO={};
+let SCD={},SO={},REV={};
 const pts=()=>S.set.mode=='pts',grp=()=>S.set.mode=='grp';
 const isLg=m=>pts()||m.g!=null,GL=g=>String.fromCharCode(65+g);
 const gcount=()=>S.rounds.filter(rd=>rd.length&&rd[0].g!=null).length;
@@ -602,7 +611,7 @@ function viewJadual(){
   <div class="stats"><div class="glass stat"><b>${S.teams.length}</b><span>Kumpulan</span></div><div class="glass stat"><b>${S.teams.length*5}</b><span>Pelajar</span></div><div class="glass stat"><b>${done}/${all.length}</b><span>Perlawanan selesai</span></div><div class="glass stat"><b>${S.rounds?S.rounds.length:0}</b><span>Pusingan</span></div></div>`;
   if(!S.rounds)return h+`<div class="glass empty"><h2>Jadual belum dijana</h2><p>${S.teams.length<2?'Daftarkan sekurang-kurangnya 2 kumpulan dahulu.':`${S.teams.length} kumpulan sedia. Jana jadual untuk mula.`}</p>${S.teams.length>=2?'<p class="sub">Sistem pertandingan dan format perlawanan ditetapkan di tab Pendaftaran.</p>':''}<div class="row" style="justify-content:center"><button class="btn pink" onclick="go('daftar')">Daftar kumpulan</button><button class="btn" onclick="gen()" ${S.teams.length<2?'disabled':''}>Jana jadual</button></div></div>`;
   if(ch)h+=`<div class="glass champ"><i class="av lg xl">${logo(ch)}</i><p class="sub">Juara kejohanan</p><h2>🏆 ${nm(ch)}</h2><p class="sub">${tm(ch).members.filter(Boolean).map(e).join(', ')}</p><button class="btn sm pink noprint" style="margin-top:10px" onclick="showPodium()">🎖️ Lihat podium</button></div>`;
-  h+=`<div class="row noprint" style="margin-bottom:10px"><button class="btn sm" onclick="print()">Cetak jadual</button><button class="btn sm pink" onclick="location.hash='#paparan'">📺 Paparan awam</button><button class="btn sm pink" onclick="tvEnter()">🎬 Mod TV</button>${canPush?'<span class="chip">🟢 Siaran langsung aktif</span>':''}<button class="btn sm ${S.set.noNx?'':'pink'}" onclick="toggleNx()">⚡ Sorot game seterusnya: ${S.set.noNx?'MATI':'HIDUP'}</button></div>`;
+  h+=`<div class="row noprint" style="margin-bottom:10px"><button class="btn sm" onclick="print()">Cetak jadual</button>${canPush?'<span class="chip">🟢 Siaran langsung aktif</span>':''}<button class="btn sm ${S.set.noNx?'':'pink'}" onclick="toggleNx()">⚡ Sorot game seterusnya: ${S.set.noNx?'MATI':'HIDUP'}</button></div>`;
   return h+swH()+bodyH()}
 function viewDaftar(){
   const L=started(),dr=drafts[0],t=dr||(edit?tm(edit):null);
@@ -772,14 +781,17 @@ function tvSched(){clearTimeout(tvTm);if(!(pubMode&&tv)||tvPaused)return;
 function tvGo(d){tvI+=d;tvEl=0;tvStart=Date.now();tvSched();render()}
 function tvPause(){if(tvPaused){tvPaused=false;tvSched()}else{tvEl=Date.now()-tvStart;tvPaused=true;clearTimeout(tvTm)}render()}
 function tvEnter(){location.hash='#tv';try{const el=document.documentElement;(el.requestFullscreen||el.webkitRequestFullscreen||(()=>{})).call(el)}catch(x){}}
-function tvExit(){try{if(document.fullscreenElement)document.exitFullscreen()}catch(x){}location.hash='#paparan'}
+function tvExit(){try{if(document.fullscreenElement)document.exitFullscreen()}catch(x){}location.hash=(canPush||!dbh)?'':'#paparan'}
 function tvFs(){try{const d=document,el=d.documentElement;if(d.fullscreenElement||d.webkitFullscreenElement)(d.exitFullscreen||d.webkitExitFullscreen).call(d);else(el.requestFullscreen||el.webkitRequestFullscreen).call(el)}catch(x){}}
 async function wake(){try{if(navigator.wakeLock&&!wl)wl=await navigator.wakeLock.request('screen')}catch(x){}}
 function tvSet(){clearInterval(tvSp);clearTimeout(tvTm);cancelAnimationFrame(tvRaf);document.body.classList.toggle('tv',pubMode&&tv);
   if(pubMode&&tv){tvI=0;tvEl=0;tvPaused=false;tvPrev='';tvStart=Date.now();tvSched();wake()}
   else if(wl){try{wl.release()}catch(x){}wl=null}}
 function tvPan(list,ms){const t0=performance.now()+1800;(function f(t){const k=Math.min(1,Math.max(0,(t-t0)/ms));list.forEach(([el,prop,max])=>{el[prop]=max*k});if(k<1)tvRaf=requestAnimationFrame(f)})(performance.now())}
-function tvPost(){applyTvBg();cancelAnimationFrame(tvRaf);
+let tvLK=null;
+function tvLive(){const cur=inV(()=>S.rounds?S.rounds.flat().filter(m=>m.ok&&!m.w&&!m.bye).map(m=>m.r+'-'+m.i):[]),add=tvLK?cur.filter(x=>!tvLK.includes(x)):[];tvLK=cur;
+  if(add.length&&pubMode&&tv){const k=inV(tvList).indexOf('n0');if(k>=0){tvI=k;tvEl=0;tvStart=Date.now();tvSched();render();return true}}return false}
+function tvPost(){if(tvLive())return;applyTvBg();cancelAnimationFrame(tvRaf);
   const el=document.querySelector('.tvs');if(!el)return;const sc=el.dataset.sc;tvFit();tvFx(el);tvSpot(el,sc);
   if(sc=='pod'&&tvPrev!='pod'&&!cerEl)confetti(5200);tvPrev=sc;
   const ms=Math.max(3000,dwOf(sc)*1000*.8-tvEl),b=el.querySelector('.bracket');
@@ -823,10 +835,10 @@ function defArt(i){const P=[['#13216f','#2457ff','#ffc21a'],['#3b0a45','#be185d'
   return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg)}
 const TVM=['Semoga berjaya, semua pasukan!','Fokus, kerjasama, semangat sukan.','Setiap game ada ceritanya. Terus bersemangat!','Hormati lawan, nikmati permainan.'];
 function tvImg(i){return `<div class="tvimg"><div class="tvim" style="background-image:url('${galSrc(i)}')"></div><div class="tvcap"><b>${TVM[i%TVM.length]}</b><span>${e(S.set.title)} · ${e(S.set.school)}</span></div></div>`}
-function tvRes(m){const a=(m.sa===''||m.sa==null)?'':e(m.sa),b=(m.sb===''||m.sb==null)?'':e(m.sb),W=m.w,s=id=>`<div class="tvside ${W===id?'win':'los'}"><i class="av lg">${logo(id)}</i><b>${nm(id)}</b>${W===id?'<span class="tvwn">🏆 MENANG</span>':''}</div>`;
-  return `<div class="tvvs tvres"><div class="tvvm">KEPUTUSAN · P${m.n}${m.g!=null?' · KUMPULAN '+GL(m.g):''} · ${rname(m.r)}</div><div class="tvvr">${s(m.a)}<span class="tvx">${a!==''&&b!==''?a+' - '+b:'TAMAT'}</span>${s(m.b)}</div></div>`}
+function tvRes(m){const a=(m.sa===''||m.sa==null)?'':e(m.sa),b=(m.sb===''||m.sb==null)?'':e(m.sb),W=m.w,s=id=>`<div class="tvside ${W===id?'win':'los'}"><i class="av lg">${logo(id)}</i><b>${nm(id)}</b>${W===id?'<span class="tvwn">🏆 PEMENANG</span>':''}</div>`;
+  return `<div class="tvvs tvres"><div class="tvdone">✅ PERLAWANAN TAMAT</div><div class="tvvm">KEPUTUSAN · P${m.n}${m.g!=null?' · KUMPULAN '+GL(m.g):''} · ${rname(m.r)}</div><div class="tvvr">${s(m.a)}<span class="tvx">${a!==''&&b!==''?a+' - '+b:'TAMAT'}</span>${s(m.b)}</div></div>`}
 function tvVs(m){const s=id=>`<div class="tvside"><i class="av lg">${logo(id)}</i><b>${nm(id)}</b></div>`;
-  return `<div class="tvvs live"><div class="tvlive">SEDANG BERLANGSUNG</div><div class="tvvm">P${m.n}${m.g!=null?' · KUMPULAN '+GL(m.g):''} · ${rname(m.r)} · ${fmtOf(m.r)}${m.time?' · ⏰ '+e(m.time):''}</div><div class="tvvr">${s(m.a)}<span class="tvx">VS</span>${s(m.b)}</div></div>`}
+  return `<div class="tvvs ${m.ok?'live':'idle'}"><div class="tvlive${m.ok?'':' q'}">${m.ok?'SEDANG BERLANGSUNG':'BELUM DIMULAKAN'}</div><div class="tvvm">P${m.n}${m.g!=null?' · KUMPULAN '+GL(m.g):''} · ${rname(m.r)} · ${fmtOf(m.r)}${m.time?' · ⏰ '+e(m.time):''}</div><div class="tvvr">${s(m.a)}<span class="tvx">VS</span>${s(m.b)}</div></div>`}
 function tvTick(){if(!S.rounds)return '';const rc=S.rounds.flat().filter(m=>m.w&&!m.bye).sort((a,b)=>(b.dt||0)-(a.dt||0)||(b.n||0)-(a.n||0)).slice(0,8);if(!rc.length)return '';
   const x=rc.map(m=>`<span>P${m.n}: <b>${nm(m.w)}</b> menang${fs(m)?' '+fs(m):''} lawan ${nm(m.w===m.a?m.b:m.a)}</span>`).join('');
   return `<div class="tvtk"><div class="tvtkin" style="animation-duration:${Math.max(24,rc.length*7)}s">${x}${x}</div></div>`}
@@ -848,7 +860,7 @@ function viewTV(){
   if(S.rounds)numM();
   const TT={tb:'🏆 KEDUDUKAN',br:'🌳 BRACKET',rs:'✅ KEPUTUSAN TERKINI',ld:'🔥 PENDAHULU SEMASA',pod:'🎖️ TAHNIAH KEPADA JUARA',wait:'⏳ JADUAL BELUM DIJANA',tm:'🛡️ KUMPULAN BERTANDING ('+S.teams.length+')',st:'📊 STATISTIK KEJOHANAN'};
   let body='';
-  if(kd=='n'){const nx=S.rounds.flat().filter(rdy).slice(ix*2,ix*2+2);body=nx.length?nx.map(tvVs).join(''):nextH()}
+  if(kd=='n'){const nx=S.rounds.flat().filter(rdy).sort((a,b)=>(!!b.ok)-(!!a.ok)).slice(ix*2,ix*2+2);body=nx.length?nx.map(tvVs).join(''):nextH()}
   else if(kd=='g')body=tvImg(ix);
   else if(kd=='ld'){const md=['🥇','🥈','🥉'],c=(x,l)=>`<div class="tvteam ld"><small>${l}</small><i class="av lg">${logo(x.id)}</i><b>${nm(x.id)}</b><small>${x.p} mata · ${x.w} menang ${x.l} kalah</small></div>`;
     body=`<div class="tvwall">${grp()?S.set.gm.map((_,g)=>c(standings(g)[0],'KUMPULAN '+GL(g))).join(''):standings().slice(0,3).map((x,i)=>c(x,md[i]+' TEMPAT '+(i+1))).join('')}</div>`}
@@ -976,7 +988,7 @@ function viewSah(){
   }
   if(!any&&!ch&&!gt)h+=`<div class="glass empty">Menunggu pusingan sebelumnya selesai.</div>`;
   const dn=S.rounds.flat().filter(m=>m.w&&!m.bye);
-  if(dn.length){h+=`<div class="rn">KEPUTUSAN DISAHKAN</div>`;dn.reverse().forEach(m=>{h+=`<div class="glass team"><div><span class="n">${nm(m.w)}</span><small>${rname(m.r)} · lawan ${nm(m.w===m.a?m.b:m.a)}${m.sa!==''?` · ${e(m.sa)}-${e(m.sb)}`:''}</small></div><button class="btn sm red" onclick="undo(${m.r},${m.i})">Batal</button></div>`})}
+  if(dn.length){h+=`<div class="rn">KEPUTUSAN DISAHKAN</div>`;dn.reverse().forEach(m=>{const k=`${m.r}-${m.i}`;if(REV[k]){h+=revCard(m,k);return}h+=`<div class="glass team"><div><span class="n">${nm(m.w)}</span><small>P${m.n} · ${rname(m.r)} · lawan ${nm(m.w===m.a?m.b:m.a)}${m.sa!==''?` · ${e(m.sa)}-${e(m.sb)}`:''}${m.rev?' · ✏️ dibetulkan':''}</small></div><div style="display:flex;gap:6px"><button class="btn sm" onclick="revOpen(${m.r},${m.i})">🔍 Semak</button><button class="btn sm red" onclick="undo(${m.r},${m.i})">Batal</button></div></div>`})}
   return h}
 function tmStr(t){try{return new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(x){return ''}}
 function okBox(m,k){
@@ -994,15 +1006,73 @@ async function win(r,i,side){const m=S.rounds[r][i],k=`${r}-${i}`,w=m[side];
   if(!await ask(`${isCur?'':'⚠️ INI BUKAN PERLAWANAN SEKARANG (perlawanan seterusnya).\n'}P${m.n}${m.g!=null?' · Kumpulan '+GL(m.g):''}: ${tm(m.a).name} vs ${tm(m.b).name}${va!==''&&vb!==''?' ('+va+'-'+vb+')':''}\nSahkan ${tm(w).name} menang${isLg(m)?'':' dan mara'}?`))return;
   delete SCD['sa'+k];delete SCD['sb'+k];delete SO[k];
   m.sa=document.getElementById('sa'+k).value;m.sb=document.getElementById('sb'+k).value;
-  const was=r1done();adv(m,w);m.dt=Date.now();fillKO();save();render();
+  const was=r1done();adv(m,w);m.dt=Date.now();fillKO();save();render();bakSave('Auto · selepas P'+m.n,true);
   const g2=gateInfo();toast(g2?rname(g2.from)+' selesai! Sahkan untuk mulakan '+rname(g2.to):grp()&&m.g!=null&&S.rounds.flat().filter(x=>x.g!=null).every(x=>x.w)?'Peringkat kumpulan selesai!':tm(w).name+(isLg(m)?' menang':' mara'))}
 async function undo(r,i){const m=S.rounds[r][i],nx=isLg(m)?null:S.rounds[r+1]?.[i>>1];
   if(nx&&nx.w)return toast('Batalkan keputusan pusingan seterusnya dahulu');
   if(grp()&&m.g!=null&&S.rounds.flat().some(x=>x.g==null&&!x.bye&&x.w))return toast('Batalkan keputusan peringkat kalah mati dahulu');
   if(!await ask('Batalkan keputusan ini?'))return;
+  bakSave('Sebelum batal P'+m.n,true);
   if(S.go!=null&&S.go>m.r)S.go=m.r;
   if(nx){if(i%2==0)nx.a=null;else nx.b=null;nx.ok=null}
   m.w=null;m.sa='';m.sb='';fillKO();save();render()}
+
+/* ===== Semak / betulkan keputusan ===== */
+function revOpen(r,i){const m=S.rounds[r][i];REV[`${r}-${i}`]={a:m.sa??'',b:m.sb??'',s:m.w===m.a?'a':'b'};render()}
+function revCard(m,k){const v=REV[k],a=nm(m.a),b=nm(m.b);
+  return `<div class="glass vs cur open"><div class="vh"><span>🔍 SEMAK KEPUTUSAN · P${m.n}${m.g!=null?' · Kumpulan '+GL(m.g):''} · ${rname(m.r)}</span><span class="badge nxt">${m.dt?'Disahkan '+tmStr(m.dt):'Disahkan'}</span></div>
+  <p class="sub" style="margin:0 0 10px">Rekod semasa: <b>${nm(m.w)}</b> menang${m.sa!==''?' ('+e(m.sa)+'-'+e(m.sb)+')':''}. Betulkan skor atau pemenang di bawah, kemudian simpan.</p>
+  <div class="tt"><div><i class="av lg lgv">${logo(m.a)}</i><b>${a}</b><br><input class="sc" type="number" min="0" placeholder="0" value="${e(v.a)}" oninput="REV['${k}'].a=this.value"></div><span class="x">VS</span><div><i class="av lg lgv">${logo(m.b)}</i><b>${b}</b><br><input class="sc" type="number" min="0" placeholder="0" value="${e(v.b)}" oninput="REV['${k}'].b=this.value"></div></div>
+  <label>Pemenang</label><div class="win"><button class="btn ${v.s=='a'?'pink':''}" onclick="REV['${k}'].s='a';render()">${v.s=='a'?'✔ ':''}${a} menang</button><button class="btn ${v.s=='b'?'pink':''}" onclick="REV['${k}'].s='b';render()">${v.s=='b'?'✔ ':''}${b} menang</button></div>
+  <div class="row" style="margin-top:12px"><button class="btn pink" onclick="revSave(${m.r},${m.i})">💾 Simpan pembetulan</button><button class="btn" onclick="delete REV['${k}'];render()">Tutup</button></div></div>`}
+async function revSave(r,i){const m=S.rounds[r][i],k=`${r}-${i}`,v=REV[k];if(!v)return;
+  const w=m[v.s],va=String(v.a??'').trim(),vb=String(v.b??'').trim();
+  if((va===''||vb==='')&&(va!==''||vb!==''))return toast('Isi kedua-dua skor, atau kosongkan kedua-duanya');
+  if(va!==''&&(+va<0||+vb<0))return toast('Skor tidak boleh negatif');
+  if(va!==''&&+va!==+vb&&((v.s=='a')!==(+va>+vb)))return toast('Skor tidak sepadan dengan pemenang yang dipilih');
+  const ch=w!==m.w,nx=isLg(m)?null:S.rounds[r+1]?.[i>>1];
+  if(ch){
+    if(nx&&nx.w)return toast('Pusingan seterusnya sudah ada keputusan. Batalkan keputusan itu dahulu');
+    if(grp()&&m.g!=null&&S.rounds.flat().some(x=>x.g==null&&!x.bye&&x.w))return toast('Peringkat kalah mati sudah ada keputusan. Batalkan keputusan itu dahulu')}
+  if(!ch&&va===String(m.sa??'')&&vb===String(m.sb??'')){delete REV[k];render();return toast('Tiada perubahan untuk disimpan')}
+  const sc=(x,y)=>x!==''?' ('+x+'-'+y+')':'';
+  if(!await ask(`Simpan pembetulan P${m.n}?\n\nSebelum: ${tm(m.w).name} menang${sc(String(m.sa??''),String(m.sb??''))}\nSelepas: ${tm(w).name} menang${sc(va,vb)}${ch?'\n\n⚠️ Pemenang bertukar. Pusingan seterusnya dikemas kini'+(nx&&nx.ok?' dan pengesahan guru perlawanan itu perlu dibuat semula':'')+'.':''}\n\nData semasa disandarkan dahulu.`))return;
+  bakSave('Sebelum pembetulan P'+m.n,true);
+  const GR=grp()?gcount():0,k0=grp()&&m.g!=null&&S.rounds[GR]?S.rounds[GR].map(x=>x.a+'|'+x.b):null;
+  if(ch){adv(m,w);if(nx)nx.ok=null}
+  m.sa=va;m.sb=vb;m.dt=Date.now();m.rev=(m.rev||0)+1;
+  fillKO();
+  if(k0)S.rounds[GR].forEach((x,j)=>{if(x.a+'|'+x.b!==k0[j])x.ok=null});
+  delete REV[k];save();render();bakSave('Auto · selepas pembetulan P'+m.n,true);toast('Keputusan P'+m.n+' dibetulkan')}
+
+/* ===== Sandaran (backup) ===== */
+const BK=KEY+'_bak';
+function bakAll(){try{const a=JSON.parse(localStorage.getItem(BK));return Array.isArray(a)?a:[]}catch(x){return []}}
+function bakWrite(a){while(a.length){try{localStorage.setItem(BK,JSON.stringify(a));return true}catch(x){if(a.length<=1)return false;let j=-1;for(let n=a.length-1;n>0;n--)if(a[n].auto){j=n;break}a.splice(j>0?j:a.length-1,1)}}return false}
+function bakStat(d){const m=(d.rounds||[]).flat().filter(x=>!x.bye);return {tm:(d.teams||[]).length,done:m.filter(x=>x.w).length,tot:m.length}}
+function bakSave(label,auto){
+  if(!S||!S.teams||(!S.teams.length&&!S.rounds))return false;
+  const d=JSON.stringify(S),a=bakAll();
+  if(a[0]&&a[0].d===d){if(!auto&&a[0].auto){a[0].auto=false;a[0].label=label;bakWrite(a)}return true}
+  a.unshift(Object.assign({id:Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:Date.now(),label,auto:!!auto,d},bakStat(S)));
+  let ac=0;const b=a.filter(x=>{if(x.auto&&++ac>8)return false;return true}).slice(0,20);
+  return bakWrite(b)}
+const bakT=t=>new Date(t).toLocaleString('ms-MY',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+function bakNow(){if(bakSave('Sandaran manual',false))toast('Sandaran dibuat');else toast('Tiada data untuk disandarkan atau storan penuh');render()}
+function bakDl(id){const b=bakAll().find(x=>x.id==id);if(!b)return;const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([b.d],{type:'application/json'}));const t=new Date(b.t),p=n=>String(n).padStart(2,'0');a.download=`mlbb-sandaran-${t.getFullYear()}${p(t.getMonth()+1)}${p(t.getDate())}-${p(t.getHours())}${p(t.getMinutes())}.json`;a.click()}
+async function bakRestore(id){const b=bakAll().find(x=>x.id==id);if(!b)return;
+  let d;try{d=JSON.parse(b.d);if(!d.teams||!d.set)throw 0}catch(x){return toast('Sandaran ini rosak')}
+  if(!await ask(`Pulihkan sandaran "${b.label}" (${bakT(b.t)})?\n${b.tm} kumpulan · ${b.done}/${b.tot} perlawanan selesai.\n\nData semasa akan digantikan. Data semasa disandarkan dahulu supaya boleh dipulihkan semula.`))return;
+  bakSave('Sebelum pemulihan',false);S=d;drafts=[];edit=null;SCD={};SO={};REV={};save();tab='jadual';render();toast('Data dipulihkan')}
+async function bakDel(id){if(!await ask('Padam sandaran ini? Ia tidak boleh dikembalikan.'))return;bakWrite(bakAll().filter(x=>x.id!=id));render()}
+function bakView(){const a=bakAll();
+  return `<section class="glass pad" style="grid-column:1/-1"><h2>🛟 Sandaran data</h2><p class="sub">Sandaran dibuat automatik selepas setiap keputusan disahkan atau dibetulkan, dan sebelum sebarang pemadaman, reset atau import. Disimpan dalam pelayar peranti ini. Untuk keselamatan penuh, muat turun fail sandaran dan simpan di tempat lain (contoh: telefon guru atau Google Drive).</p>
+  <div class="row" style="margin-bottom:12px"><button class="btn pink" onclick="bakNow()">➕ Buat sandaran sekarang</button></div>
+  ${a.length?a.map(b=>`<div class="glass team"><div><span class="n">${e(b.label)}</span><small>${bakT(b.t)} · ${b.tm} kumpulan · ${b.done}/${b.tot} perlawanan selesai${b.auto?'':' · 🔒 dilindungi'}</small></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button class="btn sm pink" onclick="bakRestore('${b.id}')">♻ Pulihkan</button><button class="btn sm" onclick="bakDl('${b.id}')" title="Muat turun">⬇</button><button class="btn sm red" onclick="bakDel('${b.id}')" title="Padam" aria-label="Padam sandaran">🗑</button></div></div>`).join(''):'<p class="sub">Belum ada sandaran.</p>'}</section>`}
+function askType(msg,word){return new Promise(res=>{const d=document.createElement('div');d.className='ov';
+  d.innerHTML=`<div class="glass pad dlg"><p>${e(msg)}</p><div class="row" style="margin-bottom:12px"><button class="btn sm" data-v="dl">⬇ Muat turun sandaran dahulu</button></div><label>Taip <b>${e(word)}</b> untuk mengesahkan</label><input id="cfw" autocomplete="off" style="margin-bottom:14px"><div class="row" style="justify-content:flex-end"><button class="btn sm" data-v="0">Batal</button><button class="btn sm red" data-v="1" id="cfgo" disabled>Padam</button></div></div>`;
+  const inp=d.querySelector('#cfw'),go=d.querySelector('#cfgo');inp.oninput=()=>{go.disabled=inp.value.trim().toUpperCase()!==word};
+  d.onclick=ev=>{const v=ev.target.dataset&&ev.target.dataset.v;if(v==='dl'){exp();return}if(v!==undefined&&!(v==='1'&&go.disabled)){d.remove();res(v==='1')}};document.body.appendChild(d);setTimeout(()=>inp.focus(),50)})}
 function viewSet(){const s=S.set;
   return `<div class="two"><section class="glass pad"><h2>Maklumat kejohanan</h2>
   <label>Nama kejohanan</label><input value="${e(s.title)}" onchange="S.set.title=this.value;save()">
@@ -1015,6 +1085,7 @@ function viewSet(){const s=S.set;
   <div class="row" style="margin-bottom:10px"><button class="btn pink" onclick="resetSched()" ${S.rounds?'':'disabled'}>Jana semula jadual (kekalkan kumpulan)</button></div><div class="row"><button class="btn" onclick="exp()">Eksport data</button><button class="btn" onclick="document.getElementById('imp').click()">Import data</button><input type="file" id="imp" accept=".json" hidden onchange="imp(this.files[0])"></div>
   <h2 style="margin-top:22px">Tetapan semula</h2>
   <div class="row"><button class="btn pink" onclick="resetB()" ${started()?'':'disabled'}>Reset jadual sahaja</button><button class="btn red" onclick="resetAll()">Padam semua data</button></div></section>
+  ${bakView()}
   <section class="glass pad" style="grid-column:1/-1"><h2>Jadual masa</h2><p class="sub">Jana masa dan gelanggang untuk semua perlawanan yang belum selesai. Anda masih boleh ubah masa setiap perlawanan di tab Pengesahan.</p><div class="grid2"><div><label>Masa mula</label><input type="time" value="${e(s.start||'09:00')}" onchange="S.set.start=this.value;save()"></div><div><label>Selang setiap perlawanan (minit)</label><input type="number" min="5" value="${s.gap||40}" onchange="S.set.gap=+this.value;save()"></div><div><label>Bilangan gelanggang serentak</label><input type="number" min="1" value="${s.courts||2}" onchange="S.set.courts=+this.value;save()"></div>${grp()?`<div><label>Selang perlawanan peringkat kumpulan (minit)</label><input type="number" min="5" value="${s.gapG||20}" onchange="S.set.gapG=+this.value;save()"></div>`:''}</div><div class="row" style="margin-top:14px"><button class="btn pink" onclick="autoTime()" ${started()?'':'disabled'}>Jana masa automatik</button></div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang</h2><p class="sub">Latar asal ialah reka bentuk medan perang bertema MOBA. Anda boleh memuat naik wallpaper sendiri, contohnya imej Mobile Legends yang anda berhak guna. Gambar disimpan pada peranti ini dan turut dipaparkan pada paparan awam.</p><div class="row"><button class="btn" onclick="document.getElementById('bgf').click()">Muat naik gambar</button><button class="btn red" onclick="clearBg()" ${bgData?'':'disabled'}>Guna latar asal</button><input type="file" id="bgf" accept="image/*" hidden onchange="setBg(this.files[0]);this.value=''"></div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Gambar halaman pemilihan &amp; bahagian peserta</h2><p class="sub">Hanya AJK boleh menukar gambar ini. Peserta hanya dapat melihatnya.</p>
@@ -1025,10 +1096,16 @@ function viewSet(){const s=S.set;
   <section class="glass pad" style="grid-column:1/-1"><h2>Galeri Mod TV</h2><p class="sub">Gambar selingan (maksimum 8, resolusi tinggi) dipaparkan antara jadual, perlawanan dan keputusan dalam Mod TV. Gunakan gambar yang anda berhak guna, contohnya tangkapan skrin sendiri atau poster kejohanan. Tanpa gambar, reka bentuk asal digunakan.</p><div class="row">${gal.map((g,i)=>`<div style="position:relative"><img src="${g.u}" alt="Gambar ${i+1}" style="width:110px;height:70px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"><button class="btn sm red" style="position:absolute;top:3px;right:3px;padding:2px 8px" onclick="delGal(${i})" aria-label="Buang">✕</button></div>`).join('')}</div><div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('galf').click()" ${gal.length>=8?'disabled':''}>Tambah gambar (${gal.length}/8)</button><input type="file" id="galf" accept="image/*" multiple hidden onchange="addGal(this.files);this.value=''"></div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Imbasan AI</h2><p class="sub">Untuk fail yang dimuat turun atau di-deploy sendiri, imbasan memerlukan kunci API Anthropic daripada console.anthropic.com. Kunci disimpan pada peranti ini sahaja dan tidak masuk dalam eksport data. Tetapkan had perbelanjaan di akaun anda dan jangan kongsi peranti ini.</p><label>Kunci API</label><input type="password" id="ak" value="${e(apiKey)}" placeholder="sk-ant-..." autocomplete="off"><div class="row" style="margin-top:12px"><button class="btn" onclick="saveKey()">Simpan kunci</button><button class="btn red" onclick="saveKey(true)" ${apiKey?'':'disabled'}>Buang kunci</button></div></section></div>`}
 function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='mlbb-seri-rompin.json';a.click()}
-function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.teams||!d.set)throw 0;S=d;save();render();toast('Data diimport')}catch(x){toast('Fail tidak sah')}};r.readAsText(f)}
-async function resetB(){if(await ask('Reset jadual dan semua keputusan? Kumpulan kekal.')){S.rounds=null;save();tab='jadual';render();toast('Jadual direset')}}
-async function resetSched(){if(!S.rounds)return;if(!await ask('Padam jadual dan semua keputusan perlawanan? Senarai kumpulan dikekalkan, kemudian anda boleh jana jadual baharu.'))return;S.rounds=null;S.go=null;save();tab='jadual';render();toast('Jadual dipadam — sedia dijana semula')}
-async function resetAll(){if(await ask('Padam SEMUA data termasuk kumpulan?')){S=def();drafts=[];edit=null;save();tab='jadual';render();toast('Semua data dipadam')}}
+async function imp(f){if(!f)return;let d;try{d=JSON.parse(await f.text());if(!d.teams||!d.set)throw 0}catch(x){return toast('Fail tidak sah')}
+  if((S.teams.length||S.rounds)&&!await ask('Import akan menggantikan semua data semasa.\nData semasa disandarkan dahulu dan boleh dipulihkan. Teruskan?'))return;
+  bakSave('Sebelum import',false);S=d;drafts=[];edit=null;SCD={};SO={};REV={};save();render();toast('Data diimport')}
+const lossTxt=()=>{const t=bakStat(S);return `${t.done} keputusan disahkan${S.rounds?' dan jadual':''}`};
+async function resetB(){if(!await askType(`Reset jadual dan semua keputusan?\n${lossTxt()} akan dipadam. Kumpulan kekal.\n\nSandaran dibuat automatik dan boleh dipulihkan di Setting › Sandaran data.`,'PADAM'))return;
+  bakSave('Sebelum reset jadual',false);S.rounds=null;S.go=null;REV={};save();tab='jadual';render();toast('Jadual direset. Boleh dipulihkan di Sandaran data')}
+async function resetSched(){if(!S.rounds)return;if(!await askType(`Padam jadual dan semua keputusan perlawanan?\n${lossTxt()} akan dipadam. Senarai kumpulan dikekalkan.\n\nSandaran dibuat automatik dan boleh dipulihkan di Setting › Sandaran data.`,'PADAM'))return;
+  bakSave('Sebelum padam jadual',false);S.rounds=null;S.go=null;REV={};save();tab='jadual';render();toast('Jadual dipadam. Boleh dipulihkan di Sandaran data')}
+async function resetAll(){const t=bakStat(S);if(!await askType(`⚠️ Padam SEMUA data?\n${t.tm} kumpulan dan ${lossTxt()} akan dipadam.\n\nSandaran dibuat automatik dan boleh dipulihkan di Setting › Sandaran data.`,'PADAM'))return;
+  bakSave('Sebelum padam semua data',false);S=def();drafts=[];edit=null;SCD={};SO={};REV={};save();tab='jadual';render();toast('Semua data dipadam. Boleh dipulihkan di Sandaran data')}
 /* ===== Pintu masuk: AJK / Peserta ===== */
 let role='';try{role=sessionStorage.getItem('mlbb_role')||''}catch(x){}
 let gs=0,ptab='daftar',regs=[],my=[],regUn=null,uid=null;
@@ -1104,9 +1181,10 @@ function render0(){
   if(!role){document.getElementById('nav').style.display='none';const bak=S;if(pubData&&pubData.set)S=Object.assign(def(),pubData);applyBg(gateOwn());document.body.classList.toggle('imgbg',!!gateOwn());document.getElementById('app').innerHTML=gateH();S=bak;const p=document.getElementById('pw');if(p)p.focus();return}
   if(role=='peserta'){const bak=S;S=Object.assign(def(),pubData||{});applyBg(pesBg());document.body.classList.toggle('imgbg',!!pesOwn());navP();document.getElementById('app').innerHTML=viewPes();S=bak;return}
   document.getElementById('nav').style.display='';
-  const T=[['jadual','🏆','Jadual'],['daftar','👥','Pendaftaran'],['sah','✅','Pengesahan'],['set','⚙️','Setting'],['out','🚪','Keluar']];
-  document.getElementById('nav').innerHTML=T.map(([k,i,n])=>`<button class="${tab==k?'on':''}" onclick="go('${k}')"><i>${i}</i>${n}</button>`).join('');
-  document.getElementById('app').innerHTML={jadual:viewJadual,daftar:viewDaftar,sah:viewSah,set:viewSet}[tab]()}
+  const T=[['jadual','🏆','Jadual'],['daftar','👥','Pendaftaran'],['sah','✅','Pengesahan'],['set','⚙️','Setting'],['tv','🎬','Mod TV'],['out','🚪','Keluar']];
+  document.getElementById('nav').innerHTML=T.map(([k,i,n])=>`<button class="${tab==k?'on':''}" onclick="${k=='tv'?'tvEnter()':`go('${k}')`}"><i>${i}</i>${n}</button>`).join('');
+  const bk=bakAll(),bn=(!S.teams.length&&!S.rounds&&bk.length&&tab!='set')?`<div class="glass gate"><h2>⚠️ Tiada data dalam sistem</h2><p class="sub">Terdapat ${bk.length} sandaran. Terkini: ${e(bk[0].label)} (${bakT(bk[0].t)}) · ${bk[0].tm} kumpulan · ${bk[0].done}/${bk[0].tot} perlawanan selesai.</p><div class="row"><button class="btn pink" onclick="bakRestore('${bk[0].id}')">♻ Pulihkan sandaran terkini</button><button class="btn" onclick="go('set')">Lihat semua sandaran</button></div></div>`:'';
+  document.getElementById('app').innerHTML=bn+{jadual:viewJadual,daftar:viewDaftar,sah:viewSah,set:viewSet}[tab]()}
 tvSet();render();
 </script>
 </body>
