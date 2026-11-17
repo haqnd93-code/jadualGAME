@@ -70,6 +70,8 @@ label{display:block;font-size:13px;font-weight:500;color:var(--mut);margin:12px 
 .seg button{border:0;background:none;color:var(--mut);padding:8px 18px;border-radius:10px;font:600 13px Inter,sans-serif;cursor:pointer;transition:background .15s,color .15s}
 .seg button:hover{color:var(--ink)}
 .seg button.on{background:var(--c1);color:#fff}
+.seg{max-width:100%;overflow-x:auto;scrollbar-width:none}.seg::-webkit-scrollbar{display:none}.seg button{white-space:nowrap}
+@media(max-width:560px){.seg button{padding:8px 11px;font-size:12.5px}}
 .seg button[disabled]{opacity:.45;cursor:not-allowed}
 .fl{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px}
 .fl button{background:#fff;border:1px solid var(--line);color:var(--mut);padding:7px 14px;border-radius:99px;font:600 13px Inter,sans-serif;cursor:pointer;transition:.15s}
@@ -279,6 +281,36 @@ input[type=range]{padding:0;border:0;background:none;accent-color:var(--c1);heig
 .mth{width:100%;max-width:240px;aspect-ratio:16/9;border-radius:10px;border:1px dashed #b9c5e4;background:#eef2fb center/cover no-repeat;margin:8px 0;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:12px}
 body.imgbg #bg::after{background:linear-gradient(180deg,rgba(242,245,251,.15),rgba(242,245,251,.6))}
 .gt2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:760px){.gt2{grid-template-columns:1fr}}
+.rulebox{background:var(--ambt);border:1px solid #f1d27a;border-radius:14px;padding:14px 16px;margin:4px 0 14px}.rulebox h3{margin:0 0 4px;font-size:16px}.rulebox ol{margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.55}.rulebox li{margin-bottom:6px}.ackl{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:600;font-size:14px}.ackl input{width:20px;height:20px;margin:2px 0 0;flex:none}
+/* ===== pilihan paparan: Auto / Telefon / Desktop ===== */
+body.v-phone main{max-width:460px}
+body.v-phone .two,body.v-phone .gt2{grid-template-columns:1fr}
+body.v-phone .hero::before,body.v-phone .hero::after{width:22%}
+body.v-phone{padding-top:0;padding-bottom:84px}
+body.v-phone nav{top:auto;bottom:0;left:50%;right:auto;transform:translateX(-50%);width:100%;max-width:460px;padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);border-bottom:0;box-shadow:0 -4px 20px rgba(15,26,61,.06)}
+body.v-phone nav button{flex:1;min-width:0;display:block;font-size:12px}
+body.v-phone nav button i{display:block;font-size:18px}
+body.v-phone .fsb{right:max(10px,calc(50% - 230px + 10px))}
+body.v-desk .two{grid-template-columns:minmax(0,380px) 1fr}
+body.v-desk .gt2{grid-template-columns:1fr 1fr}
+body.v-desk nav{top:0;bottom:auto;padding:10px 16px;border-top:0;border-bottom:1px solid var(--line);box-shadow:0 4px 20px rgba(15,26,61,.06)}
+body.v-desk nav button{flex:none;min-width:140px;display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px}
+body.v-desk nav button i{display:inline;font-size:16px}
+body.v-desk{padding-top:68px;padding-bottom:28px}
+.vmb{right:64px}body.v-phone .vmb{right:max(64px,calc(50% - 230px + 64px))}
+.vmm{position:fixed;top:calc(62px + env(safe-area-inset-top,0px));right:10px;z-index:40;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(15,26,61,.2);padding:6px;min-width:190px}
+.vmm[hidden]{display:none}
+.vmm p{margin:4px 8px 6px;font:600 12px Inter,sans-serif;color:var(--mut)}
+.vmm button{display:flex;gap:10px;align-items:center;width:100%;text-align:left;border:0;background:none;padding:10px 12px;border-radius:10px;font:600 14px Inter,sans-serif;color:var(--ink);cursor:pointer}
+.vmm button:hover{background:#f1f4fb}.vmm button.on{background:var(--c1);color:#fff}
+.okb{margin:8px 0 12px;padding:12px 14px;border-radius:12px;background:var(--ambt);border:1px solid #f1d27a;display:flex;flex-direction:column;gap:6px}
+.okb small{color:var(--mut);font-size:13px}
+.okb .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}.okb .row input{flex:1;min-width:150px;margin:0}
+.okb.ok{background:var(--okt);border-color:#9fdcb9;flex-direction:row;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.okb.ok b{color:var(--ok);display:block}
+.okl{padding:6px 14px 10px;font-size:12px;font-weight:600;color:var(--ok)}
+.vs input.sc[disabled],.win .btn[disabled]{opacity:.45;cursor:not-allowed}
+.okf{padding:4px 14px 14px;display:flex;justify-content:flex-end}.okf .btn:not(.sm){width:100%}
 </style>
 </head>
 <body>
@@ -286,6 +318,8 @@ body.imgbg #bg::after{background:linear-gradient(180deg,rgba(242,245,251,.15),rg
 <main id="app"></main>
 <nav class="noprint" id="nav"></nav>
 <button id="fsb" class="fsb noprint" onclick="toggleFS()" title="Skrin penuh (tekan F)" aria-label="Skrin penuh">⛶</button>
+<button id="vmb" class="fsb vmb noprint" onclick="vmMenu(event)" title="Pilih paparan" aria-label="Pilih paparan">🔄</button>
+<div id="vmm" class="vmm noprint" hidden><p>Pilih paparan</p><button data-v="auto" onclick="setVm('auto')">🔄 Auto</button><button data-v="phone" onclick="setVm('phone')">📱 Telefon</button><button data-v="desk" onclick="setVm('desk')">🖥️ Desktop</button></div>
 <script>
 const KEY='mlbb_seri_rompin_v1';
 const def=()=>({set:{title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:'',venue:'',fmt:3,shuffle:true},teams:[],rounds:null});
@@ -348,7 +382,7 @@ function fillKO(){
   if(!grp())return;const GR=gcount(),k0=S.rounds[GR];if(!k0)return;
   const ok=S.rounds.slice(0,GR).flat().every(m=>m.w),rank=ok?S.set.gm.map((_,g)=>standings(g)):null;
   k0.forEach(m=>{
-    if(!ok){if(m.bye&&m.w){const nx=S.rounds[m.r+1];if(nx){const k=nx[m.i>>1];if(m.i%2==0)k.a=null;else k.b=null}}m.a=m.b=null;if(m.bye)m.w=null;return}
+    if(!ok){if(m.bye&&m.w){const nx=S.rounds[m.r+1];if(nx){const k=nx[m.i>>1];if(m.i%2==0)k.a=null;else k.b=null}}m.a=m.b=null;m.ok=null;if(m.bye)m.w=null;return}
     const id=ix=>ix==null?null:rank[S.set.seeds[ix][0]][S.set.seeds[ix][1]].id;
     m.a=id(m.sd[0]);m.b=id(m.sd[1]);if(m.bye&&!m.w)adv(m,m.a||m.b)})}
 function gen(){
@@ -362,7 +396,7 @@ function gen(){
   const slots=seedOrder(size).map(s=>t[s-1]||null);
   S.rounds=[];
   for(let r=0,c=size/2;c>=1;r++,c/=2)S.rounds.push(Array.from({length:c},(_,i)=>({r,i,a:null,b:null,w:null,sa:'',sb:'',time:'',bye:false})));
-  S.rounds[0].forEach((m,i)=>{m.a=slots[2*i];m.b=slots[2*i+1];if(!m.a||!m.b){m.bye=true;adv(m,m.a||m.b)}});jv='list'}
+  S.rounds[0].forEach((m,i)=>{m.a=slots[2*i];m.b=slots[2*i+1];if(!m.a||!m.b){m.bye=true;adv(m,m.a||m.b)}});jv='nx'}
   S.go=autoGo();save();tab='jadual';render();toast('Jadual dijana')
 }
 function slot(m,side){const id=m[side],w=m.w;
@@ -389,8 +423,8 @@ function mcH(m,big){
     if(!id)return `<div class="tr p"><i class="av ph">?</i><span class="nm">${lbl(m,side)}</span></div>`;
     const t=tm(id),ini=e(((t&&t.name)||'?').trim().slice(0,2).toUpperCase());
     return `<div class="tr ${w?(w===id?'w':'l'):''}" onclick="hl('${id}')"><i class="av lg">${logo(id)}</i><span class="nm">${nm(id)}</span>${w&&sc!==''&&sc!=null?`<b class="sc">${e(sc)}</b>`:''}</div>`};
-  const pill=m.w?'<span class="pill dn">Selesai</span>':live?(nx?'<span class="pill live">Game seterusnya</span>':'<span class="pill rdy">Sedia</span>'):'<span class="pill wt">Menunggu</span>';
-  return `<article class="mc ${big?'big':''} ${rcl(m.r)} ${m.w?'dn':''} ${nx?'nx':''} ${ids?(inv?'hl':'dim'):''}"><div class="mc-h"><span class="no">P${m.n}</span>${m.g!=null?`<span class="gt">Kump. ${GL(m.g)}</span>`:''}${m.time?`<span class="tm">${e(m.time)}</span>`:''}<span class="rt">${fs(m)?`<b class="fs">${fs(m)}</b>`:''}${pill}</span></div>${row('a')}${row('b')}</article>`}
+  const pill=m.w?'<span class="pill dn">Selesai</span>':live?(m.ok?'<span class="pill live">✔ Disahkan · Berlangsung</span>':'<span class="pill rdy">⏳ Menunggu pengesahan guru</span>'):'<span class="pill wt">Menunggu</span>';
+  return `<article class="mc ${big?'big':''} ${rcl(m.r)} ${m.w?'dn':''} ${nx?'nx':''} ${ids?(inv?'hl':'dim'):''}"><div class="mc-h"><span class="no">P${m.n}</span>${m.g!=null?`<span class="gt">Kump. ${GL(m.g)}</span>`:''}${m.time?`<span class="tm">${e(m.time)}</span>`:''}<span class="rt">${fs(m)?`<b class="fs">${fs(m)}</b>`:''}${pill}</span></div>${row('a')}${row('b')}${big&&live&&m.ok?`<div class="okl">✔ Disahkan guru · ${tmStr(m.ok.t)}</div>`:''}${big&&live&&!pm()?`<div class="okf noprint">${m.ok?`<button class="btn sm red" onclick="unok(${m.r},${m.i})">Batal sah</button>`:`<button class="btn pink" onclick="okM(${m.r},${m.i})">✅ Sah</button>`}</div>`:''}</article>`}
 function nextH(){
   if(!S.rounds)return '';
   const nx=S.rounds.flat().filter(rdy);if(!nx.length){const g=gateInfo();return g?`<div class="bdh"><h2 class="disp">⏳ ${rname(g.from)} selesai</h2><span class="chip">Menunggu ${rname(g.to)} dimulakan</span></div>`:''}
@@ -399,8 +433,9 @@ function nextH(){
 function setJv(v){jv=v;render()}
 function setJf(v){jf=v;render()}
 function swH(){const o=pts()?[['tbl','🏆 Kedudukan']]:grp()?[['tbl','🏆 Kedudukan'],['br','🌳 Bracket']]:[['br','🌳 Bracket']];
-  return `<div class="seg noprint"><button class="${jv=='list'?'on':''}" onclick="setJv('list')">📋 Senarai</button>${o.map(([k,l])=>`<button class="${jv==k?'on':''}" onclick="setJv('${k}')">${l}</button>`).join('')}</div>${jv=='br'&&!pts()?legH():''}`}
-function bodyH(){return jv=='tbl'&&(pts()||grp())?tableH():jv=='br'&&!pts()?bracketH():listH()}
+  return `<div class="seg noprint"><button class="${jv=='nx'?'on':''}" onclick="setJv('nx')">▶ Game seterusnya</button><button class="${jv=='list'?'on':''}" onclick="setJv('list')">📋 Senarai</button>${o.map(([k,l])=>`<button class="${jv==k?'on':''}" onclick="setJv('${k}')">${l}</button>`).join('')}</div>${jv=='br'&&!pts()?legH():''}`}
+function nxTabH(){return nextH()||'<div class="glass empty"><h2>Tiada perlawanan sedia</h2><p class="sub">Game seterusnya akan dipaparkan di sini apabila ada perlawanan yang sedia bermula.</p></div>'}
+function bodyH(){return jv=='nx'?nxTabH():jv=='tbl'&&(pts()||grp())?tableH():jv=='br'&&!pts()?bracketH():listH()}
 function togR(r){jo[r]=!jo[r];render()}
 function listH(){
   numM();
@@ -432,7 +467,7 @@ function standings(g){
   const h2h=(a,b)=>{const m=all.find(x=>x.w&&(g==null||x.g===g)&&((x.a===a.id&&x.b===b.id)||(x.a===b.id&&x.b===a.id)));return m?(m.w===a.id?-1:1):0};
   return T.sort((a,b)=>b.p-a.p||h2h(a,b)||(b.gw-b.gl)-(a.gw-a.gl)||b.gw-a.gw||(tm(a.id).name||'').localeCompare(tm(b.id).name||''))}
 function tbl(st,q){const ids=hlIds();
-  return `<div class="tbw"><table class="tb"><thead><tr><th>#</th><th>Kumpulan</th><th>Main</th><th>Menang</th><th>Kalah</th><th>Game</th><th>+/-</th><th>Mata</th></tr></thead><tbody>${st.map((x,i)=>{const d=x.gw-x.gl;return `<tr class="${i<3&&x.w+x.l?'r'+(i+1):''} ${i<q?'q':''} ${ids?(ids.includes(x.id)?'hl':'dim'):''}" onclick="hl('${x.id}')"><td class="rk">${i+1}</td><td class="tn"><b><i class="av lg">${logo(x.id)}</i>${nm(x.id)}${i<q?'<span class="qb">LAYAK</span>':''}</b><small>${e(tm(x.id).cls||'')}</small></td><td>${x.w+x.l}</td><td>${x.w}</td><td>${x.l}</td><td>${x.gw}-${x.gl}</td><td>${d>0?'+':''}${d}</td><td class="pt">${x.p}</td></tr>`}).join('')}</tbody></table></div>`}
+  return `<div class="tbw"><table class="tb"><thead><tr><th>#</th><th>Kumpulan</th><th>Main</th><th>Menang</th><th>Kalah</th><th>Game</th><th>+/-</th><th>Mata</th></tr></thead><tbody>${st.map((x,i)=>{const d=x.gw-x.gl;return `<tr class="${i<3&&x.w+x.l?'r'+(i+1):''} ${i<q?'q':''} ${ids?(ids.includes(x.id)?'hl':'dim'):''}" onclick="hl('${x.id}')"><td class="rk">${i+1}</td><td class="tn"><b><i class="av lg">${logo(x.id)}</i>${nm(x.id)}${i<q?'<span class="qb">LAYAK</span>':''}</b></td><td>${x.w+x.l}</td><td>${x.w}</td><td>${x.l}</td><td>${x.gw}-${x.gl}</td><td>${d>0?'+':''}${d}</td><td class="pt">${x.p}</td></tr>`}).join('')}</tbody></table></div>`}
 function tableH(){
   if(grp()){const adv=+S.set.adv||2;const GC=['#0e7490','#6d28d9','#c2410c','#be185d','#15803d','#1d4ed8','#a16207','#b91c1c'];return S.set.gm.map((_,g)=>`<section class="gbox" style="--gc:${GC[g%GC.length]}"><h3 class="gh">KUMPULAN ${GL(g)}<span>${adv} teratas mara ke ${rname(gcount())}</span></h3>${tbl(standings(g),adv)}</section>`).join('')+`<div class="gnote"><span><i style="background:#e3f6ec;border:2px solid var(--ok)"></i>Hijau = layak ke peringkat seterusnya</span><span><i style="background:#ff5a7a"></i>Garis merah putus = had kelayakan</span></div><p class="sub">Menang = 3 mata. Jika mata sama: keputusan antara dua pasukan, beza game, kemudian jumlah game menang.</p>`}
   return tbl(standings(),0)+`<p class="sub" style="margin-top:10px">Menang = 3 mata. Jika mata sama: keputusan antara dua pasukan, beza game, kemudian jumlah game menang.</p>`}
@@ -471,25 +506,25 @@ function viewJadual(){
   let h=`<section class="glass hero${heroSt(hdData)}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p>${imCap('hd')}<div class="chips">${s.date?`<span class="chip">📅 ${e(s.date)}</span>`:''}${s.venue?`<span class="chip">📍 ${e(s.venue)}</span>`:''}<span class="chip">${fmtText()}</span><span class="chip">${pts()?'Kiraan mata':grp()?'Kumpulan + kalah mati':'Kalah mati'}</span></div><div class="row noprint" style="margin-top:14px"><button class="btn sm" onclick="document.getElementById('hdf').click()">🖼️ ${hdData?'Tukar':'Muat naik'} gambar header</button>${hdData?'<button class="btn sm red" onclick="clearHd()">Buang gambar</button><button class="btn sm" onclick="imTg(\'hd\')">⚙️ Laras gambar</button>':''}<button class="btn sm pink" onclick="toggleFS()">⛶ Skrin penuh</button><input type="file" id="hdf" accept="image/*" hidden onchange="setHd(this.files[0]);this.value=''"></div></section>${imPanel('hd')}
   <div class="stats"><div class="glass stat"><b>${S.teams.length}</b><span>Kumpulan</span></div><div class="glass stat"><b>${S.teams.length*5}</b><span>Pelajar</span></div><div class="glass stat"><b>${done}/${all.length}</b><span>Perlawanan selesai</span></div><div class="glass stat"><b>${S.rounds?S.rounds.length:0}</b><span>Pusingan</span></div></div>`;
   if(!S.rounds)return h+`<div class="glass empty"><h2>Jadual belum dijana</h2><p>${S.teams.length<2?'Daftarkan sekurang-kurangnya 2 kumpulan dahulu.':`${S.teams.length} kumpulan sedia. Jana jadual untuk mula.`}</p>${S.teams.length>=2?'<p class="sub">Sistem pertandingan dan format perlawanan ditetapkan di tab Pendaftaran.</p>':''}<div class="row" style="justify-content:center"><button class="btn pink" onclick="go('daftar')">Daftar kumpulan</button><button class="btn" onclick="gen()" ${S.teams.length<2?'disabled':''}>Jana jadual</button></div></div>`;
-  if(ch)h+=`<div class="glass champ"><i class="av lg xl">${logo(ch)}</i><p class="sub">Juara kejohanan</p><h2>🏆 ${nm(ch)}</h2><p class="sub">${e(tm(ch).cls)} · ${tm(ch).members.filter(Boolean).map(e).join(', ')}</p></div>`;
+  if(ch)h+=`<div class="glass champ"><i class="av lg xl">${logo(ch)}</i><p class="sub">Juara kejohanan</p><h2>🏆 ${nm(ch)}</h2><p class="sub">${tm(ch).members.filter(Boolean).map(e).join(', ')}</p></div>`;
   h+=`<div class="row noprint" style="margin-bottom:10px"><button class="btn sm" onclick="print()">Cetak jadual</button><button class="btn sm pink" onclick="location.hash='#paparan'">📺 Paparan awam</button>${canPush?'<span class="chip">🟢 Siaran langsung aktif</span>':''}<button class="btn sm ${S.set.noNx?'':'pink'}" onclick="toggleNx()">⚡ Sorot game seterusnya: ${S.set.noNx?'MATI':'HIDUP'}</button></div>`;
-  return h+nextH()+swH()+bodyH()}
+  return h+swH()+bodyH()}
 function viewDaftar(){
   const L=started(),dr=drafts[0],t=dr||(edit?tm(edit):null);
   const mem=[0,1,2,3,4].map(i=>`<label>${i==0?'Ketua pasukan':'Ahli '+(i+1)}</label><input id="m${i}" maxlength="40" value="${e(t?.members[i]||'')}" ${L?'disabled':''}>`).join('');
   let h=`<div id="inbox">${inboxH()}</div><div class="two"><div>${scanCard(L)}<section class="glass pad"><h2>${dr?'Semak borang imbasan':t?'Kemas kini kumpulan':'Daftar kumpulan'}</h2><p class="sub">${dr?'Semak nama yang dibaca, betulkan jika perlu, kemudian daftar.':'Setiap kumpulan 5 ahli.'}</p>
   ${L?'<p style="color:var(--gold)">Jadual telah dijana. Pendaftaran dikunci. Tetapkan semula jadual di Setting untuk mengubah.</p>':''}
   <label>Nama kumpulan</label><input id="tn" maxlength="30" value="${e(t?.name||'')}" ${L?'disabled':''}>
-  <label>Kelas</label><input id="tc" maxlength="20" placeholder="cth: 4 Bestari" value="${e(t?.cls||'')}" ${L?'disabled':''}>${mem}
+  ${mem}
   <div class="row" style="margin-top:16px"><button class="btn" onclick="addTeam()" ${L?'disabled':''}>${t?'Simpan':'Daftar kumpulan'}</button>${t?`<button class="btn red" onclick="skip()">${dr?'Langkau':'Batal'}</button>`:''}</div></section></div>
   <section><h2>Senarai kumpulan (${S.teams.length})</h2><p class="sub">${S.teams.length*5} pelajar terlibat</p>`;
   h+=`<div class="row" style="margin-bottom:10px"><button class="btn sm" onclick="demo15()" ${L?'disabled':''}>🧪 Isi 20 kumpulan contoh</button></div>`;
   if(!S.teams.length)h+=`<div class="glass empty">Belum ada kumpulan didaftarkan.</div>`;
-  S.teams.forEach((x,i)=>{h+=`<div class="glass team"><div class="tl"><i class="av lg">${logo(x.id)}</i><div><span class="n">${i+1}. ${e(x.name)}</span><small>${e(x.cls)} · ${x.members.filter(Boolean).map(e).join(', ')}</small></div></div><div class="row"><button class="btn sm" onclick="edit='${x.id}';render()" ${L?'disabled':''}>Edit</button><button class="btn sm red" onclick="delTeam('${x.id}')" ${L?'disabled':''}>Padam</button></div></div>`});
+  S.teams.forEach((x,i)=>{h+=`<div class="glass team"><div class="tl"><i class="av lg">${logo(x.id)}</i><div><span class="n">${i+1}. ${e(x.name)}</span><small>${x.members.filter(Boolean).map(e).join(', ')}</small></div></div><div class="row"><button class="btn sm" onclick="edit='${x.id}';render()" ${L?'disabled':''}>Edit</button><button class="btn sm red" onclick="delTeam('${x.id}')" ${L?'disabled':''}>Padam</button></div></div>`});
   if(S.teams.length>=2)h+=modeSel()+(L?'':`<button class="btn pink" onclick="gen()">Jana jadual (${S.teams.length} kumpulan)</button>`);
   return h+`</section></div>`}
 function addTeam(){
-  const name=document.getElementById('tn').value.trim(),cls=document.getElementById('tc').value.trim(),members=[0,1,2,3,4].map(i=>document.getElementById('m'+i).value.trim());
+  const name=document.getElementById('tn').value.trim(),cls='',members=[0,1,2,3,4].map(i=>document.getElementById('m'+i).value.trim());
   if(!name)return toast('Masukkan nama kumpulan');
   if(members.some(x=>!x))return toast('Lengkapkan nama 5 ahli');
   if(S.teams.some(x=>x.name.toLowerCase()===name.toLowerCase()&&x.id!==edit))return toast('Nama kumpulan sudah digunakan');
@@ -570,6 +605,17 @@ function mediaBox(k,t,d){const v=k=='g'?gbgData:pbgData;
 const heroSt=src=>src?` himg" style="${hdCss(src)}`:'';
 let fsApi=false;const fsOn=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
 function fsBtn(){const x=document.getElementById('fsb');if(x)x.textContent=document.body.classList.contains('pres')?'✕':'⛶'}
+/* ===== Pilihan paparan: Auto / Telefon / Desktop ===== */
+let vm='auto';try{const z=localStorage.getItem('mlbb_vm');if(z=='phone'||z=='desk')vm=z}catch(x){}
+function applyVm(){const b=document.body;b.classList.toggle('v-phone',vm=='phone');b.classList.toggle('v-desk',vm=='desk');
+  const mt=document.querySelector('meta[name=viewport]');
+  if(mt)mt.setAttribute('content',vm=='desk'&&Math.min(screen.width,window.innerWidth)<900?'width=1100, viewport-fit=cover':'width=device-width, initial-scale=1, viewport-fit=cover');
+  const ic={auto:'🔄',phone:'📱',desk:'🖥️'},bt=document.getElementById('vmb');if(bt)bt.textContent=ic[vm];
+  document.querySelectorAll('#vmm button').forEach(x=>x.classList.toggle('on',x.dataset.v==vm))}
+function setVm(v){vm=v;try{localStorage.setItem('mlbb_vm',v)}catch(x){}applyVm();const m=document.getElementById('vmm');if(m)m.hidden=true;toast(v=='phone'?'Paparan telefon':v=='desk'?'Paparan desktop':'Paparan automatik')}
+function vmMenu(ev){if(ev)ev.stopPropagation();const m=document.getElementById('vmm');m.hidden=!m.hidden}
+document.addEventListener('click',ev=>{const m=document.getElementById('vmm');if(m&&!m.hidden&&!m.contains(ev.target))m.hidden=true});
+applyVm();
 function toggleFS(){const b=document.body,d=document,el=d.documentElement,rq=el.requestFullscreen||el.webkitRequestFullscreen;
   if(!b.classList.contains('pres')){b.classList.add('pres');fsApi=false;if(rq){try{const r=rq.call(el);fsApi=true;if(r&&r.catch)r.catch(()=>{fsApi=false})}catch(x){}}}
   else{b.classList.remove('pres');if(fsOn())(d.exitFullscreen||d.webkitExitFullscreen).call(d)}
@@ -607,13 +653,13 @@ function imPanel(k){if(pubMode||!imOpen[k]||!(k=='br'?brData:hdData))return '';c
 function pubOf(){return {set:S.set,teams:S.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid})),rej:S.rej||[],rounds:S.rounds,go:S.go,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
 function queuePush(){if(pubMode||!canPush)return;clearTimeout(pt);pt=setTimeout(pushNow,800)}
 async function pushNow(){try{await dbh.doc('tournament/state').set({json:JSON.stringify(pubOf()),t:Date.now()})}catch(x){}}
-let hlTeam=null,hlQ='',jv='list',jf='all',jo={};
+let hlTeam=null,hlQ='',jv='nx',jf='all',jo={};
 function hlIds(){if(hlTeam)return [hlTeam];if(hlQ)return S.teams.filter(t=>t.name.toLowerCase().includes(hlQ)).map(t=>t.id);return null}
 function hl(id){hlTeam=hlTeam===id?null:id;hlQ='';render()}
 function srch(v){hlQ=v.trim().toLowerCase();hlTeam=null;render();const i=document.getElementById('sq');if(i){i.focus();i.setSelectionRange(99,99)}}
 function fmtOf(r){if(pts())return 'Bo'+(S.set.fmt||3);if(grp()&&r<gcount())return 'Bo1';return 'Bo'+boOf(S.rounds.length-r)}
 function mcard(m){const ids=hlIds(),live=rdy(m),nx=live&&nxOn(),inv=ids&&ids.some(i=>m.a===i||m.b===i);
-  return `<div class="mw"><div class="m ${rcl(m.r)} ${m.w?'dn':''} ${live?'live':''} ${nx?'nx':''} ${ids?(inv?'hl':'dim'):''}"><div class="mh"><span>${m.bye?'—':'P'+m.n}</span><span class="${nx?'go':live?'rdy':''}">${m.bye?'BYE':m.w?'Selesai'+(fs(m)?' · '+fs(m):''):nx?'▶ GAME SETERUSNYA':live?'● Sedia':'Menunggu'}</span></div>${slot(m,'a')}${slot(m,'b')}${m.time&&!m.bye?`<div class="mt">⏰ ${e(m.time)}</div>`:''}</div></div>`}
+  return `<div class="mw"><div class="m ${rcl(m.r)} ${m.w?'dn':''} ${live?'live':''} ${nx?'nx':''} ${ids?(inv?'hl':'dim'):''}"><div class="mh"><span>${m.bye?'—':'P'+m.n}</span><span class="${nx?'go':live?'rdy':''}">${m.bye?'BYE':m.w?'Selesai'+(fs(m)?' · '+fs(m):''):live&&m.ok?'✔ DISAHKAN GURU':nx?'▶ GAME SETERUSNYA':live?'● Sedia':'Menunggu'}</span></div>${slot(m,'a')}${slot(m,'b')}${m.time&&!m.bye?`<div class="mt">⏰ ${e(m.time)}</div>`:''}</div></div>`}
 function srchRow(){return `<div class="row noprint" style="margin-bottom:10px"><input id="sq" class="sq" placeholder="🔍 Cari kumpulan" value="${e(hlQ)}" oninput="srch(this.value)">${hlTeam||hlQ?'<button class="btn sm red" onclick="hlTeam=null;hlQ=\'\';render()">Padam sorotan</button>':'<span class="sub" style="margin:0">Tekan nama kumpulan untuk menjejak perjalanannya</span>'}</div>`}
 function pc(a,b){return nxOn()&&(rdy(a)||rdy(b))?' hot':(a.w&&b.w?' fin':'')}
 function bracketH(){
@@ -630,7 +676,7 @@ function viewPub(){
   if(!S.rounds)return h+`<div class="glass empty"><h2>Jadual belum dijana</h2><p>${S.teams.length} kumpulan berdaftar.</p></div>`;
   const ch=champion();
   if(ch)h+=`<div class="glass champ"><i class="av lg xl">${logo(ch)}</i><p class="sub">Juara kejohanan</p><h2>🏆 ${nm(ch)}</h2></div>`;
-  h+=nextH()+swH();
+  h+=swH();
   return h+bodyH()+'<p class="sub" style="text-align:center">Dikemas kini secara automatik</p>'}
 function startPub(){
   if(pubStarted)return;pubStarted=true;
@@ -661,9 +707,9 @@ function viewSah(){
   const gt=gateInfo();
   if(gt)h+=`<div class="glass gate"><h2>✅ ${rname(gt.from)} selesai</h2><p class="sub">${gt.cnt} perlawanan ${rname(gt.to)} menunggu pengesahan anda. Selepas disahkan, perlawanan itu disorot untuk semua orang dan senarai pengesahan bertukar kepada pusingan ini.</p><button class="btn pink" onclick="startRound()">▶ Mulakan ${rname(gt.to)}</button></div>`;
   const rl=S.rounds.flat().filter(rdy),any=rl.length>0,cr=any?Math.min(...rl.map(m=>m.r)):-1;
-  const card=(m,c)=>{const k=`${m.r}-${m.i}`,va=SCD['sa'+k]??'',vb=SCD['sb'+k]??'';return `<div class="glass vs ${c?'cur':'nxt open'}"><div class="vh"><span>P${m.n}${m.g!=null?' · Kumpulan '+GL(m.g):''}${c?'':' · '+rname(m.r)}${m.time?' · ⏰ '+e(m.time):''}</span><span class="badge ${c?'cur':'nxt'}">${c?'▶ SEKARANG':'⏭ SETERUSNYA'}</span></div><div class="tt"><div><i class="av lg lgv">${logo(m.a)}</i><b>${nm(m.a)}</b><br><input class="sc" type="number" min="0" id="sa${k}" placeholder="0" value="${e(va)}" oninput="SCD['sa${k}']=this.value"></div><span class="x">VS</span><div><i class="av lg lgv">${logo(m.b)}</i><b>${nm(m.b)}</b><br><input class="sc" type="number" min="0" id="sb${k}" placeholder="0" value="${e(vb)}" oninput="SCD['sb${k}']=this.value"></div></div>
+  const card=(m,c)=>{const k=`${m.r}-${m.i}`,va=SCD['sa'+k]??'',vb=SCD['sb'+k]??'';return `<div class="glass vs ${c?'cur':'nxt open'}"><div class="vh"><span>P${m.n}${m.g!=null?' · Kumpulan '+GL(m.g):''}${c?'':' · '+rname(m.r)}${m.time?' · ⏰ '+e(m.time):''}</span><span class="badge ${c?'cur':'nxt'}">${c?'▶ SEKARANG':'⏭ SETERUSNYA'}</span></div>${okBox(m,k)}<div class="tt"><div><i class="av lg lgv">${logo(m.a)}</i><b>${nm(m.a)}</b><br><input class="sc" type="number" min="0" id="sa${k}" placeholder="0" value="${e(va)}" ${m.ok?'':'disabled'} oninput="SCD['sa${k}']=this.value"></div><span class="x">VS</span><div><i class="av lg lgv">${logo(m.b)}</i><b>${nm(m.b)}</b><br><input class="sc" type="number" min="0" id="sb${k}" placeholder="0" value="${e(vb)}" ${m.ok?'':'disabled'} oninput="SCD['sb${k}']=this.value"></div></div>
     <label>Masa / gelanggang (pilihan)</label><input id="tm${k}" value="${e(m.time)}" placeholder="cth: 9:00 pagi, Makmal 1" onchange="S.rounds[${m.r}][${m.i}].time=this.value;save()">
-    <div class="win"><button class="btn" onclick="win(${m.r},${m.i},'a')">${nm(m.a)} menang</button><button class="btn pink" onclick="win(${m.r},${m.i},'b')">${nm(m.b)} menang</button></div></div>`};
+    <div class="win"><button class="btn" ${m.ok?'':'disabled'} onclick="win(${m.r},${m.i},'a')">${nm(m.a)} menang</button><button class="btn pink" ${m.ok?'':'disabled'} onclick="win(${m.r},${m.i},'b')">${nm(m.b)} menang</button></div></div>`};
   if(any){
     const now=rl.filter(m=>m.r==cr),nxt=rl.filter(m=>m.r!=cr),all=S.rounds[cr].filter(m=>!m.bye),dn0=all.filter(m=>m.w).length;
     h+=`<div class="rn" style="--rc:var(--ok)">▶ SEKARANG · ${rname(cr)} · ${fmtOf(cr)}<span style="float:right">${dn0}/${all.length} selesai</span></div>`;
@@ -676,7 +722,16 @@ function viewSah(){
   const dn=S.rounds.flat().filter(m=>m.w&&!m.bye);
   if(dn.length){h+=`<div class="rn">KEPUTUSAN DISAHKAN</div>`;dn.reverse().forEach(m=>{h+=`<div class="glass team"><div><span class="n">${nm(m.w)}</span><small>${rname(m.r)} · lawan ${nm(m.w===m.a?m.b:m.a)}${m.sa!==''?` · ${e(m.sa)}-${e(m.sb)}`:''}</small></div><button class="btn sm red" onclick="undo(${m.r},${m.i})">Batal</button></div>`})}
   return h}
+function tmStr(t){try{return new Date(t).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}catch(x){return ''}}
+function okBox(m,k){
+  if(m.ok)return `<div class="okb ok"><div><b>✅ Perlawanan disahkan guru</b><small>${tmStr(m.ok.t)}</small></div></div>`;
+  return `<div class="okb"><b>⏳ Belum disahkan guru</b><small>Tekan butang Sah pada perlawanan ini di Jadual › Game seterusnya sebelum memasukkan keputusan.</small><div class="row"><button class="btn sm pink" onclick="jv='nx';go('jadual')">Ke Game seterusnya</button></div></div>`}
+function okM(r,i){const m=S.rounds[r][i];if(!rdy(m))return toast('Perlawanan ini belum sedia');m.ok={t:Date.now()};save();render();toast('Perlawanan disahkan')}
+async function unok(r,i){const m=S.rounds[r][i];if(m.w)return;
+  if(!await ask('Batalkan pengesahan perlawanan ini?'))return;
+  m.ok=null;save();render()}
 async function win(r,i,side){const m=S.rounds[r][i],k=`${r}-${i}`,w=m[side];
+  if(!m.ok)return toast('Guru mesti mengesahkan perlawanan diadakan dahulu');
   const ea=document.getElementById('sa'+k),eb=document.getElementById('sb'+k),va=ea?ea.value:'',vb=eb?eb.value:'';
   if(va!==''&&vb!==''&&+va!==+vb&&((side=='a')!==(+va>+vb)))return toast('Skor tidak sepadan dengan pemenang yang dipilih');
   numM();const rl=S.rounds.flat().filter(rdy),isCur=rl.length&&m.r==Math.min(...rl.map(x=>x.r));
@@ -690,7 +745,7 @@ async function undo(r,i){const m=S.rounds[r][i],nx=isLg(m)?null:S.rounds[r+1]?.[
   if(grp()&&m.g!=null&&S.rounds.flat().some(x=>x.g==null&&!x.bye&&x.w))return toast('Batalkan keputusan peringkat kalah mati dahulu');
   if(!await ask('Batalkan keputusan ini?'))return;
   if(S.go!=null&&S.go>m.r)S.go=m.r;
-  if(nx){if(i%2==0)nx.a=null;else nx.b=null}
+  if(nx){if(i%2==0)nx.a=null;else nx.b=null;nx.ok=null}
   m.w=null;m.sa='';m.sb='';fillKO();save();render()}
 function viewSet(){const s=S.set;
   return `<div class="two"><section class="glass pad"><h2>Maklumat kejohanan</h2>
@@ -735,7 +790,7 @@ function gateH(){const s=(pubData&&pubData.set)||S.set;
 const pend=()=>regs.filter(t=>!S.teams.some(x=>x.rid===t.rid)&&!(S.rej||[]).includes(t.rid));
 function inboxH(){const p=pend(),L=started();
   if(!canPush&&!localMode())return `<section class="glass pad" style="margin-bottom:16px"><h2>Pendaftaran daripada peserta</h2><p class="sub">Hanya akaun penyunting boleh melihat pendaftaran yang dihantar peserta.</p></section>`;
-  return `<section class="glass pad" style="margin-bottom:16px"><h2>Pendaftaran daripada peserta (${p.length})</h2><p class="sub">Semak, kemudian terima untuk masukkan ke senarai kumpulan.${localMode()?' (Mod ujian: pendaftaran dibaca dari pelayar ini sahaja.)':''}${L?' Jadual telah dijana, pendaftaran dikunci.':''}</p>${p.length?`<div class="row" style="margin-bottom:10px"><button class="btn sm pink" onclick="acc()" ${L?'disabled':''}>Terima semua</button></div>`:'<p class="sub" style="margin:0">Tiada pendaftaran baharu.</p>'}${p.map(t=>`<div class="glass team"><div><span class="n">${e(t.name)}</span><small>${e(t.cls)} · ${t.members.map(e).join(', ')}</small></div><div class="row"><button class="btn sm" onclick="acc('${t.rid}')" ${L?'disabled':''}>Terima</button><button class="btn sm red" onclick="rej('${t.rid}')">Tolak</button></div></div>`).join('')}</section>`}
+  return `<section class="glass pad" style="margin-bottom:16px"><h2>Pendaftaran daripada peserta (${p.length})</h2><p class="sub">Semak, kemudian terima untuk masukkan ke senarai kumpulan.${localMode()?' (Mod ujian: pendaftaran dibaca dari pelayar ini sahaja.)':''}${L?' Jadual telah dijana, pendaftaran dikunci.':''}</p>${p.length?`<div class="row" style="margin-bottom:10px"><button class="btn sm pink" onclick="acc()" ${L?'disabled':''}>Terima semua</button></div>`:'<p class="sub" style="margin:0">Tiada pendaftaran baharu.</p>'}${p.map(t=>`<div class="glass team"><div><span class="n">${e(t.name)}</span><small>${t.members.map(e).join(', ')}</small></div><div class="row"><button class="btn sm" onclick="acc('${t.rid}')" ${L?'disabled':''}>Terima</button><button class="btn sm red" onclick="rej('${t.rid}')">Tolak</button></div></div>`).join('')}</section>`}
 function inboxUp(){const b=document.getElementById('inbox');if(b)b.innerHTML=inboxH()}
 const localMode=()=>!FB_ON()&&!(dbh&&uid);
 const localRegs=()=>{try{return JSON.parse(localStorage.getItem('mlbb_regs'))||[]}catch(x){return[]}};
@@ -752,21 +807,24 @@ function rej(rid){S.rej=[...(S.rej||[]),rid];save();inboxUp();toast('Pendaftaran
 function pgo(t){if(t=='out')return setRole('');ptab=t;render();scrollTo(0,0)}
 function navP(){const T=[['daftar','📝','Daftar'],['jadual','📅','Jadual'],['kep','🏆','Keputusan'],['out','🚪','Keluar']],n=document.getElementById('nav');n.style.display='';n.innerHTML=T.map(([k,i,l])=>`<button class="${ptab==k?'on':''}" onclick="pgo('${k}')"><i>${i}</i>${l}</button>`).join('')}
 function regSt(r){return S.teams.some(x=>x.rid===r.rid)?'✅ Diterima':(S.rej||[]).includes(r.rid)?'❌ Ditolak':'⏳ Menunggu kelulusan AJK'}
-function regH(){const c=closed(),off=c||(!localMode()&&(!dbh||!uid));
-  const mem=[0,1,2,3,4].map(i=>`<label>${i?'Ahli '+(i+1):'Ketua pasukan'}</label><input id="rm${i}" maxlength="40" ${off?'disabled':''}>`).join('');
-  let h=`<div class="two"><section class="glass pad"><h2>Daftar kumpulan</h2><p class="sub">Setiap kumpulan 5 ahli. Pendaftaran akan disemak oleh AJK.</p>${c?'<p style="color:var(--gold)">Pendaftaran ditutup kerana jadual sudah dijana.</p>':localMode()?'<p style="color:var(--gold)">Mod ujian: pendaftaran disimpan dalam pelayar ini dan boleh dilihat AJK di pelayar yang sama.</p>':!dbh||!uid?`<p style="color:var(--gold)">${FB_ON()?'Sedang menyambung ke pangkalan data… jika berterusan, muat semula halaman.':'Pangkalan data belum disediakan. Isi FB_CONFIG dalam fail ini.'}</p>`:''}<label>Nama kumpulan</label><input id="rn" maxlength="30" ${off?'disabled':''}><label>Kelas</label><input id="rc" maxlength="20" placeholder="cth: 4 Bestari" ${off?'disabled':''}>${mem}<div class="row" style="margin-top:16px"><button class="btn" onclick="regSend()" ${off?'disabled':''}>Hantar pendaftaran</button></div></section><section>`;
-  if(my.length)h+=`<h2>Pendaftaran saya</h2>`+my.map(r=>`<div class="glass team"><div><span class="n">${e(r.name)}</span><small>${e(r.cls)}</small></div><span class="chip">${regSt(r)}</span></div>`).join('');
-  h+=`<h2 style="margin-top:18px">Kumpulan berdaftar (${S.teams.length})</h2>`+(S.teams.length?S.teams.map((x,i)=>`<div class="glass team"><div class="tl"><i class="av lg">${logo(x.id)}</i><div><span class="n">${i+1}. ${e(x.name)}</span><small>${e(x.cls||'')}</small></div></div></div>`).join(''):'<div class="glass empty">Belum ada kumpulan diterima.</div>');
+const PLAY_M='30/11/2026',PLAY_F='1/12/2026';let ack=false;
+function setAck(v){ack=!!v;document.querySelectorAll('#rf input,#rf button').forEach(x=>x.disabled=!ack);const w=document.querySelector('.rulebox>p.sub:last-child');if(w)w.style.display=ack?'none':''}
+function regH(){const c=closed(),off=c||(!localMode()&&(!dbh||!uid)),ofx=off||!ack;
+  const mem=[0,1,2,3,4].map(i=>`<label>${i?'Ahli '+(i+1):'Ketua pasukan'}</label><input id="rm${i}" maxlength="40" ${ofx?'disabled':''}>`).join('');
+  let h=`<div class="two"><section class="glass pad"><h2>Daftar kumpulan</h2><p class="sub">Setiap kumpulan 5 ahli. Pendaftaran akan disemak oleh AJK.</p>${c?'<p style="color:var(--gold)">Pendaftaran ditutup kerana jadual sudah dijana.</p>':localMode()?'':!dbh||!uid?`<p style="color:var(--gold)">${FB_ON()?'Sedang menyambung ke pangkalan data… jika berterusan, muat semula halaman.':'Pangkalan data belum disediakan. Isi FB_CONFIG dalam fail ini.'}</p>`:''}<div class="rulebox"><h3>📋 Arahan &amp; Syarat Penyertaan</h3><p class="sub" style="margin:0 0 8px">Sila baca dengan teliti sebelum mendaftar.</p><ol><li>Jelas dan faham berkaitan syarat dan peraturan pertandingan.</li><li><b>WAJIB</b> menyerahkan surat penyertaan dan surat kebenaran ibu bapa yang lengkap (semua ahli kumpulan).</li><li>Peserta hanya wajib membawa peranti pada hari perlawanan sahaja iaitu <b>${PLAY_M}</b> (Lelaki) dan <b>${PLAY_F}</b> (Perempuan). Jika gagal mematuhi arahan ini, peranti akan <b>dirampas</b> tertakluk kepada peraturan sekolah.</li></ol><label class="ackl"><input type="checkbox" id="ackc" ${ack?'checked':''} ${off?'disabled':''} onchange="setAck(this.checked)"><span>Saya telah membaca, jelas dan faham semua arahan &amp; syarat penyertaan di atas.</span></label>${!ack&&!off?'<p class="sub" style="margin:8px 0 0;color:var(--gold)">Tandakan kotak di atas untuk membuka borang pendaftaran.</p>':''}</div><div id="rf"><label>Nama kumpulan</label><input id="rn" maxlength="30" ${ofx?'disabled':''}>${mem}<div class="row" style="margin-top:16px"><button class="btn" onclick="regSend()" ${ofx?'disabled':''}>Hantar pendaftaran</button></div></div></section><section>`;
+  if(my.length)h+=`<h2>Pendaftaran saya</h2>`+my.map(r=>`<div class="glass team"><div><span class="n">${e(r.name)}</span></div><span class="chip">${regSt(r)}</span></div>`).join('');
+  h+=`<h2 style="margin-top:18px">Kumpulan berdaftar (${S.teams.length})</h2>`+(S.teams.length?S.teams.map((x,i)=>`<div class="glass team"><div class="tl"><i class="av lg">${logo(x.id)}</i><div><span class="n">${i+1}. ${e(x.name)}</span></div></div></div>`).join(''):'<div class="glass empty">Belum ada kumpulan diterima.</div>');
   return h+'</section></div>'}
 async function regSend(){
   if(closed())return toast('Pendaftaran telah ditutup');
-  const g=i=>document.getElementById(i).value.trim(),name=g('rn'),cls=g('rc'),members=[0,1,2,3,4].map(i=>g('rm'+i));
+  if(!ack)return toast('Sila baca dan tandakan persetujuan syarat penyertaan dahulu');
+  const g=i=>document.getElementById(i).value.trim(),name=g('rn'),cls='',members=[0,1,2,3,4].map(i=>g('rm'+i));
   if(!name)return toast('Masukkan nama kumpulan');
   if(members.some(x=>!x))return toast('Lengkapkan nama 5 ahli');
   if(my.length>=5)return toast('Had 5 pendaftaran bagi satu peranti');
   const nl=name.toLowerCase();
   if(((pubData&&pubData.teams)||[]).some(x=>x.name.toLowerCase()===nl)||my.some(x=>x.name.toLowerCase()===nl))return toast('Nama kumpulan sudah digunakan');
-  const t={rid:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,cls,members};
+  const t={rid:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name,cls,members,ack:true};
   try{if(localMode()){const L=localRegs();L.push(t);localStorage.setItem('mlbb_regs',JSON.stringify(L))}else{const d=dbh.doc('registrations/'+uid),sn=await d.get(),items=(sn.exists&&sn.data().items)||[];await d.set({items:[...items,t]})}
     my.push({rid:t.rid,name,cls});try{localStorage.setItem('mlbb_my',JSON.stringify(my))}catch(x){}
     render();toast('Pendaftaran dihantar. Menunggu kelulusan AJK')}catch(x){toast('Gagal menghantar. Cuba lagi')}}
