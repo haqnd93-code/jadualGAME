@@ -427,10 +427,19 @@ body.tv.tvbgi #bg{display:block!important;background:var(--tvimg) center/cover n
 const KEY='mlbb_seri_rompin_v1';
 const def=()=>({set:{title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:'',venue:'',fmt:3,shuffle:true},teams:[],rounds:null});
 let S;try{S=JSON.parse(localStorage.getItem(KEY))||def()}catch(e){S=def()}
-/* ===== SAMBUNGAN FIREBASE (isi sebelum deploy) =====
-   Firebase Console > Project settings > Your apps > Web app > firebaseConfig.
-   ajkEmail = e-mel akaun AJK yang anda cipta di Authentication (Email/Password). */
-const FB_CONFIG={apiKey:'',authDomain:'',projectId:'',appId:'',ajkEmail:''};
+/* ===== SAMBUNGAN FIREBASE (projek: jadual-game) =====
+   ajkEmail = e-mel akaun AJK yang dicipta di Firebase Console > Authentication > Users (Email/Password).
+   E-mel yang SAMA mesti ditulis dalam firestore.rules (fungsi isAjk). Kata laluan AJK = kata laluan akaun ini. */
+const FB_CONFIG={
+  apiKey:'AIzaSyC9nlhJpJKd6n8_mDrOD-5iE6_j4nL_dYY',
+  authDomain:'jadual-game.firebaseapp.com',
+  projectId:'jadual-game',
+  storageBucket:'jadual-game.firebasestorage.app',
+  messagingSenderId:'692694313460',
+  appId:'1:692694313460:web:611e1e92643d1a2180b1a1',
+  measurementId:'G-44R1Y1HVDR',
+  ajkEmail:'ajk@jadual-game.com'
+};
 const FB_ON=()=>!!(FB_CONFIG.apiKey&&FB_CONFIG.projectId&&typeof firebase!=='undefined');
 let fbAuth=null;
 function fbSet(u){uid=u?u.uid:null;canPush=!!(u&&!u.isAnonymous&&u.email&&u.email.toLowerCase()===String(FB_CONFIG.ajkEmail).toLowerCase())}
@@ -447,7 +456,7 @@ async function fbToAnon(noRender){
   if(!noRender)render()}
 let tab='jadual',edit=null,drafts=[],scanning=false,pubMode=(location.hash=='#paparan'||location.hash=='#tv'),pubData=null,dbh=null,canPush=false,pubStarted=false,pt;
 let lastAuto=0;
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}if(Date.now()-lastAuto>180000){lastAuto=Date.now();try{bakSave('Auto',true)}catch(x){}}queuePush()};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('mlbb_ts',String(Date.now()))}catch(e){}if(Date.now()-lastAuto>180000){lastAuto=Date.now();try{bakSave('Auto',true)}catch(x){}}queuePush()};
 const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const tm=id=>S.teams.find(t=>t.id===id);
 const nm=id=>id?e(tm(id)?.name):null;
@@ -918,7 +927,41 @@ function imPanel(k){if(pubMode||!imOpen[k]||!(k=='br'?brData:hdData))return '';c
  return `<section class="glass pad noprint impanel"><h2>Laras gambar ${k=='br'?'bracket':'header'}</h2><label>Keterangan gambar</label><input maxlength="120" value="${e(m.cap)}" placeholder="cth: Dewan Sekolah, Hari Kejohanan" onchange="imSet('${k}','cap',this.value,1)"><div class="grid2"><div><label>Kedudukan pantas</label><div class="ppad">${pad}</div></div><div>${sl('x','Mendatar',0,100)}${sl('y','Menegak',0,100)}</div></div><label>Saiz gambar</label><div class="seg"><button class="${m.fit=='cover'?'on':''}" onclick="imSet('${k}','fit','cover',1)">Penuhi ruang</button><button class="${m.fit=='contain'?'on':''}" onclick="imSet('${k}','fit','contain',1)">Tunjuk semua</button></div>${k=='br'?sl('ov','Lapisan putih (supaya teks jelas)',0,95):''}<div class="row" style="margin-top:12px"><button class="btn sm pink" onclick="imReset('${k}')">Set semula</button><button class="btn sm" onclick="imTg('${k}')">Siap</button></div></section>`}
 function pubOf(){return {set:S.set,teams:S.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid})),rej:S.rej||[],rounds:S.rounds,go:S.go,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
 function queuePush(){if(pubMode||!canPush)return;clearTimeout(pt);pt=setTimeout(pushNow,800)}
-async function pushNow(){try{await dbh.doc('tournament/state').set({json:JSON.stringify(pubOf()),t:Date.now()})}catch(x){}}
+async function pushNow(){
+  if(!dbh||!canPush)return;const t=Date.now();
+  /* tournament/state = data awam (tanpa nama ahli) untuk peserta & paparan TV */
+  try{await dbh.doc('tournament/state').set({json:JSON.stringify(pubOf()),t})}catch(x){}
+  /* ajk/full = salinan penuh (termasuk nama ahli) untuk AJK sahaja, supaya peranti AJK lain boleh sambung kerja */
+  try{const j=JSON.stringify(S);if(j.length<900000){await dbh.doc('ajk/full').set({json:j,t});try{localStorage.setItem('mlbb_ts',String(t))}catch(x){}}else toast('Data terlalu besar untuk disegerak penuh')}catch(x){}}
+async function pullFull(){
+  if(!dbh||!canPush)return false;
+  let changed=false;
+  const rd=async p=>{try{const s=await dbh.doc(p).get();return s.exists?s.data():null}catch(x){return null}};
+  const ls=(k,v)=>{try{localStorage.setItem(k,v)}catch(x){}};
+  try{
+    const c=await rd('ajk/full');
+    if(c&&c.json){
+      const ct=+c.t||0;let lt=0;try{lt=+localStorage.getItem('mlbb_ts')||0}catch(x){}
+      const empty=!S.teams.length&&!S.rounds;
+      if(empty||ct>lt){
+        let ok=true;
+        if(!empty)ok=await ask('Data di awan (Firestore) lebih baharu daripada data pada peranti ini.\nGunakan data awan? Data pada peranti ini akan diganti (sandaran dibuat automatik).');
+        if(ok){const d=JSON.parse(c.json);
+          if(d&&d.set){if(!empty){try{bakSave('Sebelum muat turun data awan',false)}catch(x){}}
+            S=Object.assign(def(),d);ls(KEY,JSON.stringify(S));ls('mlbb_ts',String(ct));changed=true}}}}
+  }catch(x){console.error(x)}
+  /* gambar & latar: diisi daripada awan hanya jika peranti ini masih kosong */
+  try{
+    const st=await rd('tournament/state');
+    if(st&&st.json){const p=JSON.parse(st.json);
+      if(!hdData&&p.hd){hdData=p.hd;ls('mlbb_hd',hdData)}
+      if(!brData&&p.br){brData=p.br;ls('mlbb_br',brData)}
+      if(!bgData&&p.bg){bgData=p.bg;ls('mlbb_bg',bgData)}}
+    if(!gal.length){const g=await rd('tournament/gal');if(g&&g.list&&g.list.length){gal=g.list.filter(Boolean).map(u=>({u}));ls('mlbb_gal',JSON.stringify(gal))}}
+    if(!tvbg){const t=await rd('tournament/tvbg');if(t&&t.u){tvbg={u:t.u,o:t.o};ls('mlbb_tvbg',JSON.stringify(tvbg))}}
+    for(const k of ['g','p']){if(!(k=='g'?gbgData:pbgData)){const m=await rd('tournament/'+k+'bg');if(m&&m.d){if(k=='g')gbgData=m.d;else pbgData=m.d;mediaData[k+'bg']=m.d;ls('mlbb_'+k+'bg',m.d)}}}
+  }catch(x){console.error(x)}
+  return changed}
 let hlTeam=null,hlQ='',jv='nx',jf='all',jo={};
 function hlIds(){if(hlTeam)return [hlTeam];if(hlQ)return S.teams.filter(t=>t.name.toLowerCase().includes(hlQ)).map(t=>t.id);return null}
 function hl(id){hlTeam=hlTeam===id?null:id;hlQ='';render()}
@@ -959,6 +1002,7 @@ addEventListener('hashchange',()=>{pubMode=(location.hash=='#paparan'||location.
 (async()=>{
   try{if(FB_ON())await fbInit();else{dbh=await claude.use('db');const u=await claude.use('user');canPush=!!(dbh&&u&&await u.canEdit());try{uid=u?await u.id():null}catch(x){}}}catch(x){console.error(x)}
   if(FB_ON()){if(role=='ajk'&&!canPush){role='';try{sessionStorage.removeItem('mlbb_role')}catch(x){}}else if(canPush&&role!='ajk')await fbToAnon(true)}
+  if(!pubMode&&role=='ajk'&&canPush)await pullFull();
   if(pubMode||role!='ajk')startPub();if(role=='ajk')startRegs();if(!pubMode&&canPush&&(S.teams.length||S.rounds))pushNow();if(!pubMode&&canPush&&gal.length)pushGal();if(!pubMode&&canPush&&tvbg)pushTv();
   render()})();
 function autoTime(){
@@ -1116,7 +1160,7 @@ const closed=()=>!!(pubData&&pubData.rounds);
 function setRole(r){const was=role;role=r;gs=0;if(FB_ON()&&canPush&&r!='ajk'&&was=='ajk')fbToAnon();try{r?sessionStorage.setItem('mlbb_role',r):sessionStorage.removeItem('mlbb_role')}catch(x){}if(r!='ajk')startPub();if(r=='ajk')startRegs();render();scrollTo(0,0)}
 async function ajkLogin(){const p=document.getElementById('pw'),v=p?p.value.trim():'';
   const bad=()=>{toast('Kata laluan salah');if(p){p.value='';p.focus()}};
-  if(FB_ON()&&fbAuth){if(!v)return bad();try{const r=await fbAuth.signInWithEmailAndPassword(FB_CONFIG.ajkEmail,v);fbSet(r.user);if(!canPush)return bad();setRole('ajk')}catch(x){bad()}return}
+  if(FB_ON()&&fbAuth){if(!v)return bad();try{const r=await fbAuth.signInWithEmailAndPassword(FB_CONFIG.ajkEmail,v);fbSet(r.user);if(!canPush)return bad();await pullFull();setRole('ajk')}catch(x){bad()}return}
   if(v==='12345')setRole('ajk');else bad()}
 function gateH(){const s=(pubData&&pubData.set)||S.set;
   return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div>`}
@@ -1177,7 +1221,7 @@ function render(){document.body.classList.toggle('tv',pubMode&&tv);render0();chk
 function render0(){
   document.body.classList.toggle('pub',pubMode);
   document.body.classList.remove('imgbg');
-  if(pubMode){const bak=S;S=Object.assign(def(),pubData||{});applyBg(pubData&&pubData.bg);document.getElementById('nav').style.display='none';document.getElementById('app').innerHTML=pubData?(tv?viewTV():viewPub()):'<div class="glass empty"><h2>Menunggu data jadual…</h2><p>Jika paparan kekal kosong, log masuk akaun Claude dan muat semula halaman.</p></div>';S=bak;return}
+  if(pubMode){const bak=S;S=Object.assign(def(),pubData||{});applyBg(pubData&&pubData.bg);document.getElementById('nav').style.display='none';document.getElementById('app').innerHTML=pubData?(tv?viewTV():viewPub()):'<div class="glass empty"><h2>Menunggu data jadual…</h2><p>Jika paparan kekal kosong, semak sambungan internet dan muat semula halaman.</p></div>';S=bak;return}
   if(!role){document.getElementById('nav').style.display='none';const bak=S;if(pubData&&pubData.set)S=Object.assign(def(),pubData);applyBg(gateOwn());document.body.classList.toggle('imgbg',!!gateOwn());document.getElementById('app').innerHTML=gateH();S=bak;const p=document.getElementById('pw');if(p)p.focus();return}
   if(role=='peserta'){const bak=S;S=Object.assign(def(),pubData||{});applyBg(pesBg());document.body.classList.toggle('imgbg',!!pesOwn());navP();document.getElementById('app').innerHTML=viewPes();S=bak;return}
   document.getElementById('nav').style.display='';
