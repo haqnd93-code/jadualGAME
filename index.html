@@ -1082,42 +1082,64 @@ function imPanel(k){if(pubMode||!imOpen[k]||!(k=='br'?brData:hdData))return '';c
  const pad=[0,50,100].flatMap(y=>[0,50,100].map(x=>`<button class="${m.x==x&&m.y==y?'on':''}" aria-label="Kedudukan ${x}% ${y}%" onclick="imSet('${k}','x',${x});imSet('${k}','y',${y},1)"></button>`)).join('');
  return `<section class="glass pad noprint impanel"><h2>Laras gambar ${k=='br'?'bracket':'header'}</h2><label>Keterangan gambar</label><input maxlength="120" value="${e(m.cap)}" placeholder="cth: Dewan Sekolah, Hari Kejohanan" onchange="imSet('${k}','cap',this.value,1)"><div class="grid2"><div><label>Kedudukan pantas</label><div class="ppad">${pad}</div></div><div>${sl('x','Mendatar',0,100)}${sl('y','Menegak',0,100)}</div></div><label>Saiz gambar</label><div class="seg"><button class="${m.fit=='cover'?'on':''}" onclick="imSet('${k}','fit','cover',1)">Penuhi ruang</button><button class="${m.fit=='contain'?'on':''}" onclick="imSet('${k}','fit','contain',1)">Tunjuk semua</button></div>${k=='br'?sl('ov','Lapisan putih (supaya teks jelas)',0,95):''}<div class="row" style="margin-top:12px"><button class="btn sm pink" onclick="imReset('${k}')">Set semula</button><button class="btn sm" onclick="imTg('${k}')">Siap</button></div></section>`}
 function pubOf(){const C={};CATS.forEach(c=>{const x=S.C[c];C[c]={set:x.set,teams:x.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid,lg:t.lg})),rounds:x.rounds,go:x.go}});return {v:2,C,rej:S.rej||[],since:S.since||0,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
-function queuePush(){if(pubMode||!canPush)return;clearTimeout(pt);pt=setTimeout(pushNow,800)}
+let pushPend=false;
+function queuePush(){if(pubMode||!canPush)return;pushPend=true;clearTimeout(pt);pt=setTimeout(pushNow,800)}
 async function pushNow(){
-  if(!dbh||!canPush)return;const t=Date.now();
+  if(!dbh||!canPush){pushPend=false;return}const t=Date.now();
+  /* tanda masa awan ini ialah milik peranti ini, supaya ia tidak dimuat turun semula */
+  try{localStorage.setItem('mlbb_cts',String(t))}catch(x){}
   /* tournament/state = data awam (tanpa nama ahli) untuk peserta & paparan TV */
   try{await dbh.doc('tournament/state').set({json:JSON.stringify(pubOf()),t})}catch(x){}
   /* ajk/full = salinan penuh (termasuk nama ahli) untuk AJK sahaja, supaya peranti AJK lain boleh sambung kerja */
-  try{const j=JSON.stringify(S);if(j.length<900000){await dbh.doc('ajk/full').set({json:j,t});try{localStorage.setItem('mlbb_ts',String(t))}catch(x){}}else toast('Data terlalu besar untuk disegerak penuh')}catch(x){}}
+  try{const j=JSON.stringify(S);if(j.length<900000){await dbh.doc('ajk/full').set({json:j,t});try{localStorage.setItem('mlbb_ts',String(t))}catch(x){}}else toast('Data terlalu besar untuk disegerak penuh')}catch(x){}
+  pushPend=false}
+const lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(x){}};
+const dbRead=async p=>{try{const s=await dbh.doc(p).get();return s.exists?s.data():null}catch(x){return null}};
+/* gambar & latar: awan sentiasa menggantikan salinan lama pada peranti ini (senyap, tanpa soalan) */
+async function pullMedia(){
+  if(!dbh||pushPend)return false;let ch=false;
+  try{
+    const st=await dbRead('tournament/state');
+    if(st&&st.json){const p=JSON.parse(st.json);
+      if(p.hd&&p.hd!==hdData){hdData=p.hd;lsSet('mlbb_hd',hdData);ch=true}
+      if(p.br&&p.br!==brData){brData=p.br;lsSet('mlbb_br',brData);ch=true}
+      if(p.bg&&p.bg!==bgData){bgData=p.bg;lsSet('mlbb_bg',bgData);ch=true}}
+    const g=await dbRead('tournament/gal');
+    if(g&&Array.isArray(g.list)){const u=g.list.filter(Boolean);if(JSON.stringify(u)!==JSON.stringify(gal.map(x=>x.u))){gal=u.map(x=>({u:x}));lsSet('mlbb_gal',JSON.stringify(gal));ch=true}}
+    const t=await dbRead('tournament/tvbg');
+    if(t){if(t.u){if(!tvbg||tvbg.u!==t.u||tvbg.o!==t.o){tvbg={u:t.u,o:t.o};lsSet('mlbb_tvbg',JSON.stringify(tvbg));ch=true}}
+      else if(tvbg&&tvbg.u&&tvbg.u.slice(0,5)!='data:'){tvbg=null;lsSet('mlbb_tvbg','null');ch=true}}
+    for(const k of ['g','p']){const m=await dbRead('tournament/'+k+'bg');
+      if(m&&typeof m.d=='string'){const cur=k=='g'?gbgData:pbgData;
+        if(m.d!==cur){if(k=='g')gbgData=m.d;else pbgData=m.d;mediaData[k+'bg']=m.d;try{m.d?localStorage.setItem('mlbb_'+k+'bg',m.d):localStorage.removeItem('mlbb_'+k+'bg')}catch(x){}ch=true}}}
+  }catch(x){console.error(x)}
+  if(ch){try{applyBg();applyTvBg()}catch(x){}}
+  return ch}
 async function pullFull(){
   if(!dbh||!canPush)return false;
   let changed=false;
-  const rd=async p=>{try{const s=await dbh.doc(p).get();return s.exists?s.data():null}catch(x){return null}};
-  const ls=(k,v)=>{try{localStorage.setItem(k,v)}catch(x){}};
   try{
-    const c=await rd('ajk/full');
+    const c=await dbRead('ajk/full');
     if(c&&c.json){
-      const ct=+c.t||0;let lt=0;try{lt=+localStorage.getItem('mlbb_ts')||0}catch(x){}
+      const ct=+c.t||0;let lt=0;try{lt=+localStorage.getItem('mlbb_cts')||0}catch(x){}
       const empty=allEmpty();
       if(empty||ct>lt){
-        let ok=true;
-        if(!empty)ok=await ask('Data di awan (Firestore) lebih baharu daripada data pada peranti ini.\nGunakan data awan? Data pada peranti ini akan diganti (sandaran dibuat automatik).');
-        if(ok){const d=JSON.parse(c.json);
-          if(d&&(d.set||d.C)){if(!empty){try{bakSave('Sebelum muat turun data awan',false)}catch(x){}}
-            S=mkS(d);ls(KEY,JSON.stringify(S));ls('mlbb_ts',String(ct));changed=true}}}}
+        const d=JSON.parse(c.json);
+        if(d&&(d.set||d.C)){if(!empty){try{bakSave('Auto · sebelum segerak awan',true)}catch(x){}}
+          S=mkS(d);lsSet(KEY,JSON.stringify(S));lsSet('mlbb_ts',String(ct));lsSet('mlbb_cts',String(ct));changed=true}}}
   }catch(x){console.error(x)}
-  /* gambar & latar: diisi daripada awan hanya jika peranti ini masih kosong */
-  try{
-    const st=await rd('tournament/state');
-    if(st&&st.json){const p=JSON.parse(st.json);
-      if(!hdData&&p.hd){hdData=p.hd;ls('mlbb_hd',hdData)}
-      if(!brData&&p.br){brData=p.br;ls('mlbb_br',brData)}
-      if(!bgData&&p.bg){bgData=p.bg;ls('mlbb_bg',bgData)}}
-    if(!gal.length){const g=await rd('tournament/gal');if(g&&g.list&&g.list.length){gal=g.list.filter(Boolean).map(u=>({u}));ls('mlbb_gal',JSON.stringify(gal))}}
-    if(!tvbg){const t=await rd('tournament/tvbg');if(t&&t.u){tvbg={u:t.u,o:t.o};ls('mlbb_tvbg',JSON.stringify(tvbg))}}
-    for(const k of ['g','p']){if(!(k=='g'?gbgData:pbgData)){const m=await rd('tournament/'+k+'bg');if(m&&m.d){if(k=='g')gbgData=m.d;else pbgData=m.d;mediaData[k+'bg']=m.d;ls('mlbb_'+k+'bg',m.d)}}}
-  }catch(x){console.error(x)}
+  await pullMedia();
   return changed}
+/* peranti AJK sentiasa mengikuti awan secara automatik (data + gambar), tanpa sebarang soalan */
+let ajkSync=false;
+function startAjkSync(){
+  if(ajkSync||!dbh||!canPush)return;ajkSync=true;
+  const rr=()=>{if(role=='ajk'&&!typing())render()};
+  dbh.doc('ajk/full').onSnapshot(sn=>{
+    if(!sn.exists||pushPend)return;const c=sn.data()||{},ct=+c.t||0;let lt=0;try{lt=+localStorage.getItem('mlbb_cts')||0}catch(x){}
+    if(!c.json||ct<=lt)return;
+    try{const d=JSON.parse(c.json);if(d&&(d.set||d.C)){S=mkS(d);lsSet(KEY,JSON.stringify(S));lsSet('mlbb_ts',String(ct));lsSet('mlbb_cts',String(ct));rr();pullMedia().then(x=>{if(x)rr()})}}catch(x){}},()=>{});
+  ['tournament/state','tournament/gal','tournament/tvbg','tournament/gbg','tournament/pbg'].forEach(p=>dbh.doc(p).onSnapshot(()=>{pullMedia().then(x=>{if(x)rr()})},()=>{}))}
 let hlTeam=null,hlQ='',jv='nx',jf='all',jo={};
 function hlIds(){if(hlTeam)return [hlTeam];if(hlQ)return S.teams.filter(t=>t.name.toLowerCase().includes(hlQ)).map(t=>t.id);return null}
 function hl(id){hlTeam=hlTeam===id?null:id;hlQ='';render()}
@@ -1355,7 +1377,7 @@ const localMode=()=>!FB_ON()&&!(dbh&&uid);
 const localRegs=()=>{try{return JSON.parse(localStorage.getItem('mlbb_regs'))||[]}catch(x){return[]}};
 let locT=null;
 function startLocalRegs(){const f=()=>{const n=localRegs();if(JSON.stringify(n)!==JSON.stringify(regs)){regs=n;inboxUp()}};f();if(!locT){locT=setInterval(f,1500);addEventListener('storage',f)}}
-function startRegs(){if(localMode())return startLocalRegs();if(regUn||!dbh||!canPush)return;try{regUn=dbh.collection('registrations').onSnapshot(sn=>{regs=[];sn.docs.forEach(d=>{((d.data()||{}).items||[]).forEach(t=>regs.push(t))});inboxUp()},()=>{})}catch(x){}}
+function startRegs(){if(localMode())return startLocalRegs();startAjkSync();if(regUn||!dbh||!canPush)return;try{regUn=dbh.collection('registrations').onSnapshot(sn=>{regs=[];sn.docs.forEach(d=>{((d.data()||{}).items||[]).forEach(t=>regs.push(t))});inboxUp()},()=>{})}catch(x){}}
 function acc(rid){const L=rid?pend().filter(t=>t.rid===rid):pendC();let n=0,bl=0;
   L.forEach(t=>{const X=S.C[t.cat||'L'];if(X.rounds){bl++;return}if(X.teams.some(x=>x.name.toLowerCase()===t.name.toLowerCase()))return;X.teams.push({id:'t'+Date.now()+n,rid:t.rid,name:t.name,cls:t.cls,members:t.members});n++});
   save();render();toast(n?n+' kumpulan diterima':bl?'Jadual kategori itu telah dijana, pendaftaran dikunci':'Nama kumpulan sudah wujud, tidak diterima')}
