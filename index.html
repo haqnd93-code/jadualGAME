@@ -518,12 +518,12 @@ function norm(raw){raw=raw||{};let C;
   else{C={L:{set:raw.set,teams:raw.teams,rounds:raw.rounds,go:raw.go},P:{}}}
   CATS.forEach(c=>{const x=C[c];if(!x.set){x.set=dset(c);if(c=='P'&&C.L.set){const l=C.L.set;SHARED.forEach(k=>{if(l[k]!==undefined)x.set[k]=l[k]})}}
     if(!x.teams)x.teams=[];if(x.rounds===undefined)x.rounds=null;if(x.go===undefined)x.go=null});
-  return {C,rej:raw.rej||[]}}
-function mkS(raw){const n=norm(raw),o={v:2,C:n.C,rej:n.rej};
+  return {C,rej:raw.rej||[],since:+raw.since||0}}
+function mkS(raw){const n=norm(raw),o={v:2,C:n.C,rej:n.rej,since:n.since};
   ['set','teams','rounds','go'].forEach(k=>Object.defineProperty(o,k,{get(){return this.C[CAT][k]},set(v){this.C[CAT][k]=v},enumerable:false,configurable:true}));
   return o}
 const def=()=>mkS();
-function pubNorm(x){const n=norm(x);try{ensureLg(n.C)}catch(e){}return Object.assign({},x,{C:n.C,rej:n.rej})}
+function pubNorm(x){const n=norm(x);try{ensureLg(n.C)}catch(e){}return Object.assign({},x,{C:n.C,rej:n.rej,since:n.since})}
 const pubC=()=>pubData&&pubData.C?pubData.C[CAT]:null;
 const allEmpty=()=>CATS.every(c=>!S.C[c].teams.length&&!S.C[c].rounds);
 function syncShared(){if(!S||!S.C)return;const a=S.C[CAT].set,b=S.C[CAT=='L'?'P':'L'].set;SHARED.forEach(k=>{if(a[k]===undefined)delete b[k];else b[k]=a[k]})}
@@ -1111,7 +1111,7 @@ function imPanel(k){if(pubMode||!imOpen[k]||!(k=='br'?brData:hdData))return '';c
  const sl=(f,l,mn,mx)=>`<label>${l}: <b id="iv${k}${f}">${m[f]}%</b></label><input type="range" min="${mn}" max="${mx}" value="${m[f]}" oninput="imSet('${k}','${f}',+this.value)">`;
  const pad=[0,50,100].flatMap(y=>[0,50,100].map(x=>`<button class="${m.x==x&&m.y==y?'on':''}" aria-label="Kedudukan ${x}% ${y}%" onclick="imSet('${k}','x',${x});imSet('${k}','y',${y},1)"></button>`)).join('');
  return `<section class="glass pad noprint impanel"><h2>Laras gambar ${k=='br'?'bracket':'header'}</h2><label>Keterangan gambar</label><input maxlength="120" value="${e(m.cap)}" placeholder="cth: Dewan Sekolah, Hari Kejohanan" onchange="imSet('${k}','cap',this.value,1)"><div class="grid2"><div><label>Kedudukan pantas</label><div class="ppad">${pad}</div></div><div>${sl('x','Mendatar',0,100)}${sl('y','Menegak',0,100)}</div></div><label>Saiz gambar</label><div class="seg"><button class="${m.fit=='cover'?'on':''}" onclick="imSet('${k}','fit','cover',1)">Penuhi ruang</button><button class="${m.fit=='contain'?'on':''}" onclick="imSet('${k}','fit','contain',1)">Tunjuk semua</button></div>${k=='br'?sl('ov','Lapisan putih (supaya teks jelas)',0,95):''}<div class="row" style="margin-top:12px"><button class="btn sm pink" onclick="imReset('${k}')">Set semula</button><button class="btn sm" onclick="imTg('${k}')">Siap</button></div></section>`}
-function pubOf(){const C={};CATS.forEach(c=>{const x=S.C[c];C[c]={set:x.set,teams:x.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid,lg:t.lg})),rounds:x.rounds,go:x.go}});return {v:2,C,rej:S.rej||[],bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
+function pubOf(){const C={};CATS.forEach(c=>{const x=S.C[c];C[c]={set:x.set,teams:x.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid,lg:t.lg})),rounds:x.rounds,go:x.go}});return {v:2,C,rej:S.rej||[],since:S.since||0,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
 function queuePush(){if(pubMode||!canPush)return;clearTimeout(pt);pt=setTimeout(pushNow,800)}
 async function pushNow(){
   if(!dbh||!canPush)return;const t=Date.now();
@@ -1349,7 +1349,7 @@ async function resetB(){if(!await askType(`Reset jadual dan semua keputusan kate
 async function resetSched(){if(!S.rounds)return;if(!await askType(`Padam jadual dan semua keputusan perlawanan kategori ${CATN[CAT]}?\n${lossTxt()} akan dipadam. Senarai kumpulan dikekalkan.\n\nSandaran dibuat automatik dan boleh dipulihkan di Setting › Sandaran data.`,'PADAM'))return;
   bakSave('Sebelum padam jadual',false);S.rounds=null;S.go=null;REV={};save();tab='jadual';render();toast('Jadual dipadam. Boleh dipulihkan di Sandaran data')}
 async function resetAll(){const t=bakStat(S);if(!await askType(`⚠️ Padam SEMUA data?\n${t.tm} kumpulan dan ${t.done} keputusan disahkan (kedua-dua kategori) akan dipadam.\n\nSandaran dibuat automatik dan boleh dipulihkan di Setting › Sandaran data.`,'PADAM'))return;
-  bakSave('Sebelum padam semua data',false);const oldRej=[...(S.rej||[]),...regs.map(r=>r.rid)];S=mkS();S.rej=[...new Set(oldRej)];drafts=[];edit=null;SCD={};SO={};REV={};save();await regPurge(()=>true);tab='jadual';render();toast('Semua data dan pendaftaran peserta dipadam. Boleh dipulihkan di Sandaran data')}
+  bakSave('Sebelum padam semua data',false);const oldRej=[...(S.rej||[]),...regs.map(r=>r.rid)];S=mkS();S.rej=[...new Set(oldRej)];S.since=Date.now();drafts=[];edit=null;SCD={};SO={};REV={};save();await regPurge(()=>true);tab='jadual';render();toast('Semua data dan pendaftaran peserta dipadam. Boleh dipulihkan di Sandaran data')}
 /* ===== Pintu masuk: AJK / Peserta ===== */
 let role='';try{role=sessionStorage.getItem('mlbb_role')||''}catch(x){}
 let gs=0,ptab='daftar',regs=[],my=[],regUn=null,uid=null;
@@ -1373,7 +1373,9 @@ function gateH(){const s=(pubC()&&pubC().set)||S.set;
   return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><p class="sub" style="margin-top:-4px">Penyertaan dibahagikan kepada <b>👦 bahagian Lelaki</b> dan <b>👧 bahagian Perempuan</b>.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div><section class="glass pad livegate${liveOn()?' on':''}"><div class="row" style="justify-content:space-between;gap:12px"><div><h2>${liveDot()} LIVE</h2><p class="sub" style="margin:0">${liveOn()?'Siaran langsung sedang berlangsung. Tekan untuk menonton.':'Tiada siaran langsung buat masa ini.'}</p></div><button class="btn" ${liveOn()?'':'disabled'} onclick="liveView=true;render();scrollTo(0,0)">▶ Tonton LIVE</button></div></section>`}
 
 /* ===== AJK: peti masuk pendaftaran peserta ===== */
-const pend=()=>regs.filter(t=>!CATS.some(c=>S.C[c].teams.some(x=>x.rid===t.rid))&&!(S.rej||[]).includes(t.rid));
+/* masa pendaftaran dikodkan dalam rid; pendaftaran sebelum 'Padam semua data' (S.since) tidak dipaparkan lagi */
+const ridTs=r=>{const n=parseInt(String(r||'').slice(1,9),36);return isFinite(n)?n:0};
+const pend=()=>regs.filter(t=>ridTs(t.rid)>(S.since||0)&&!CATS.some(c=>S.C[c].teams.some(x=>x.rid===t.rid))&&!(S.rej||[]).includes(t.rid));
 const pendC=()=>pend().filter(t=>(t.cat||'L')==CAT);
 function inboxH(){const p=pendC(),O=CAT=='L'?'P':'L',no=pend().filter(t=>(t.cat||'L')==O).length,L=!!S.C[CAT].rounds;
   if(!canPush&&!localMode())return `<section class="glass pad" style="margin-bottom:16px"><h2>Pendaftaran daripada peserta</h2><p class="sub">Hanya akaun penyunting boleh melihat pendaftaran yang dihantar peserta.</p></section>`;
