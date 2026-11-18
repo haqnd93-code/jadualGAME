@@ -573,7 +573,7 @@ async function fbToAnon(noRender){
   if(regUn){try{regUn()}catch(x){}regUn=null}regs=[];
   try{if(canPush&&uid){try{await dbh.doc('ajk_keys/'+uid).delete()}catch(x){}}await fbAuth.signOut();const r=await fbAuth.signInAnonymously();fbSet(r.user)}catch(x){fbSet(null)}
   if(!noRender)render()}
-let tab='jadual',edit=null,drafts=[],scanning=false,pubMode=(location.hash=='#paparan'||location.hash=='#tv'),pubData=null,dbh=null,canPush=false,pubStarted=false,pt;
+let tab='jadual',edit=null,drafts=[],pubMode=(location.hash=='#paparan'||location.hash=='#tv'),pubData=null,dbh=null,canPush=false,pubStarted=false,pt;
 let lastAuto=0;
 const save=()=>{try{syncShared()}catch(e){}try{ensureLg()}catch(e){}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem('mlbb_ts',String(Date.now()))}catch(e){}if(Date.now()-lastAuto>180000){lastAuto=Date.now();try{bakSave('Auto',true)}catch(x){}}queuePush()};
 const e=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -799,7 +799,7 @@ function viewJadual(){
 function viewDaftar(){
   const L=started(),dr=drafts[0],t=dr||(edit?tm(edit):null);
   const mem=[0,1,2,3,4].map(i=>`<label>${i==0?'Ketua pasukan':'Ahli '+(i+1)}</label><input id="m${i}" maxlength="40" value="${e(t?.members[i]||'')}" ${L?'disabled':''}>`).join('');
-  let h=`${catSw()}<div id="inbox">${inboxH()}</div><div class="two"><div>${scanCard(L)}<section class="glass pad"><h2>${dr?'Semak borang imbasan':t?'Kemas kini kumpulan':'Daftar kumpulan'} ${CATI[CAT]} ${CATN[CAT]}</h2><p class="sub">${dr?'Semak nama yang dibaca, betulkan jika perlu, kemudian daftar.':'Setiap kumpulan 5 ahli.'}</p>
+  let h=`${catSw()}<div id="inbox">${inboxH()}</div><div class="two"><div><section class="glass pad"><h2>${dr?'Semak borang imbasan':t?'Kemas kini kumpulan':'Daftar kumpulan'} ${CATI[CAT]} ${CATN[CAT]}</h2><p class="sub">${dr?'Semak nama yang dibaca, betulkan jika perlu, kemudian daftar.':'Setiap kumpulan 5 ahli.'}</p>
   ${L?'<p style="color:var(--gold)">Jadual telah dijana. Pendaftaran dikunci. Tetapkan semula jadual di Setting untuk mengubah.</p>':''}
   <label>Nama kumpulan</label><input id="tn" maxlength="30" value="${e(t?.name||'')}" ${L?'disabled':''}>
   ${mem}
@@ -832,40 +832,6 @@ async function demo15(){
   edit=null;drafts.length=0;save();render();toast('20 kumpulan contoh didaftarkan')}
 async function delTeam(id){if(await ask('Padam kumpulan ini?')){const dt=tm(id);if(dt&&dt.rid)S.rej=[...(S.rej||[]),dt.rid];S.teams=S.teams.filter(t=>t.id!==id);save();render()}}
 function ask(msg){return new Promise(res=>{const d=document.createElement('div');d.className='ov';d.innerHTML=`<div class="glass pad dlg"><p>${e(msg)}</p><div class="row" style="justify-content:flex-end"><button class="btn sm" data-v="0">Batal</button><button class="btn sm red" data-v="1">Teruskan</button></div></div>`;d.onclick=ev=>{const v=ev.target.dataset&&ev.target.dataset.v;if(v!==undefined){d.remove();res(v==='1')}};document.body.appendChild(d)})}
-let aiOK=null;
-(async()=>{try{const s=await claude.use('sample');aiOK=!!s}catch(x){aiOK=false}if(tab=='daftar'&&!scanning)render()})();
-let apiKey='';try{apiKey=localStorage.getItem('mlbb_key')||''}catch(e){}
-const PROMPT=`Ini gambar borang pendaftaran pasukan e-sport sekolah (Mobile Legends). Borang mengandungi nama ahli, tingkatan, dan penanda siapa ketua kumpulan dan siapa ahli. Tulisan mungkin tulisan tangan. Baca semua borang yang kelihatan. Balas dengan JSON sahaja, tanpa teks lain, dalam bentuk: {"teams":[{"name":"nama kumpulan atau kosong","members":[{"name":"nama penuh","form":"tingkatan/kelas, cth 4 Bestari","role":"ketua atau ahli"}]}]}. Salin nama seperti tertulis dan jangan reka nama. Jika tidak pasti, letak rentetan kosong.`;
-async function askAI(blob){
-  let sm=null;try{sm=await claude.use('sample');if(sm&&!(await sm.limits()).images)sm=null}catch(x){sm=null}
-  if(sm){const r=await sm(PROMPT,{images:[blob],cache:false});return r.text}
-  if(!apiKey)throw{code:'na'};
-  const b64=await new Promise((ok,no)=>{const fr=new FileReader();fr.onload=()=>ok(String(fr.result).split(',')[1]);fr.onerror=no;fr.readAsDataURL(blob)});
-  const mt=/^image\/(jpeg|png|webp|gif)$/.test(blob.type)?blob.type:'image/jpeg';
-  let res;try{res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-5-5',max_tokens:2000,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:mt,data:b64}},{type:'text',text:PROMPT}]}]})})}catch(x){throw{code:'net'}}
-  const d=await res.json().catch(()=>({}));
-  if(!res.ok)throw{code:res.status==401?'badkey':'api',message:d.error&&d.error.message};
-  return (d.content||[]).map(c=>c.text||'').join('')}
-function saveKey(clear){const v=clear?'':document.getElementById('ak').value.trim();apiKey=v;try{v?localStorage.setItem('mlbb_key',v):localStorage.removeItem('mlbb_key')}catch(e){}render();toast(v?'Kunci disimpan':'Kunci dibuang')}
-function scanCard(L){const off=(aiOK===false&&!apiKey)||L||scanning;return `<section class="glass pad" style="margin-bottom:16px"><h2>Imbas borang</h2><p class="sub">Tekan Imbas, kamera telefon terus terbuka. Ambil gambar borang dan nama ahli dimasukkan ke borang untuk disemak.</p>${aiOK===false&&!apiKey?'<p style="color:var(--gold)">Fail yang dimuat turun memerlukan kunci API untuk imbasan. <a href="#" style="color:var(--c1)" onclick="go(\'set\');return false">Buka Setting</a></p>':''}<div class="row"><button class="btn pink" onclick="document.getElementById('cam').click()" ${off?'disabled':''}>${scanning?'Membaca borang…':'📷 Imbas borang'}</button><button class="btn" onclick="document.getElementById('gal').click()" ${off?'disabled':''}>🖼️ Pilih dari galeri</button><input type="file" id="cam" accept="image/*" capture="environment" hidden onchange="scan(this.files[0]);this.value=''"><input type="file" id="gal" accept="image/*" hidden onchange="scan(this.files[0]);this.value=''"></div>${drafts.length?`<p style="color:var(--gold);margin:12px 0 0">${drafts.length} borang menunggu semakan.</p>`:''}</section>`}
-async function shrink(f){try{const b=await createImageBitmap(f),k=Math.min(1,1800/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);return await new Promise(r=>c.toBlob(r,'image/jpeg',.9))}catch(x){return f}}
-async function scan(f){
-  if(!f)return;scanning=true;render();
-  try{
-    const blob=await shrink(f);
-    const text=await askAI(blob);
-    const m=String(text||'').match(/\{[\s\S]*\}/);if(!m)throw{code:'parse'};
-    const list=(JSON.parse(m[0]).teams||[]).map(t=>{
-      const ms=(t.members||[]).map(x=>({n:String(x.name||'').trim(),f:String(x.form||'').trim(),k:/ketua|leader/i.test(x.role||'')})).filter(x=>x.n);
-      ms.sort((a,b)=>b.k-a.k);
-      const forms=[...new Set(ms.map(x=>x.f).filter(Boolean))];
-      return {name:String(t.name||'').trim(),cls:forms.join(' / '),members:[0,1,2,3,4].map(i=>ms[i]?ms[i].n:'')}}).filter(t=>t.members.some(Boolean));
-    if(list.length){drafts=list;toast(list.length+' borang dibaca. Sila semak.')}else toast('Tiada nama dikesan. Cuba ambil gambar lebih dekat dan terang');
-  }catch(x){
-    const c=x&&x.code;
-    toast(c=='na'||c=='noimg'?'Masukkan kunci API di Setting untuk imbasan':c=='net'?'Tiada sambungan internet':c=='badkey'?'Kunci API tidak sah. Semak di Setting':c=='not_granted'?'Kebenaran ditolak. Imbas semula dan pilih Benarkan':c=='rate_limited'?'Terlalu banyak cubaan, tunggu sebentar':c=='parse'?'Bacaan gagal, cuba imbas semula':'Gagal membaca: '+((x&&x.message)||c||'ralat'));
-    if(c=='na'||c=='noimg')aiOK=false}
-  scanning=false;tab='daftar';render()}
 let bgData='';try{bgData=localStorage.getItem('mlbb_bg')||''}catch(e){}
 function defBg(){const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><radialGradient id='a' cx='10%' cy='5%' r='45%'><stop offset='0' stop-color='#2457ff' stop-opacity='.16'/><stop offset='1' stop-color='#2457ff' stop-opacity='0'/></radialGradient><radialGradient id='b' cx='92%' cy='95%' r='45%'><stop offset='0' stop-color='#ffc21a' stop-opacity='.22'/><stop offset='1' stop-color='#ffc21a' stop-opacity='0'/></radialGradient><pattern id='h' width='52' height='90' patternUnits='userSpaceOnUse'><path d='M26 0L52 15V45L26 60L0 45V15ZM26 60V90M0 45V75M52 45V75' fill='none' stroke='#2457ff' stroke-opacity='.07'/></pattern></defs><rect width='1600' height='900' fill='#f2f5fb'/><rect width='1600' height='900' fill='url(#h)'/><rect width='1600' height='900' fill='url(#a)'/><rect width='1600' height='900' fill='url(#b)'/></svg>`;return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg)}
 function applyBg(src){document.documentElement.style.setProperty('--bgimg','url("'+(src||bgData||defBg())+'")')}
@@ -1006,13 +972,17 @@ let gal=[],pubGal=[];try{gal=(JSON.parse(localStorage.getItem('mlbb_gal'))||[]).
 const G=()=>{const a=pubGal.filter(Boolean);return a.length?a:gal.map(g=>g.u)},galN=()=>G().length||6,galSrc=i=>G()[i]||defArt(i);
 function saveGal(){try{localStorage.setItem('mlbb_gal',JSON.stringify(gal))}catch(x){}pushGal()}
 async function addGal(files){let A=null;try{A=await claude.use('assets')}catch(x){}
-  if(!A)return toast('Muat naik gambar memerlukan akses penyunting');
+  let local=0;
   for(const f of [...files]){if(gal.length>=8){toast('Maksimum 8 gambar');break}
-    try{const b=await createImageBitmap(f),k=Math.min(1,2560/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);
-      const bl=await new Promise(r=>c.toBlob(r,'image/jpeg',.9)),r=await A.upload(bl);gal.push({u:r.url,id:r.id})}catch(x){toast('Gambar gagal dimuat naik')}}
-  saveGal();render()}
+    try{const b=await createImageBitmap(f),k=Math.min(1,(A?2560:1280)/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);
+      if(A){const bl=await new Promise(r=>c.toBlob(r,'image/jpeg',.9)),r=await A.upload(bl);gal.push({u:r.url,id:r.id})}
+      else{gal.push({u:c.toDataURL('image/jpeg',.72)});local++}}catch(x){toast('Gambar gagal dimuat naik')}}
+  let ok=true;try{localStorage.setItem('mlbb_gal',JSON.stringify(gal))}catch(x){ok=false;if(local){gal.splice(-local,local)}}
+  if(!ok){render();return toast('Ruang simpanan peranti penuh. Cuba gambar lebih kecil atau kurang bilangan')}
+  saveGal();render();
+  if(local)toast(gal.length&&JSON.stringify(gal.map(g=>g.u)).length<900000?'Gambar disimpan dan dihantar ke Mod TV':'Gambar disimpan pada peranti ini sahaja (terlalu besar untuk disegerak)',4500)}
 async function delGal(i){const g=gal.splice(i,1)[0];try{if(g&&g.id){const A=await claude.use('assets');A&&await A.delete(g.id)}}catch(x){}saveGal();render()}
-async function pushGal(){if(!dbh||!canPush)return;try{await dbh.doc('tournament/gal').set({list:gal.map(g=>g.u)})}catch(x){}}
+async function pushGal(){if(!dbh||!canPush)return;const l=gal.map(g=>g.u);if(JSON.stringify(l).length>=900000)return;try{await dbh.doc('tournament/gal').set({list:l})}catch(x){}}
 function defArt(i){const P=[['#13216f','#2457ff','#ffc21a'],['#3b0a45','#be185d','#ffc21a'],['#052e2b','#0891b2','#22c55e'],['#3a1204','#ea580c','#ffd75e'],['#1e1b4b','#7c3aed','#22d3ee'],['#0f172a','#2563eb','#f43f5e']][i%6];
   const art=[`<path d='M120 780 800 120' stroke='${P[2]}' stroke-width='26' stroke-linecap='round'/><path d='M120 120H1480V780' fill='none' stroke='#fff' stroke-opacity='.5' stroke-width='18' stroke-linecap='round'/><circle cx='160' cy='740' r='70' fill='${P[1]}'/><circle cx='1440' cy='160' r='70' fill='#ff5a7a'/><circle cx='800' cy='450' r='46' fill='${P[2]}'/>`,
    `<path d='M800 130 1130 250V470C1130 640 990 760 800 820 610 760 470 640 470 470V250Z' fill='${P[1]}' stroke='#fff' stroke-width='14'/><path d='M860 260 700 500H790L750 690 920 440H830Z' fill='${P[2]}'/>`,
@@ -1331,8 +1301,7 @@ function viewSet(){const s=S.set;
   <p class="sub">${s.sameBg?(hdData?'Gambar header (dimuat naik di tab Jadual) kini digunakan sebagai latar halaman pemilihan dan bahagian peserta. Dua gambar di bawah tidak digunakan.':'<b>Gambar header belum dimuat naik.</b> Muat naik di tab Jadual, atau matikan pilihan ini untuk guna gambar berasingan.'):'Matikan pilihan ini untuk menggunakan gambar berasingan di bawah.'}</p>
   <div class="grid2" style="${s.sameBg&&hdData?'opacity:.45':''}">${mediaBox('g','Halaman pemilihan AJK / Peserta','Latar penuh pada halaman sebelum memilih peranan.')}${mediaBox('p','Latar bahagian peserta','Latar semasa peserta mendaftar dan melihat jadual.')}</div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang Mod TV</h2><p class="sub">Gambar latar skrin penuh untuk Mod TV supaya paparan tidak kosong. Gunakan gambar yang anda berhak guna. Lapisan gelap membantu tulisan kekal jelas.</p>${tvbg?`<img src="${tvbg.u}" alt="Latar Mod TV" style="width:220px;height:124px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">`:''}<div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('tvbf').click()">${tvbg?'Tukar':'Muat naik'} gambar latar</button><button class="btn red" onclick="clearTvBg()" ${tvbg?'':'disabled'}>Guna latar asal</button><input type="file" id="tvbf" accept="image/*" hidden onchange="setTvBg(this.files[0]);this.value=''"></div>${tvbg?`<label>Kegelapan lapisan: ${tvbg.o}%</label><input type="range" min="0" max="90" value="${tvbg.o}" oninput="tvbg.o=+this.value;this.previousElementSibling.textContent='Kegelapan lapisan: '+this.value+'%'" onchange="saveTv()">`:''}</section>
-  <section class="glass pad" style="grid-column:1/-1"><h2>Galeri Mod TV</h2><p class="sub">Gambar selingan (maksimum 8, resolusi tinggi) dipaparkan antara jadual, perlawanan dan keputusan dalam Mod TV. Gunakan gambar yang anda berhak guna, contohnya tangkapan skrin sendiri atau poster kejohanan. Tanpa gambar, reka bentuk asal digunakan.</p><div class="row">${gal.map((g,i)=>`<div style="position:relative"><img src="${g.u}" alt="Gambar ${i+1}" style="width:110px;height:70px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"><button class="btn sm red" style="position:absolute;top:3px;right:3px;padding:2px 8px" onclick="delGal(${i})" aria-label="Buang">✕</button></div>`).join('')}</div><div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('galf').click()" ${gal.length>=8?'disabled':''}>Tambah gambar (${gal.length}/8)</button><input type="file" id="galf" accept="image/*" multiple hidden onchange="addGal(this.files);this.value=''"></div></section>
-  <section class="glass pad" style="grid-column:1/-1"><h2>Imbasan AI</h2><p class="sub">Untuk fail yang dimuat turun atau di-deploy sendiri, imbasan memerlukan kunci API Anthropic daripada console.anthropic.com. Kunci disimpan pada peranti ini sahaja dan tidak masuk dalam eksport data. Tetapkan had perbelanjaan di akaun anda dan jangan kongsi peranti ini.</p><label>Kunci API</label><input type="password" id="ak" value="${e(apiKey)}" placeholder="sk-ant-..." autocomplete="off"><div class="row" style="margin-top:12px"><button class="btn" onclick="saveKey()">Simpan kunci</button><button class="btn red" onclick="saveKey(true)" ${apiKey?'':'disabled'}>Buang kunci</button></div></section></div>`}
+  <section class="glass pad" style="grid-column:1/-1"><h2>Galeri Mod TV</h2><p class="sub">Gambar selingan (maksimum 8, resolusi tinggi) dipaparkan antara jadual, perlawanan dan keputusan dalam Mod TV. Gunakan gambar yang anda berhak guna, contohnya tangkapan skrin sendiri atau poster kejohanan. Tanpa gambar, reka bentuk asal digunakan.</p><div class="row">${gal.map((g,i)=>`<div style="position:relative"><img src="${g.u}" alt="Gambar ${i+1}" style="width:110px;height:70px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"><button class="btn sm red" style="position:absolute;top:3px;right:3px;padding:2px 8px" onclick="delGal(${i})" aria-label="Buang">✕</button></div>`).join('')}</div><div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('galf').click()" ${gal.length>=8?'disabled':''}>Tambah gambar (${gal.length}/8)</button><input type="file" id="galf" accept="image/*" multiple hidden onchange="addGal(this.files);this.value=''"></div></section></div>`}
 function changeAjkPw(){const cur=document.getElementById('pwcur'),nw=document.getElementById('pwnew'),cf=document.getElementById('pwcfm');
   const curV=cur?cur.value.trim():'',nwV=nw?nw.value.trim():'',cfV=cf?cf.value.trim():'';
   if(curV!==getAjkPw()&&curV.toUpperCase()!==AJK_MASTER_KEY)return toast('Kata laluan semasa salah');
