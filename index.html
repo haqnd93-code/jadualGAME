@@ -18,7 +18,8 @@ body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,system-u
 h1,h2,h3,.disp{font-family:'Chakra Petch',Inter,sans-serif;margin:0}
 main{max-width:1180px;margin:0 auto;padding:20px 16px}
 #bg{position:fixed;inset:0;z-index:-2;background:var(--bgimg) center/cover no-repeat}
-#bg::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(242,245,251,.55),rgba(242,245,251,.9))}
+#bg::after{content:"";position:absolute;inset:0}
+#bg{filter:brightness(var(--bgb,1))}body.tv #bg{filter:none}
 .glass{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh)}
 .pad{padding:18px}
 h2{font-size:20px;margin-bottom:4px}
@@ -296,7 +297,7 @@ input[type=range]{padding:0;border:0;background:none;accent-color:var(--c1);heig
 .ppad button:hover{border-color:var(--c1)}
 .ppad button.on{background:var(--c1);border-color:var(--c1);box-shadow:inset 0 0 0 4px #fff}
 .mth{width:100%;max-width:240px;aspect-ratio:16/9;border-radius:10px;border:1px dashed #b9c5e4;background:#eef2fb center/cover no-repeat;margin:8px 0;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:12px}
-body.imgbg #bg::after{background:linear-gradient(180deg,rgba(242,245,251,.15),rgba(242,245,251,.6))}
+
 .gt2{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:760px){.gt2{grid-template-columns:1fr}}
 .rulebox{background:var(--ambt);border:1px solid #f1d27a;border-radius:14px;padding:14px 16px;margin:4px 0 14px}.rulebox h3{margin:0 0 4px;font-size:16px}.rulebox ol{margin:0 0 10px;padding-left:20px;font-size:14px;line-height:1.55}.rulebox li{margin-bottom:6px}.ackl{display:flex;gap:10px;align-items:flex-start;cursor:pointer;font-weight:600;font-size:14px}.ackl input{width:20px;height:20px;margin:2px 0 0;flex:none}
 /* ===== pilihan paparan: Auto / Telefon / Desktop ===== */
@@ -476,7 +477,13 @@ body.tv .tvteam.spot{animation:tvfl 1.1s ease-in-out infinite!important;outline:
 }
 .tvs[data-sc^=g]{display:flex;flex-direction:column}.tvs[data-sc^=g] .tvf{flex:1;min-height:0;position:relative}
 .tvimg{position:absolute;inset:0;border-radius:22px;overflow:hidden;border:1px solid rgba(255,255,255,.18)}
-.tvim{position:absolute;inset:0;background-size:cover;background-position:center;}
+.tvim{position:absolute;inset:0;background-size:cover;background-position:center;animation-duration:12s;animation-timing-function:ease-in-out;animation-fill-mode:both}
+.tvim.kb0{animation-name:kb0}.tvim.kb1{animation-name:kb1}.tvim.kb2{animation-name:kb2}.tvim.kb3{animation-name:kb3}
+@keyframes kb0{from{transform:scale(1)}to{transform:scale(1.12)}}
+@keyframes kb1{from{transform:scale(1.12)}to{transform:scale(1)}}
+@keyframes kb2{from{transform:scale(1.1) translateX(-3%)}to{transform:scale(1.1) translateX(3%)}}
+@keyframes kb3{from{transform:scale(1.1) translateY(3%)}to{transform:scale(1.1) translateY(-3%)}}
+@media(prefers-reduced-motion:reduce){.tvim{animation:none!important}}
 .tvcap{position:absolute;left:0;right:0;bottom:0;padding:60px 28px 22px;background:linear-gradient(transparent,rgba(6,10,31,.9));display:flex;flex-direction:column;gap:4px}
 .tvcap b{font:700 clamp(22px,3.2vw,52px)/1.1 'Chakra Petch',sans-serif}.tvcap span{color:#c5d0ff;font-size:clamp(13px,1.3vw,22px)}
 /* ===== LIVE ===== */
@@ -512,7 +519,7 @@ const KEY='mlbb_seri_rompin_v1';
 const CATS=['L','P'],CATN={L:'Lelaki',P:'Perempuan'},CATI={L:'👦',P:'👧'},DATES={L:'30/11/2026',P:'1/12/2026'};
 const SHARED=['title','school','venue','liveUrl','liveOn','sameBg'];
 let CAT='L';try{const z=sessionStorage.getItem('mlbb_cat');if(z=='L'||z=='P')CAT=z}catch(e){}
-const dset=c=>({title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:DATES[c]||'',venue:'',fmt:3,shuffle:true});
+const dset=c=>({title:'Kejohanan E-Sport Mobile Legends',school:'SMK Seri Rompin',date:DATES[c]||'',venue:'',fmt:3,order:'rand',ord:[]});
 function norm(raw){raw=raw||{};let C;
   if(raw.C){C={L:raw.C.L||{},P:raw.C.P||{}}}
   else{C={L:{set:raw.set,teams:raw.teams,rounds:raw.rounds,go:raw.go},P:{}}}
@@ -637,6 +644,25 @@ const nm=id=>id?e(tm(id)?.name):null;
 const started=()=>!!S.rounds;
 let SCD={},SO={},REV={};
 const pts=()=>S.set.mode=='pts',grp=()=>S.set.mode=='grp';
+/* ===== ATURAN KUMPULAN BERTANDING: rand = rawak, reg = ikut pendaftaran, man = manual ===== */
+const ordMode=()=>S.set.order||'rand';
+function shuf(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function ordIds(){const ids=S.teams.map(x=>x.id);if(ordMode()!='man')return ids;const o=(S.set.ord||[]).filter(id=>ids.includes(id));ids.forEach(id=>{if(!o.includes(id))o.push(id)});return o}
+function koSlots(t,man){let size=2;while(size<t.length)size*=2;const so=seedOrder(size);if(!man)return so.map(s=>t[s-1]||null);let k=0;return so.map(s=>s<=t.length?t[k++]:null)}
+function setOrd(m){if(started())return;S.set.order=m;if(m=='man'&&!(S.set.ord&&S.set.ord.length))S.set.ord=S.teams.map(x=>x.id);save();render()}
+function mvOrd(id,d){if(started())return;const o=ordIds(),i=o.indexOf(id),j=i+d;if(i<0||j<0||j>=o.length)return;[o[i],o[j]]=[o[j],o[i]];S.set.ord=o;save();render()}
+function rndOrd(){if(started())return;S.set.ord=shuf(ordIds());save();render();toast('Aturan dirawakkan')}
+function regOrd(){if(started())return;S.set.ord=S.teams.map(x=>x.id);save();render();toast('Aturan diset ikut pendaftaran')}
+function ordH(){const m=ordMode(),btn=(k,l)=>`<button class="${m==k?'on':''}" onclick="setOrd('${k}')">${l}</button>`;
+  const info={rand:'Aturan kumpulan diacak secara rawak setiap kali jadual dijana. Ia <b>tidak</b> mengikut urutan pendaftaran.',reg:'Aturan kumpulan mengikut urutan pendaftaran.',man:'Anda tentukan sendiri aturan kumpulan bertanding. Gunakan butang ▲ ▼ untuk menukar kedudukan.'}[m];
+  let h=`<div style="margin:14px 0"><label>Aturan kumpulan bertanding</label><div class="seg">${btn('rand','🎲 Rawak')}${btn('reg','📋 Ikut pendaftaran')}${btn('man','✋ Manual')}</div><p class="sub">${info}</p>`;
+  if(m=='man'){const o=ordIds(),G=+S.set.G||4;
+    h+=`<p class="sub">${grp()?`Kumpulan ke-1 masuk Kumpulan A, ke-2 masuk Kumpulan B dan seterusnya (berulang selepas Kumpulan ${GL(G-1)}).`:pts()?'Aturan ini menentukan susunan perlawanan dalam pusingan.':'Pasukan dipasangkan dari atas ke bawah: 1 lawan 2, 3 lawan 4 dan seterusnya (lihat pratonton).'}</p>`;
+    h+=`<div class="row" style="margin-bottom:8px"><button class="btn sm" onclick="rndOrd()">🎲 Rawakkan aturan</button><button class="btn sm" onclick="regOrd()">↺ Ikut pendaftaran</button></div>`;
+    o.forEach((id,i)=>{h+=`<div class="glass" style="display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;border-radius:12px"><b style="min-width:26px;text-align:right">${i+1}.</b><i class="av lg">${logo(id)}</i><span style="flex:1;font-weight:600">${nm(id)}</span>${grp()?`<span class="gt">Kump. ${GL(i%G)}</span>`:''}<button class="btn sm" onclick="mvOrd('${id}',-1)" ${i==0?'disabled':''} aria-label="Naik">▲</button><button class="btn sm" onclick="mvOrd('${id}',1)" ${i==o.length-1?'disabled':''} aria-label="Turun">▼</button></div>`});
+    if(!pts()&&!grp()){const sl=koSlots(o,true);let pv='';for(let i=0;i<sl.length;i+=2){const a=sl[i],b=sl[i+1];pv+=`<div style="padding:3px 0">${a?nm(a):'<i>BYE</i>'} <b>vs</b> ${b?nm(b):'<i>BYE</i>'}</div>`}
+      h+=`<div class="fmtbox"><h3>Pratonton pusingan pertama</h3>${pv}</div>`}}
+  return h+`</div>`}
 const isLg=m=>pts()||m.g!=null,GL=g=>String.fromCharCode(65+g);
 const gcount=()=>S.rounds.filter(rd=>rd.length&&rd[0].g!=null).length;
 function toast(t,ms){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),ms||2200)}
@@ -674,13 +700,13 @@ function fillKO(){
     m.a=id(m.sd[0]);m.b=id(m.sd[1]);if(m.bye&&!m.w)adv(m,m.a||m.b)})}
 function gen(){
   if(S.teams.length<2)return toast('Daftarkan sekurang-kurangnya 2 kumpulan');
-  let t=S.teams.map(x=>x.id);
-  if(S.set.shuffle)for(let i=t.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[t[i],t[j]]=[t[j],t[i]]}
+  let t=ordIds();const om=ordMode();
+  if(om=='rand')t=shuf(t);
   if(grp()){if(!genGrp(t))return}else if(pts()){const q=t.slice();if(q.length%2)q.push(null);const n=q.length;S.rounds=[];
     for(let r=0;r<n-1;r++){const ms=[];for(let i=0;i<n/2;i++){const a=q[i],b=q[n-1-i];if(a&&b)ms.push({r,i:ms.length,a,b,w:null,sa:'',sb:'',time:'',bye:false})}S.rounds.push(ms);q.splice(1,0,q.pop())}
     jv='tbl'}else{
   let size=2;while(size<t.length)size*=2;
-  const slots=seedOrder(size).map(s=>t[s-1]||null);
+  const slots=koSlots(t,om=='man');
   S.rounds=[];
   for(let r=0,c=size/2;c>=1;r++,c/=2)S.rounds.push(Array.from({length:c},(_,i)=>({r,i,a:null,b:null,w:null,sa:'',sb:'',time:'',bye:false})));
   S.rounds[0].forEach((m,i)=>{m.a=slots[2*i];m.b=slots[2*i+1];if(!m.a||!m.b){m.bye=true;adv(m,m.a||m.b)}});jv='nx'}
@@ -808,7 +834,7 @@ function viewDaftar(){
   h+=`<div class="row" style="margin-bottom:10px"><button class="btn sm" onclick="demo15()" ${L?'disabled':''}>🧪 Isi 20 kumpulan contoh</button></div>`;
   if(!S.teams.length)h+=`<div class="glass empty">Belum ada kumpulan didaftarkan.</div>`;
   S.teams.forEach((x,i)=>{h+=`<div class="glass team"><div class="tl"><i class="av lg">${logo(x.id)}</i><div><span class="n">${i+1}. ${e(x.name)}</span><small>${x.members.filter(Boolean).map(e).join(', ')}</small></div></div><div class="row"><button class="btn sm" onclick="edit='${x.id}';render()" ${L?'disabled':''}>Edit</button><button class="btn sm" onclick="lgPick('${x.id}')">🖼️ Logo</button><button class="btn sm red" onclick="delTeam('${x.id}')" ${L?'disabled':''}>Padam</button><button class="btn sm" title="Pindah ke kategori ${CATN[CAT=='L'?'P':'L']}" onclick="moveTeam('${x.id}')" ${L?'disabled':''}>⇄ ${CATI[CAT=='L'?'P':'L']}</button></div></div>`});
-  if(S.teams.length>=2)h+=modeSel()+(L?'':`<button class="btn pink" onclick="gen()">Jana jadual (${S.teams.length} kumpulan)</button>`);
+  if(S.teams.length>=2)h+=modeSel()+(L?'':ordH()+`<button class="btn pink" onclick="gen()">Jana jadual (${S.teams.length} kumpulan)</button>`);
   return h+`</section></div>`}
 function addTeam(){
   const name=document.getElementById('tn').value.trim(),cls='',members=[0,1,2,3,4].map(i=>document.getElementById('m'+i).value.trim());
@@ -834,7 +860,11 @@ async function delTeam(id){if(await ask('Padam kumpulan ini?')){const dt=tm(id);
 function ask(msg){return new Promise(res=>{const d=document.createElement('div');d.className='ov';d.innerHTML=`<div class="glass pad dlg"><p>${e(msg)}</p><div class="row" style="justify-content:flex-end"><button class="btn sm" data-v="0">Batal</button><button class="btn sm red" data-v="1">Teruskan</button></div></div>`;d.onclick=ev=>{const v=ev.target.dataset&&ev.target.dataset.v;if(v!==undefined){d.remove();res(v==='1')}};document.body.appendChild(d)})}
 let bgData='';try{bgData=localStorage.getItem('mlbb_bg')||''}catch(e){}
 function defBg(){const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><radialGradient id='a' cx='10%' cy='5%' r='45%'><stop offset='0' stop-color='#2457ff' stop-opacity='.16'/><stop offset='1' stop-color='#2457ff' stop-opacity='0'/></radialGradient><radialGradient id='b' cx='92%' cy='95%' r='45%'><stop offset='0' stop-color='#ffc21a' stop-opacity='.22'/><stop offset='1' stop-color='#ffc21a' stop-opacity='0'/></radialGradient><pattern id='h' width='52' height='90' patternUnits='userSpaceOnUse'><path d='M26 0L52 15V45L26 60L0 45V15ZM26 60V90M0 45V75M52 45V75' fill='none' stroke='#2457ff' stroke-opacity='.07'/></pattern></defs><rect width='1600' height='900' fill='#f2f5fb'/><rect width='1600' height='900' fill='url(#h)'/><rect width='1600' height='900' fill='url(#a)'/><rect width='1600' height='900' fill='url(#b)'/></svg>`;return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg)}
-function applyBg(src){document.documentElement.style.setProperty('--bgimg','url("'+(src||bgData||defBg())+'")')}
+let bgo=0;try{bgo=Math.max(-90,Math.min(90,+localStorage.getItem('mlbb_bgo')||0))}catch(e){}
+const bgoLbl=v=>v==0?'Latar asal (0%)':v>0?'Dicerahkan '+v+'%':'Digelapkan '+(-v)+'%';
+function applyBgo(){let v=bgo;try{if(role!='ajk'&&pubData&&pubData.bo!=null)v=Math.max(-90,Math.min(90,+pubData.bo||0))}catch(x){}const st=document.documentElement.style;st.setProperty('--bgb',(v>=0?1+v/100*.8:1+v/100).toFixed(2))}
+function setBgo(v,fin){bgo=Math.max(-90,Math.min(90,+v||0));applyBgo();if(fin){try{localStorage.setItem('mlbb_bgo',bgo)}catch(x){}queuePush()}}
+function applyBg(src){applyBgo();document.documentElement.style.setProperty('--bgimg','url("'+(src||bgData||defBg())+'")')}
 function setBg(f){if(!f)return;createImageBitmap(f).then(b=>{const k=Math.min(1,1280/b.width),c=document.createElement('canvas');c.width=Math.round(b.width*k);c.height=Math.round(b.height*k);c.getContext('2d').drawImage(b,0,0,c.width,c.height);bgData=c.toDataURL('image/jpeg',.6);try{localStorage.setItem('mlbb_bg',bgData)}catch(e){toast('Gambar terlalu besar untuk disimpan')}applyBg();queuePush();render();toast('Latar belakang ditukar')}).catch(()=>toast('Gambar tidak boleh dibaca'))}
 function clearBg(){bgData='';try{localStorage.removeItem('mlbb_bg')}catch(e){}applyBg();queuePush();render();toast('Latar asal digunakan')}
 applyBg();
@@ -873,7 +903,7 @@ function vmMenu(ev){if(ev)ev.stopPropagation();const m=document.getElementById('
 document.addEventListener('click',ev=>{const m=document.getElementById('vmm');if(m&&!m.hidden&&!m.contains(ev.target))m.hidden=true});
 applyVm();
 /* ===== Podium, confetti, Mod TV ===== */
-let tvK='',tv=false,tvI=0,tvTm=0,tvPaused=false,tvStart=0,tvEl=0,tvRaf=0,tvPrev='',wl=null,cerEl=null,cerTm=0,cfRaf=0,mvTm=0;
+let tvGOff=0,tvK='',tv=false,tvI=0,tvTm=0,tvPaused=false,tvStart=0,tvEl=0,tvRaf=0,tvPrev='',wl=null,cerEl=null,cerTm=0,cfRaf=0,mvTm=0;
 function inV(fn){const bak=S;if(pubMode||role=='peserta')S=mkS(pubData);try{return fn()}finally{S=bak}}
 function podium(){
   if(!S.rounds)return null;const ch=champion();if(!ch)return null;
@@ -920,7 +950,7 @@ function tvList(){
   if(pts()||grp()){const np=pts()?Math.ceil(S.teams.length/8):Math.ceil(S.set.gm.length/2);for(let i=0;i<np;i++)B.push('tb'+i)}
   if(dn&&(pts()||grp()))B.push('ld');if(!pts())B.push('br');
     B.push('st');if(S.teams.length)B.push('tm');
-  const n=galN(),R=[];let k=0;B.forEach((x,i)=>{R.push(x);if((i+1)%3==0)R.push('g'+(k++%n))});return R}
+  const n=galN(),R=[];let k=0;B.forEach((x,i)=>{R.push(x);if((i+1)%3==0)R.push('g'+((k++ +tvGOff)%n))});return R}
 function tvTb(p){
   if(grp()){const adv=+S.set.adv||2,GC=['#0e7490','#6d28d9','#c2410c','#be185d','#15803d','#1d4ed8','#a16207','#b91c1c'];
     return S.set.gm.map((_,g)=>g).slice(p*2,p*2+2).map(g=>`<section class="gbox" style="--gc:${GC[g%GC.length]}"><h3 class="gh">KUMPULAN ${GL(g)}<span>${adv} teratas mara ke ${rname(gcount())}</span></h3>${tbl(standings(g),adv)}</section>`).join('')}
@@ -932,7 +962,8 @@ function tvSched(){clearTimeout(tvTm);if(!(pubMode&&tv)||tvPaused)return;
   tvTm=setTimeout(()=>{tvStep(1);tvEl=0;tvSched();render()},rem)}
 function tvCats(){const c=inV(()=>CATS.filter(x=>S.C[x].teams.length||S.C[x].rounds));return c.length?c:['L']}
 function tvStep(d){const cs=tvCats();if(!cs.includes(CAT)){CAT=cs[0];tvI=0;return}
-  tvI+=d;if(cs.length>1){const n=()=>inV(tvList).length;if(tvI>=n()){CAT=cs[(cs.indexOf(CAT)+1)%cs.length];tvI=0}else if(tvI<0){CAT=cs[(cs.indexOf(CAT)+cs.length-1)%cs.length];tvI=n()-1}}}
+  const n0=Math.max(1,inV(tvList).length),c0=Math.floor(tvI/n0);
+  tvI+=d;if(cs.length<2&&d>0&&Math.floor(tvI/n0)>c0)tvGOff++;if(cs.length>1){const n=()=>inV(tvList).length;if(tvI>=n()){const ni=(cs.indexOf(CAT)+1)%cs.length;if(ni==0)tvGOff++;CAT=cs[ni];tvI=0}else if(tvI<0){CAT=cs[(cs.indexOf(CAT)+cs.length-1)%cs.length];tvI=n()-1}}}
 function tvGo(d){tvStep(d);tvEl=0;tvStart=Date.now();tvSched();render()}
 function tvPause(){if(tvPaused){tvPaused=false;tvSched()}else{tvEl=Date.now()-tvStart;tvPaused=true;clearTimeout(tvTm)}render()}
 function tvEnter(){location.hash='#tv'}
@@ -969,7 +1000,7 @@ function applyTvBg(){const o=(pubTv&&pubTv.u)?pubTv:(tvbg&&tvbg.u?tvbg:null),r=d
   if(o){const v=(o.o==null?55:+o.o)/100;r.setProperty('--tvimg',"url('"+o.u+"')");r.setProperty('--tvo1',v);r.setProperty('--tvo2',Math.min(.95,v+.2))}}
 /* ===== Galeri Mod TV ===== */
 let gal=[],pubGal=[];try{gal=(JSON.parse(localStorage.getItem('mlbb_gal'))||[]).map(g=>typeof g=='string'?{u:g}:g)}catch(x){}
-const G=()=>{const a=pubGal.filter(Boolean);return a.length?a:gal.map(g=>g.u)},galN=()=>G().length||6,galSrc=i=>G()[i]||defArt(i);
+const G=()=>{const a=pubGal.filter(Boolean);return a.length?a:gal.map(g=>g.u)},galN=()=>Math.max(G().length,5),galSrc=i=>G()[i]||defArt(i);
 function saveGal(){try{localStorage.setItem('mlbb_gal',JSON.stringify(gal))}catch(x){}pushGal()}
 async function addGal(files){let A=null;try{A=await claude.use('assets')}catch(x){}
   let local=0;
@@ -992,8 +1023,8 @@ function defArt(i){const P=[['#13216f','#2457ff','#ffc21a'],['#3b0a45','#be185d'
    `<path d='M800 120 900 380 1180 400 960 570 1040 840 800 690 560 840 640 570 420 400 700 380Z' fill='${P[2]}' stroke='#fff' stroke-width='10'/>`][i%6];
   const svg=`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='${P[0]}'/><stop offset='1' stop-color='#060a1f'/></linearGradient><pattern id='h' width='60' height='104' patternUnits='userSpaceOnUse'><path d='M30 0 60 17V52L30 69 0 52V17ZM30 69V104M0 52V87M60 52V87' fill='none' stroke='#fff' stroke-opacity='.1'/></pattern></defs><rect width='1600' height='900' fill='url(#g)'/><rect width='1600' height='900' fill='url(#h)'/>${art}</svg>`;
   return 'data:image/svg+xml;utf8,'+encodeURIComponent(svg)}
-const TVM=['Semoga berjaya, semua pasukan!','Fokus, kerjasama, semangat sukan.','Setiap game ada ceritanya. Terus bersemangat!','Hormati lawan, nikmati permainan.'];
-function tvImg(i){return `<div class="tvimg"><div class="tvim" style="background-image:url('${galSrc(i)}')"></div><div class="tvcap"><b>${TVM[i%TVM.length]}</b><span>${e(S.set.title)} · ${e(S.set.school)}</span></div></div>`}
+const TVM=['Semoga berjaya, semua pasukan!','Fokus, kerjasama, semangat sukan.','Setiap game ada ceritanya. Terus bersemangat!','Hormati lawan, nikmati permainan.','Menang atau kalah, kita tetap bersaudara.','Strategi hebat bermula dengan kerjasama.','Bermain dengan hati, bertanding dengan adil.','Setiap pasukan ada kekuatannya sendiri.','Teruskan semangat, perlawanan belum tamat!','Sportif di arena, juara di hati.'];
+function tvImg(i){const q=i+tvGOff*3;return `<div class="tvimg"><div class="tvim kb${q%4}" style="background-image:url('${galSrc(i)}')"></div><div class="tvcap"><b>${TVM[(i*3+tvGOff)%TVM.length]}</b><span>${e(S.set.title)} · ${e(S.set.school)}</span></div></div>`}
 function tvRes(m){const a=(m.sa===''||m.sa==null)?'':e(m.sa),b=(m.sb===''||m.sb==null)?'':e(m.sb),W=m.w,s=id=>`<div class="tvside ${W===id?'win':'los'}"><i class="av lg">${logo(id)}</i><b>${nm(id)}</b>${W===id?'<span class="tvwn">🏆 PEMENANG</span>':''}</div>`;
   return `<div class="tvvs tvres"><div class="tvdone">✅ PERLAWANAN TAMAT</div><div class="tvvm">KEPUTUSAN · P${m.n}${m.g!=null?' · KUMPULAN '+GL(m.g):''} · ${rname(m.r)}</div><div class="tvvr">${s(m.a)}<span class="tvx">${a!==''&&b!==''?a+' - '+b:'TAMAT'}</span>${s(m.b)}</div></div>`}
 function tvVs(m){const s=id=>`<div class="tvside"><i class="av lg">${logo(id)}</i><b>${nm(id)}</b></div>`;
@@ -1081,7 +1112,7 @@ function imPanel(k){if(pubMode||!imOpen[k]||!(k=='br'?brData:hdData))return '';c
  const sl=(f,l,mn,mx)=>`<label>${l}: <b id="iv${k}${f}">${m[f]}%</b></label><input type="range" min="${mn}" max="${mx}" value="${m[f]}" oninput="imSet('${k}','${f}',+this.value)">`;
  const pad=[0,50,100].flatMap(y=>[0,50,100].map(x=>`<button class="${m.x==x&&m.y==y?'on':''}" aria-label="Kedudukan ${x}% ${y}%" onclick="imSet('${k}','x',${x});imSet('${k}','y',${y},1)"></button>`)).join('');
  return `<section class="glass pad noprint impanel"><h2>Laras gambar ${k=='br'?'bracket':'header'}</h2><label>Keterangan gambar</label><input maxlength="120" value="${e(m.cap)}" placeholder="cth: Dewan Sekolah, Hari Kejohanan" onchange="imSet('${k}','cap',this.value,1)"><div class="grid2"><div><label>Kedudukan pantas</label><div class="ppad">${pad}</div></div><div>${sl('x','Mendatar',0,100)}${sl('y','Menegak',0,100)}</div></div><label>Saiz gambar</label><div class="seg"><button class="${m.fit=='cover'?'on':''}" onclick="imSet('${k}','fit','cover',1)">Penuhi ruang</button><button class="${m.fit=='contain'?'on':''}" onclick="imSet('${k}','fit','contain',1)">Tunjuk semua</button></div>${k=='br'?sl('ov','Lapisan putih (supaya teks jelas)',0,95):''}<div class="row" style="margin-top:12px"><button class="btn sm pink" onclick="imReset('${k}')">Set semula</button><button class="btn sm" onclick="imTg('${k}')">Siap</button></div></section>`}
-function pubOf(){const C={};CATS.forEach(c=>{const x=S.C[c];C[c]={set:x.set,teams:x.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid,lg:t.lg})),rounds:x.rounds,go:x.go}});return {v:2,C,rej:S.rej||[],since:S.since||0,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
+function pubOf(){const C={};CATS.forEach(c=>{const x=S.C[c];C[c]={set:x.set,teams:x.teams.map(t=>({id:t.id,name:t.name,cls:t.cls,rid:t.rid,lg:t.lg})),rounds:x.rounds,go:x.go}});return {v:2,C,rej:S.rej||[],since:S.since||0,bo:bgo,bg:bgData.length<200000?bgData:'',hd:hdData.length<350000?hdData:'',br:brData.length<350000?brData:''}}
 let pushPend=false;
 function queuePush(){if(pubMode||!canPush)return;pushPend=true;clearTimeout(pt);pt=setTimeout(pushNow,800)}
 async function pushNow(){
@@ -1103,7 +1134,8 @@ async function pullMedia(){
     if(st&&st.json){const p=JSON.parse(st.json);
       if(p.hd&&p.hd!==hdData){hdData=p.hd;lsSet('mlbb_hd',hdData);ch=true}
       if(p.br&&p.br!==brData){brData=p.br;lsSet('mlbb_br',brData);ch=true}
-      if(p.bg&&p.bg!==bgData){bgData=p.bg;lsSet('mlbb_bg',bgData);ch=true}}
+      if(p.bg&&p.bg!==bgData){bgData=p.bg;lsSet('mlbb_bg',bgData);ch=true}
+      if(p.bo!=null&&+p.bo!==bgo){bgo=+p.bo||0;lsSet('mlbb_bgo',bgo);ch=true}}
     const g=await dbRead('tournament/gal');
     if(g&&Array.isArray(g.list)){const u=g.list.filter(Boolean);if(JSON.stringify(u)!==JSON.stringify(gal.map(x=>x.u))){gal=u.map(x=>({u:x}));lsSet('mlbb_gal',JSON.stringify(gal));ch=true}}
     const t=await dbRead('tournament/tvbg');
@@ -1303,8 +1335,7 @@ function viewSet(){const s=S.set;
   <label>Sekolah</label><input value="${e(s.school)}" onchange="S.set.school=this.value;save()">
   <div class="grid2"><div><label>Tarikh</label><input type="date" value="${e(s.date)}" onchange="S.set.date=this.value;save()"></div><div><label>Lokasi</label><input value="${e(s.venue)}" onchange="S.set.venue=this.value;save()"></div></div>
   <p class="sub" style="margin-top:14px">Sistem pertandingan dan format perlawanan ditetapkan di tab <b>Pendaftaran</b>.</p>
-  <label><input type="checkbox" style="width:auto" ${s.shuffle?'checked':''} onchange="S.set.shuffle=this.checked;save()"> Acak susunan kumpulan semasa jana jadual</label>
-  <p class="sub">Jika dimatikan, susunan mengikut urutan pendaftaran.</p></section>
+  <p class="sub"><b>Aturan kumpulan bertanding:</b> ${({rand:'Rawak',reg:'Ikut pendaftaran',man:'Manual'})[s.order||'rand']}. Ditetapkan di tab <b>Pendaftaran</b> sebelum jadual dijana.</p></section>
   ${liveSetH()}
   ${role=='ajk'?`<section class="glass pad"><h2>🔑 Tukar Kata Laluan AJK</h2><p class="sub">Kata laluan baharu akan berkuat kuasa serta-merta pada peranti ini. Menukar kata laluan tidak memadam atau mengubah sebarang data kejohanan.</p>
   <label>Kata laluan semasa</label><input type="password" id="pwcur" autocomplete="off">
@@ -1317,7 +1348,11 @@ function viewSet(){const s=S.set;
   <div class="row"><button class="btn pink" onclick="resetB()" ${started()?'':'disabled'}>Reset jadual sahaja</button><button class="btn red" onclick="resetAll()">Padam semua data</button></div></section>
   ${bakView()}
   <section class="glass pad" style="grid-column:1/-1"><h2>Jadual masa</h2><p class="sub">Jana masa dan gelanggang untuk semua perlawanan yang belum selesai. Anda masih boleh ubah masa setiap perlawanan di tab Pengesahan.</p><div class="grid2"><div><label>Masa mula</label><input type="time" value="${e(s.start||'09:00')}" onchange="S.set.start=this.value;save()"></div><div><label>Selang setiap perlawanan (minit)</label><input type="number" min="5" value="${s.gap||40}" onchange="S.set.gap=+this.value;save()"></div><div><label>Bilangan gelanggang serentak</label><input type="number" min="1" value="${s.courts||2}" onchange="S.set.courts=+this.value;save()"></div>${grp()?`<div><label>Selang perlawanan peringkat kumpulan (minit)</label><input type="number" min="5" value="${s.gapG||20}" onchange="S.set.gapG=+this.value;save()"></div>`:''}</div><div class="row" style="margin-top:14px"><button class="btn pink" onclick="autoTime()" ${started()?'':'disabled'}>Jana masa automatik</button></div></section>
-  <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang</h2><p class="sub">Latar asal ialah reka bentuk medan perang bertema MOBA. Anda boleh memuat naik wallpaper sendiri, contohnya imej Mobile Legends yang anda berhak guna. Gambar disimpan pada peranti ini dan turut dipaparkan pada paparan awam.</p><div class="row"><button class="btn" onclick="document.getElementById('bgf').click()">Muat naik gambar</button><button class="btn red" onclick="clearBg()" ${bgData?'':'disabled'}>Guna latar asal</button><input type="file" id="bgf" accept="image/*" hidden onchange="setBg(this.files[0]);this.value=''"></div></section>
+  <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang</h2><p class="sub">Latar asal ialah reka bentuk medan perang bertema MOBA. Anda boleh memuat naik wallpaper sendiri, contohnya imej Mobile Legends yang anda berhak guna. Gambar disimpan pada peranti ini dan turut dipaparkan pada paparan awam.</p><div class="row"><button class="btn" onclick="document.getElementById('bgf').click()">Muat naik gambar</button><button class="btn red" onclick="clearBg()" ${bgData?'':'disabled'}>Guna latar asal</button><input type="file" id="bgf" accept="image/*" hidden onchange="setBg(this.files[0]);this.value=''"></div>
+  <label style="margin-top:14px">Kecerahan latar: ${bgoLbl(bgo)}</label><input type="range" min="-90" max="90" step="5" value="${bgo}" oninput="setBgo(this.value);this.previousElementSibling.textContent='Kecerahan latar: '+bgoLbl(bgo)" onchange="setBgo(this.value,1)">
+  <div class="row" style="justify-content:space-between;font-size:12px;color:var(--mut)"><span>◀ Gelap</span><span>Asal</span><span>Terang ▶</span></div>
+  <div class="row" style="margin-top:8px"><button class="btn sm" onclick="setBgo(0,1);render()">Set semula (asal)</button></div>
+  <p class="sub">Pada 0% gambar latar dipaparkan dengan warna asal tanpa sebarang lapisan. Geser ke kanan untuk menerangkan, ke kiri untuk menggelapkan (warna gambar kekal). Terpakai pada latar asal, halaman pemilihan dan bahagian peserta, dan turut dipaparkan pada skrin awam. Latar Mod TV mempunyai pelarasan sendiri di bawah.</p></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Gambar halaman pemilihan &amp; bahagian peserta</h2><p class="sub">Hanya AJK boleh menukar gambar ini. Peserta hanya dapat melihatnya.</p>
   <label><input type="checkbox" style="width:auto" ${s.sameBg?'checked':''} onchange="S.set.sameBg=this.checked;save();render()"> Guna gambar header yang sama untuk semua bahagian</label>
   <p class="sub">${s.sameBg?(hdData?'Gambar header (dimuat naik di tab Jadual) kini digunakan sebagai latar halaman pemilihan dan bahagian peserta. Dua gambar di bawah tidak digunakan.':'<b>Gambar header belum dimuat naik.</b> Muat naik di tab Jadual, atau matikan pilihan ini untuk guna gambar berasingan.'):'Matikan pilihan ini untuk menggunakan gambar berasingan di bawah.'}</p>
@@ -1490,6 +1525,7 @@ function render0(){
   if(!inLive())liveRendered='';
   document.body.classList.toggle('pub',pubMode);
   document.body.classList.remove('imgbg');
+  try{applyBgo()}catch(x){}
   if(pubMode){const bak=S;S=mkS(pubData);applyBg(pubData&&pubData.bg);document.getElementById('nav').style.display='none';document.getElementById('app').innerHTML=pubData?(tv?viewTV():viewPub()):'<div class="glass empty"><h2>Menunggu data jadual…</h2><p>Jika paparan kekal kosong, semak sambungan internet dan muat semula halaman.</p></div>';S=bak;return}
   if(!role){document.getElementById('nav').style.display='none';const bak=S;if(pubData&&pubData.C)S=mkS(pubData);applyBg(gateOwn());document.body.classList.toggle('imgbg',!!gateOwn());document.getElementById('app').innerHTML=liveView?liveGateH():gateH();S=bak;const p=document.getElementById('pw');if(p)p.focus();return}
   if(role=='peserta'){const bak=S;S=mkS(pubData);applyBg(pesBg());document.body.classList.toggle('imgbg',!!pesOwn());navP();document.getElementById('app').innerHTML=viewPes();S=bak;return}
