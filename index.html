@@ -547,9 +547,9 @@ async function moveTeam(id){const t=tm(id);if(!t)return;const o=CAT=='L'?'P':'L'
   if(!await ask(`Pindahkan "${t.name}" ke kategori ${CATN[o]}?`))return;
   S.C[CAT].teams=S.C[CAT].teams.filter(x=>x.id!==id);S.C[o].teams.push(t);edit=null;save();render();toast('Dipindahkan ke kategori '+CATN[o])}
 /* ===== Kata laluan AJK (boleh tukar) + kunci pemulihan ===== */
-const PW_KEY='mlbb_ajkpw';
+const PW_KEY='mlbb_ajkpw2';
 const AJK_MASTER_KEY='HAQHENSEM';
-function getAjkPw(){try{return localStorage.getItem(PW_KEY)||'12345'}catch(e){return '12345'}}
+function getAjkPw(){try{return localStorage.getItem(PW_KEY)||'HAQPADU'}catch(e){return 'HAQPADU'}}
 function setAjkPw(v){try{localStorage.setItem(PW_KEY,v)}catch(e){}}
 /* Kata laluan yang diterima oleh firestore.rules (kata laluan lama dalam rules). Semakan kata laluan sebenar kini dibuat oleh pwOk() melalui cincangan yang disimpan di awan. */
 const RULES_PIN='12345';
@@ -564,14 +564,14 @@ function sha256(m){const P=[];for(let n=2;P.length<64;n++)if(P.every(p=>n%p))P.p
   return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
 const pwHash=v=>sha256('mlbb|ajk|'+v);
 async function pwOk(v){const h=pwHash(v);let cloud=null;
-  try{if(dbh){const d=await dbh.doc('tournament/pwh').get();if(d.exists&&d.data().h)cloud=d.data().h}}catch(x){}
+  try{if(dbh){const d=await dbh.doc('tournament/pwh2').get();if(d.exists&&d.data().h)cloud=d.data().h}}catch(x){}
   if(cloud)return h===cloud;
-  let lh=null;try{lh=localStorage.getItem('mlbb_ajkph')}catch(x){}
+  let lh=null;try{lh=localStorage.getItem('mlbb_ajkph2')}catch(x){}
   if(lh)return h===lh;
   return v===getAjkPw()}
 let S;try{S=mkS(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=mkS()}
 /* ===== SAMBUNGAN FIREBASE (projek: jadual-game) =====
-   Tanpa e-mel: semua pengguna masuk secara Anonymous. Kata laluan AJK (cth 12345) disemak oleh
+   Tanpa e-mel: semua pengguna masuk secara Anonymous. Kata laluan AJK lalai kini HAQPADU; firestore.rules masih menggunakan RULES_PIN (12345) disemak oleh
    firestore.rules (bukan dalam fail ini) - tukar kata laluan di firestore.rules sahaja. */
 const FB_CONFIG={
   apiKey:'AIzaSyC9nlhJpJKd6n8_mDrOD-5iE6_j4nL_dYY',
@@ -1382,8 +1382,8 @@ async function changeAjkPw(){const cur=document.getElementById('pwcur'),nw=docum
   if(curV.toUpperCase()!==AJK_MASTER_KEY&&!(await pwOk(curV)))return toast('Kata laluan semasa salah');
   if(nwV.length<4)return toast('Kata laluan baharu mestilah sekurang-kurangnya 4 aksara');
   if(nwV!==cfV)return toast('Pengesahan kata laluan baharu tidak sepadan');
-  const nh=pwHash(nwV);setAjkPw(nwV);try{localStorage.setItem('mlbb_ajkph',nh)}catch(x){}
-  let cloudOk=true;if(dbh){try{await dbh.doc('tournament/pwh').set({h:nh,t:Date.now()})}catch(x){cloudOk=false;console.error('Simpan kata laluan ke awan gagal:',x)}}
+  const nh=pwHash(nwV);setAjkPw(nwV);try{localStorage.setItem('mlbb_ajkph2',nh)}catch(x){}
+  let cloudOk=true;if(dbh){try{await dbh.doc('tournament/pwh2').set({h:nh,t:Date.now()})}catch(x){cloudOk=false;console.error('Simpan kata laluan ke awan gagal:',x)}}
   if(cur)cur.value='';if(nw)nw.value='';if(cf)cf.value='';render();
   toast(cloudOk?'Kata laluan AJK berjaya ditukar. Kata laluan lama tidak lagi diterima':'Kata laluan ditukar pada peranti ini sahaja (gagal disimpan ke awan, semak firestore.rules)',cloudOk?3000:7000)}
 function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='mlbb-seri-rompin.json';a.click()}
