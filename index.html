@@ -551,6 +551,24 @@ const PW_KEY='mlbb_ajkpw';
 const AJK_MASTER_KEY='HAQHENSEM';
 function getAjkPw(){try{return localStorage.getItem(PW_KEY)||'12345'}catch(e){return '12345'}}
 function setAjkPw(v){try{localStorage.setItem(PW_KEY,v)}catch(e){}}
+/* Kata laluan yang diterima oleh firestore.rules (kata laluan lama dalam rules). Semakan kata laluan sebenar kini dibuat oleh pwOk() melalui cincangan yang disimpan di awan. */
+const RULES_PIN='12345';
+function sha256(m){const P=[];for(let n=2;P.length<64;n++)if(P.every(p=>n%p))P.push(n);
+  const fr=x=>Math.floor((x-Math.floor(x))*4294967296),K=P.map(p=>fr(Math.cbrt(p))),rr=(x,n)=>x>>>n|x<<32-n;
+  const b=unescape(encodeURIComponent(m)),l=b.length*8,nw=((l+64>>9)<<4)+16,w=new Array(nw).fill(0);
+  for(let i=0;i<b.length;i++)w[i>>2]|=b.charCodeAt(i)<<24-(i%4)*8;w[l>>5]|=0x80<<24-l%32;w[nw-1]=l;
+  let H=P.slice(0,8).map(p=>fr(Math.sqrt(p)));
+  for(let i=0;i<nw;i+=16){const W=w.slice(i,i+16);for(let j=16;j<64;j++){const a=W[j-15],c=W[j-2];W[j]=(W[j-16]+(rr(a,7)^rr(a,18)^a>>>3)+W[j-7]+(rr(c,17)^rr(c,19)^c>>>10))|0}
+    let [a,b2,c,d,e,f,g,h]=H;for(let j=0;j<64;j++){const t1=h+(rr(e,6)^rr(e,11)^rr(e,25))+((e&f)^(~e&g))+K[j]+W[j],t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&b2)^(a&c)^(b2&c));h=g;g=f;f=e;e=(d+t1)|0;d=c;c=b2;b2=a;a=(t1+t2)|0}
+    H=[a,b2,c,d,e,f,g,h].map((x,k)=>(H[k]+x)|0)}
+  return H.map(x=>(x>>>0).toString(16).padStart(8,'0')).join('')}
+const pwHash=v=>sha256('mlbb|ajk|'+v);
+async function pwOk(v){const h=pwHash(v);let cloud=null;
+  try{if(dbh){const d=await dbh.doc('tournament/pwh').get();if(d.exists&&d.data().h)cloud=d.data().h}}catch(x){}
+  if(cloud)return h===cloud;
+  let lh=null;try{lh=localStorage.getItem('mlbb_ajkph')}catch(x){}
+  if(lh)return h===lh;
+  return v===getAjkPw()}
 let S;try{S=mkS(JSON.parse(localStorage.getItem(KEY)))}catch(e){S=mkS()}
 /* ===== SAMBUNGAN FIREBASE (projek: jadual-game) =====
    Tanpa e-mel: semua pengguna masuk secara Anonymous. Kata laluan AJK (cth 12345) disemak oleh
@@ -1359,12 +1377,15 @@ function viewSet(){const s=S.set;
   <div class="grid2" style="${s.sameBg&&hdData?'opacity:.45':''}">${mediaBox('g','Halaman pemilihan AJK / Peserta','Latar penuh pada halaman sebelum memilih peranan.')}${mediaBox('p','Latar bahagian peserta','Latar semasa peserta mendaftar dan melihat jadual.')}</div></section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Latar belakang Mod TV</h2><p class="sub">Gambar latar skrin penuh untuk Mod TV supaya paparan tidak kosong. Gunakan gambar yang anda berhak guna. Lapisan gelap membantu tulisan kekal jelas.</p>${tvbg?`<img src="${tvbg.u}" alt="Latar Mod TV" style="width:220px;height:124px;object-fit:cover;border-radius:12px;border:1px solid var(--line)">`:''}<div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('tvbf').click()">${tvbg?'Tukar':'Muat naik'} gambar latar</button><button class="btn red" onclick="clearTvBg()" ${tvbg?'':'disabled'}>Guna latar asal</button><input type="file" id="tvbf" accept="image/*" hidden onchange="setTvBg(this.files[0]);this.value=''"></div>${tvbg?`<label>Kegelapan lapisan: ${tvbg.o}%</label><input type="range" min="0" max="90" value="${tvbg.o}" oninput="tvbg.o=+this.value;this.previousElementSibling.textContent='Kegelapan lapisan: '+this.value+'%'" onchange="saveTv()">`:''}</section>
   <section class="glass pad" style="grid-column:1/-1"><h2>Galeri Mod TV</h2><p class="sub">Gambar selingan (maksimum 8, resolusi tinggi) dipaparkan antara jadual, perlawanan dan keputusan dalam Mod TV. Gunakan gambar yang anda berhak guna, contohnya tangkapan skrin sendiri atau poster kejohanan. Tanpa gambar, reka bentuk asal digunakan.</p><div class="row">${gal.map((g,i)=>`<div style="position:relative"><img src="${g.u}" alt="Gambar ${i+1}" style="width:110px;height:70px;object-fit:cover;border-radius:10px;border:1px solid var(--line)"><button class="btn sm red" style="position:absolute;top:3px;right:3px;padding:2px 8px" onclick="delGal(${i})" aria-label="Buang">✕</button></div>`).join('')}</div><div class="row" style="margin-top:12px"><button class="btn" onclick="document.getElementById('galf').click()" ${gal.length>=8?'disabled':''}>Tambah gambar (${gal.length}/8)</button><input type="file" id="galf" accept="image/*" multiple hidden onchange="addGal(this.files);this.value=''"></div></section></div>`}
-function changeAjkPw(){const cur=document.getElementById('pwcur'),nw=document.getElementById('pwnew'),cf=document.getElementById('pwcfm');
+async function changeAjkPw(){const cur=document.getElementById('pwcur'),nw=document.getElementById('pwnew'),cf=document.getElementById('pwcfm');
   const curV=cur?cur.value.trim():'',nwV=nw?nw.value.trim():'',cfV=cf?cf.value.trim():'';
-  if(curV!==getAjkPw()&&curV.toUpperCase()!==AJK_MASTER_KEY)return toast('Kata laluan semasa salah');
+  if(curV.toUpperCase()!==AJK_MASTER_KEY&&!(await pwOk(curV)))return toast('Kata laluan semasa salah');
   if(nwV.length<4)return toast('Kata laluan baharu mestilah sekurang-kurangnya 4 aksara');
   if(nwV!==cfV)return toast('Pengesahan kata laluan baharu tidak sepadan');
-  setAjkPw(nwV);if(cur)cur.value='';if(nw)nw.value='';if(cf)cf.value='';render();toast('Kata laluan AJK berjaya ditukar')}
+  const nh=pwHash(nwV);setAjkPw(nwV);try{localStorage.setItem('mlbb_ajkph',nh)}catch(x){}
+  let cloudOk=true;if(dbh){try{await dbh.doc('tournament/pwh').set({h:nh,t:Date.now()})}catch(x){cloudOk=false;console.error('Simpan kata laluan ke awan gagal:',x)}}
+  if(cur)cur.value='';if(nw)nw.value='';if(cf)cf.value='';render();
+  toast(cloudOk?'Kata laluan AJK berjaya ditukar. Kata laluan lama tidak lagi diterima':'Kata laluan ditukar pada peranti ini sahaja (gagal disimpan ke awan, semak firestore.rules)',cloudOk?3000:7000)}
 function exp(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:'application/json'}));a.download='mlbb-seri-rompin.json';a.click()}
 async function imp(f){if(!f)return;let d;try{d=JSON.parse(await f.text());if(!(d.C||(d.teams&&d.set)))throw 0}catch(x){return toast('Fail tidak sah')}
   if(!allEmpty()&&!await ask('Import akan menggantikan semua data semasa.\nData semasa disandarkan dahulu dan boleh dipulihkan. Teruskan?'))return;
@@ -1392,9 +1413,11 @@ async function ajkLogin(){const p=document.getElementById('pw'),v=p?p.value.trim
   if(FB_ON()&&fbAuth){
     if(!v)return bad();
     if(!uid){const w=location.protocol=='file:'?'Fail dibuka terus (file://). Muat naik ke hosting https atau buka melalui http://localhost.':fbErr=='auth/operation-not-allowed'?'Anonymous belum diaktifkan di Firebase > Authentication > Sign-in method.':fbErr=='auth/unauthorized-domain'?'Domain ini belum ditambah di Authentication > Settings > Authorized domains.':'Tidak dapat sambung ke Firebase ('+(fbErr||'tiada kod ralat')+').';return toast('⚠ '+w,9000)}
-    try{await dbh.doc('ajk_keys/'+uid).set({pin:v});canPush=true;await pullFull();setRole('ajk')}
+    if(!(await pwOk(v)))return bad();
+    try{try{await dbh.doc('ajk_keys/'+uid).set({pin:RULES_PIN})}catch(x1){if(x1&&x1.code=='permission-denied'&&v!==RULES_PIN)await dbh.doc('ajk_keys/'+uid).set({pin:v});else throw x1}
+      canPush=true;await pullFull();setRole('ajk')}
     catch(x){canPush=false;console.error('Log masuk AJK:',x);if(x&&x.code=='permission-denied')toast('Kata laluan salah',4000);else toast('Ralat: '+((x&&(x.code||x.message))||'tidak diketahui'),9000)}return}
-  if(v===getAjkPw())setRole('ajk');else bad()}
+  if(await pwOk(v))setRole('ajk');else bad()}
 function gateH(){const s=(pubC()&&pubC().set)||S.set;
   return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><p class="sub" style="margin-top:-4px">Penyertaan dibahagikan kepada <b>👦 bahagian Lelaki</b> dan <b>👧 bahagian Perempuan</b>.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div><section class="glass pad livegate${liveOn()?' on':''}"><div class="row" style="justify-content:space-between;gap:12px"><div><h2>${liveDot()} LIVE</h2><p class="sub" style="margin:0">${liveOn()?'Siaran langsung sedang berlangsung. Tekan untuk menonton.':'Tiada siaran langsung buat masa ini.'}</p></div><button class="btn" ${liveOn()?'':'disabled'} onclick="liveView=true;render();scrollTo(0,0)">▶ Tonton LIVE</button></div></section>`}
 
