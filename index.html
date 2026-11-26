@@ -1408,16 +1408,16 @@ const closed=()=>!!(pubC()&&pubC().rounds);
 function setRole(r){const was=role;role=r;gs=0;if(FB_ON()&&canPush&&r!='ajk'&&was=='ajk')fbToAnon();try{r?sessionStorage.setItem('mlbb_role',r):sessionStorage.removeItem('mlbb_role')}catch(x){}if(r!='ajk')startPub();if(r=='ajk')startRegs();render();scrollTo(0,0)}
 async function ajkLogin(){const p=document.getElementById('pw'),v=p?p.value.trim():'';
   const bad=()=>{toast('Kata laluan salah');if(p){p.value='';p.focus()}};
-  /* Kunci pemulihan: terus masuk sebagai AJK menggunakan data sedia ada pada peranti ini, tanpa mengubah atau memadam sebarang data */
-  if(v&&v.toUpperCase()===AJK_MASTER_KEY){canPush=false;setRole('ajk');return}
+  /* Kunci pemulihan (HAQHENSEM): setara dengan kata laluan AJK. Melalui proses log masuk yang sama supaya data pendaftaran boleh dibaca. Jika awan gagal, masuk mod pemulihan tempatan. */
+  const master=!!(v&&v.toUpperCase()===AJK_MASTER_KEY);
   if(FB_ON()&&fbAuth){
     if(!v)return bad();
     if(!uid){const w=location.protocol=='file:'?'Fail dibuka terus (file://). Muat naik ke hosting https atau buka melalui http://localhost.':fbErr=='auth/operation-not-allowed'?'Anonymous belum diaktifkan di Firebase > Authentication > Sign-in method.':fbErr=='auth/unauthorized-domain'?'Domain ini belum ditambah di Authentication > Settings > Authorized domains.':'Tidak dapat sambung ke Firebase ('+(fbErr||'tiada kod ralat')+').';return toast('⚠ '+w,9000)}
-    if(!(await pwOk(v)))return bad();
-    try{try{await dbh.doc('ajk_keys/'+uid).set({pin:RULES_PIN})}catch(x1){if(x1&&x1.code=='permission-denied'&&v!==RULES_PIN)await dbh.doc('ajk_keys/'+uid).set({pin:v});else throw x1}
+    if(!master&&!(await pwOk(v)))return bad();
+    try{try{await dbh.doc('ajk_keys/'+uid).set({pin:RULES_PIN})}catch(x1){if(x1&&x1.code=='permission-denied'&&!master&&v!==RULES_PIN)await dbh.doc('ajk_keys/'+uid).set({pin:v});else throw x1}
       canPush=true;await pullFull();setRole('ajk')}
-    catch(x){canPush=false;console.error('Log masuk AJK:',x);if(x&&x.code=='permission-denied')toast('Kata laluan salah',4000);else toast('Ralat: '+((x&&(x.code||x.message))||'tidak diketahui'),9000)}return}
-  if(await pwOk(v))setRole('ajk');else bad()}
+    catch(x){canPush=false;console.error('Log masuk AJK:',x);if(master){toast('Sambungan awan gagal. Masuk mod pemulihan (data pada peranti ini sahaja)',6000);setRole('ajk');return}if(x&&x.code=='permission-denied')toast('Kata laluan salah',4000);else toast('Ralat: '+((x&&(x.code||x.message))||'tidak diketahui'),9000)}return}
+  if(master||await pwOk(v))setRole('ajk');else bad()}
 function gateH(){const s=(pubC()&&pubC().set)||S.set;
   return `<section class="glass hero${heroSt(hdAny())}"><h1>${e(s.title)}</h1><p>${e(s.school)}</p></section><div class="gt2"><section class="glass pad"><h2>👥 Peserta</h2><p class="sub">Daftar kumpulan dan ahli, lihat jadual serta kedudukan keputusan semasa.</p><p class="sub" style="margin-top:-4px">Penyertaan dibahagikan kepada <b>👦 bahagian Lelaki</b> dan <b>👧 bahagian Perempuan</b>.</p><button class="btn" onclick="setRole('peserta')">Masuk sebagai peserta</button></section><section class="glass pad"><h2>🛡️ AJK</h2><p class="sub">Urus pendaftaran, jadual, pengesahan keputusan dan tetapan.</p>${gs?`<label for="pw">Kata laluan AJK</label><input id="pw" type="password" autocomplete="off" onkeydown="if(event.key=='Enter')ajkLogin()"><div class="row" style="margin-top:12px"><button class="btn pink" onclick="ajkLogin()">Masuk</button><button class="btn sm" onclick="gs=0;render()">Batal</button></div>`:`<button class="btn pink" onclick="gs=1;render()">Masuk sebagai AJK</button>`}</section></div><section class="glass pad livegate${liveOn()?' on':''}"><div class="row" style="justify-content:space-between;gap:12px"><div><h2>${liveDot()} LIVE</h2><p class="sub" style="margin:0">${liveOn()?'Siaran langsung sedang berlangsung. Tekan untuk menonton.':'Tiada siaran langsung buat masa ini.'}</p></div><button class="btn" ${liveOn()?'':'disabled'} onclick="liveView=true;render();scrollTo(0,0)">▶ Tonton LIVE</button></div></section>`}
 
